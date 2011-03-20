@@ -31,14 +31,18 @@ namespace MyMediaLite.RatingPrediction
 	public class BiasedMatrixFactorization : MatrixFactorization
 	{
 		/// <summary>regularization constant for the bias terms</summary>
-		public double BiasRegularization { get { return bias_regularization; } set { bias_regularization = value; } }
-		/// <summary>regularization constant for the bias terms</summary>
-		protected double bias_regularization = 0;
+		public double BiasRegularization { get; set; }
 
 		/// <summary>the user biases</summary>
 		protected double[] user_bias;
 		/// <summary>the item biases</summary>
 		protected double[] item_bias;
+
+		/// <inheritdoc/>
+		public BiasedMatrixFactorization()
+		{
+			BiasRegularization = 0.0001;
+		}
 
 		/// <inheritdoc/>
 		protected override void InitModel()
@@ -77,7 +81,7 @@ namespace MyMediaLite.RatingPrediction
 				int i = ratings.Items[index];
 
 				double dot_product = global_bias + user_bias[u] + item_bias[i];
-				for (int f = 0; f < num_factors; f++)
+				for (int f = 0; f < NumFactors; f++)
 					dot_product += user_factors[u, f] * item_factors[i, f];
 				double sig_dot = 1 / (1 + Math.Exp(-dot_product));
 
@@ -88,27 +92,27 @@ namespace MyMediaLite.RatingPrediction
 
 				// Adjust biases
 				if (update_user)
-					user_bias[u] += learn_rate * (gradient_common - bias_regularization * user_bias[u]);
+					user_bias[u] += LearnRate * (gradient_common - BiasRegularization * user_bias[u]);
 				if (update_item)
-					item_bias[i] += learn_rate * (gradient_common - bias_regularization * item_bias[i]);
+					item_bias[i] += LearnRate * (gradient_common - BiasRegularization * item_bias[i]);
 
 				// Adjust latent factors
-				for (int f = 0; f < num_factors; f++)
+				for (int f = 0; f < NumFactors; f++)
 				{
 				 	double u_f = user_factors[u, f];
 					double i_f = item_factors[i, f];
 
 					if (update_user)
 					{
-						double delta_u = gradient_common * i_f - regularization * u_f;
-						MatrixUtils.Inc(user_factors, u, f, learn_rate * delta_u);
+						double delta_u = gradient_common * i_f - Regularization * u_f;
+						MatrixUtils.Inc(user_factors, u, f, LearnRate * delta_u);
 						// this is faster (190 vs. 260 seconds per iteration on Netflix w/ k=30) than
 						//    user_factors[u, f] += learn_rate * delta_u;
 					}
 					if (update_item)
 					{
-						double delta_i = gradient_common * u_f - regularization * i_f;
-						MatrixUtils.Inc(item_factors, i, f, learn_rate * delta_i);
+						double delta_i = gradient_common * u_f - Regularization * i_f;
+						MatrixUtils.Inc(item_factors, i, f, LearnRate * delta_i);
 						// item_factors[i, f] += learn_rate * delta_i;
 					}
 				}
@@ -124,7 +128,7 @@ namespace MyMediaLite.RatingPrediction
 			double score = global_bias + user_bias[user_id] + item_bias[item_id];
 
 			// U*V
-			for (int f = 0; f < num_factors; f++)
+			for (int f = 0; f < NumFactors; f++)
 				score += user_factors[user_id, f] * item_factors[item_id, f];
 
 			return MinRating + ( 1 / (1 + Math.Exp(-score)) ) * (MaxRating - MinRating);
@@ -182,10 +186,10 @@ namespace MyMediaLite.RatingPrediction
 
 				// assign new model
 				this.global_bias = bias;
-				if (this.num_factors != user_factors.dim2)
+				if (this.NumFactors != user_factors.dim2)
 				{
 					Console.Error.WriteLine("Set num_factors to {0}", user_factors.dim1);
-					this.num_factors = user_factors.dim2;
+					this.NumFactors = user_factors.dim2;
 				}
 				this.user_factors = user_factors;
 				this.item_factors = item_factors;
