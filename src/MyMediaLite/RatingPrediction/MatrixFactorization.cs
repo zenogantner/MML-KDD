@@ -75,14 +75,20 @@ namespace MyMediaLite.RatingPrediction
 		public int NumIter { get { return num_iter; } set { num_iter = value; } }
 		private int num_iter = 30;
 
-		/// <inheritdoc/>
-		public override void Train()
+		/// <summary>Initialize the model data structure</summary>
+		protected virtual void InitModel()
 		{
 			// init factor matrices
 			user_factors = new Matrix<double>(ratings.MaxUserID + 1, num_factors);
 			item_factors = new Matrix<double>(ratings.MaxItemID + 1, num_factors);
 			MatrixUtils.InitNormal(user_factors, InitMean, InitStdev);
 			MatrixUtils.InitNormal(item_factors, InitMean, InitStdev);
+		}
+
+		/// <inheritdoc/>
+		public override void Train()
+		{
+			InitModel();
 
 			// learn model parameters
 			global_bias = Ratings.Average;

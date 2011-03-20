@@ -40,13 +40,9 @@ namespace MyMediaLite.RatingPrediction
 		protected double[] item_bias;
 
 		/// <inheritdoc/>
-		public override void Train()
+		protected override void InitModel()
 		{
-			// init factor matrices
-		   	user_factors = new Matrix<double>(MaxUserID + 1, num_factors);
-		   	item_factors = new Matrix<double>(MaxItemID + 1, num_factors);
-		   	MatrixUtils.InitNormal(user_factors, InitMean, InitStdev);
-		   	MatrixUtils.InitNormal(item_factors, InitMean, InitStdev);
+			base.InitModel();
 
 			user_bias = new double[MaxUserID + 1];
 			for (int u = 0; u <= MaxUserID; u++)
@@ -54,13 +50,16 @@ namespace MyMediaLite.RatingPrediction
 			item_bias = new double[MaxItemID + 1];
 			for (int i = 0; i <= MaxItemID; i++)
 				item_bias[i] = 0;
+		}
 
-			// learn model parameters
+		/// <inheritdoc/>
+		public override void Train()
+		{
+			InitModel();
 
 			// compute global average
 			double global_average = ratings.Average;
 
-			// TODO also learn global bias?
 			global_bias = Math.Log( (global_average - MinRating) / (MaxRating - global_average) );
 			for (int current_iter = 0; current_iter < NumIter; current_iter++)
 				Iterate();
