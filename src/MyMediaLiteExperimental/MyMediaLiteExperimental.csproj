@@ -73,6 +73,7 @@
     <Compile Include="RatingPrediction\SocialMF.cs" />
     <Compile Include="RatingPrediction\NewKNN.cs" />
     <Compile Include="IKDDCupRecommender.cs" />
+    <Compile Include="RatingPrediction\SharedFactorsMatrixFactorization.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AttrToFactor\" />
