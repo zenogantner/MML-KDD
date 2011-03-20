@@ -197,6 +197,12 @@ MyMediaLite KDD Cup 2011 tool
 			training_data_posonly = CreateFeedback(training_data);
 			item_recommender.Feedback = training_data_posonly;
 		}
+		
+		if (recommender is IKDDCupRecommender)
+		{
+			var kddcup_recommender = recommender as IKDDCupRecommender;
+			kddcup_recommender.ItemInfo = item_relations;
+		}
 
 		if (track_no == 1)
 			DoTrack1();
