@@ -275,13 +275,20 @@ MyMediaLite KDD Cup 2011 tool
 				var split = new PosOnlyFeedbackSimpleSplit(training_data_posonly, 0.2);
 				item_recommender.Feedback = split.Train[0];
 
-				// use candidate items as relevant items 
+				// use candidate items intersected with test items as relevant items 
 				var relevant_items = new HashSet<int>();
 				foreach (int user_id in track2_test_data.Keys)
 					foreach (int item_id in track2_test_data[user_id])
 						relevant_items.Add(item_id);
-				Console.Error.WriteLine("{0} relevant items", relevant_items.Count);
-
+				relevant_items.IntersectWith(split.Test[0].AllItems);
+				
+				// use corresponding intersection for relevant users
+				var relevant_users = new HashSet<int>(split.Test[0].AllUsers);
+				relevant_users.IntersectWith(split.Test[0].AllItems);
+				
+				Console.Error.WriteLine("{0} relevant users, {1} relevant items", relevant_users.Count, relevant_items.Count);
+				
+				
 				if (find_iter != 0)
 				{   // make this more abstract ...
 					if ( !(recommender is IIterativeModel) )
@@ -300,7 +307,7 @@ MyMediaLite KDD Cup 2011 tool
 					if (compute_fit)
 						Console.Write(string.Format(ni, "fit {0,0:0.#####} ", iterative_recommender.ComputeFit()));
 
-					ItemPredictionEval.DisplayResults(ItemPredictionEval.Evaluate(item_recommender, split.Test[0], split.Train[0], relevant_items));
+					ItemPredictionEval.DisplayResults(ItemPredictionEval.Evaluate(item_recommender, split.Test[0], split.Train[0], relevant_users, relevant_items));
 					Console.WriteLine(" " + iterative_recommender.NumIter);
 
 					for (int i = iterative_recommender.NumIter + 1; i <= max_iter; i++)
@@ -324,7 +331,7 @@ MyMediaLite KDD Cup 2011 tool
 
 							Dictionary<string, double> results = null;
 							time = Utils.MeasureTime(delegate() {
-								results = ItemPredictionEval.Evaluate(item_recommender, split.Test[0], split.Train[0], relevant_items);
+								results = ItemPredictionEval.Evaluate(item_recommender, split.Test[0], split.Train[0], relevant_users, relevant_items);
 								ItemPredictionEval.DisplayResults(results);
 								//auc_eval_stats.Add(results["AUC"]);
 								Console.WriteLine(" " + i);
@@ -343,7 +350,7 @@ MyMediaLite KDD Cup 2011 tool
 					Console.Write(" training_time " + seconds + " ");
 
 					seconds = Utils.MeasureTime(delegate() {
-						var results = ItemPredictionEval.Evaluate(item_recommender, split.Test[0], split.Train[0], relevant_items);
+						var results = ItemPredictionEval.Evaluate(item_recommender, split.Test[0], split.Train[0], relevant_users, relevant_items);
 						ItemPredictionEval.DisplayResults(results);
 					});
 					Console.Write(" evaluation_time " + seconds + " ");
