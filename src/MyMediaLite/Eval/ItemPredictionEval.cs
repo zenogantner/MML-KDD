@@ -85,7 +85,7 @@ namespace MyMediaLite.Eval
 			double ndcg_sum    = 0;
 			int num_users      = 0;
 
-			foreach (int user_id in test.AllUsers)
+			foreach (int user_id in relevant_users)
 			{
 				var correct_items = new HashSet<int>(test.UserMatrix[user_id].Intersect(relevant_items));
 
