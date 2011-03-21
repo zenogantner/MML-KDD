@@ -271,6 +271,8 @@ MyMediaLite KDD Cup 2011 tool
 			{
 				var item_recommender = recommender as ItemRecommender;
 
+				var random = new System.Random();
+				
 				// create split
 				var split = new PosOnlyFeedbackSimpleSplit(training_data_posonly, 0.2);
 				item_recommender.Feedback = split.Train[0];
@@ -282,12 +284,16 @@ MyMediaLite KDD Cup 2011 tool
 						relevant_items.Add(item_id);
 				relevant_items.IntersectWith(split.Test[0].AllItems);
 				
-				// use corresponding intersection for relevant users
-				var relevant_users = new HashSet<int>(split.Test[0].AllUsers);
-				relevant_users.IntersectWith(split.Test[0].AllItems);
+				// use corresponding intersection for relevant users, and sample from them
+				var relevant_users_set = new HashSet<int>(split.Test[0].AllUsers);
+				relevant_users_set.IntersectWith(split.Test[0].AllItems);
+				var relevant_users_list = new List<int>(relevant_users_set);
+				var relevant_users = new int[10000];
+				for (int i = 0; i < relevant_users.Length; i++)
+					relevant_users[i] = relevant_users_list[random.Next(0, relevant_users_list.Count - 1)];
 				
-				Console.Error.WriteLine("{0} relevant users, {1} relevant items", relevant_users.Count, relevant_items.Count);
-				
+				Console.Error.WriteLine("{0} relevant users, {1} relevant items", relevant_users_list.Count, relevant_items.Count);
+				Console.Error.WriteLine("Use subset of 10000 users for validation.");
 				
 				if (find_iter != 0)
 				{   // make this more abstract ...
