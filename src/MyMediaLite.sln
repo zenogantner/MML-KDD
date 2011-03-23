@@ -23,6 +23,8 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KDDCup2011", "KDDCup2011\KD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MergeRatings", "MergeRatings\MergeRatings.csproj", "{6231F69B-7D90-4FD8-B261-383100664E30}"
 EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MergeTrack2", "MergeTrack2\MergeTrack2.csproj", "{E1505676-49E1-4398-9D3C-3574FC7EB9FD}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|Any CPU = Debug|Any CPU
@@ -87,6 +89,14 @@ Global
 		{D5BBB78C-DAE0-4516-8AE5-91DBFAC6DE92}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{D5BBB78C-DAE0-4516-8AE5-91DBFAC6DE92}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{D5BBB78C-DAE0-4516-8AE5-91DBFAC6DE92}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1505676-49E1-4398-9D3C-3574FC7EB9FD}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{E1505676-49E1-4398-9D3C-3574FC7EB9FD}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{E1505676-49E1-4398-9D3C-3574FC7EB9FD}.Debug|x86.ActiveCfg = Debug|Any CPU
+		{E1505676-49E1-4398-9D3C-3574FC7EB9FD}.Debug|x86.Build.0 = Debug|Any CPU
+		{E1505676-49E1-4398-9D3C-3574FC7EB9FD}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{E1505676-49E1-4398-9D3C-3574FC7EB9FD}.Release|Any CPU.Build.0 = Release|Any CPU
+		{E1505676-49E1-4398-9D3C-3574FC7EB9FD}.Release|x86.ActiveCfg = Release|Any CPU
+		{E1505676-49E1-4398-9D3C-3574FC7EB9FD}.Release|x86.Build.0 = Release|Any CPU
 	EndGlobalSection
 	GlobalSection(MonoDevelopProperties) = preSolution
 		StartupItems = $0

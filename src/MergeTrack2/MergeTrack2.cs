@@ -14,12 +14,9 @@
 // 
 //  You should have received a copy of the GNU General Public License
 //  along with MyMediaLite.  If not, see <http://www.gnu.org/licenses/>.
-
 using System;
-using System.Globalization;
-using System.IO;
 
-class MergeRatings
+class MegeTrack2
 {
 	/// <summary>Parameters: num_files weight_1 .. weight_n file_1 .. file_n output_file</summary>
 	/// <param name="args">the command-line arguments</param>
@@ -27,9 +24,7 @@ class MergeRatings
 	{
 		var ni = new NumberFormatInfo();
 		ni.NumberDecimalDigits = '.';
-		
-		int chunk_size = 1000;
-		
+				
 		// TODO check args.Length
 		
 		double weight_sum = 0;
@@ -56,20 +51,9 @@ class MergeRatings
 		
 		// read, merge, and write
 		byte[][] ratings = new byte[num_files][];
-		while ( (ratings[0] = readers[0].ReadBytes(chunk_size)).Length > 0)
+		while ( (ratings[0] = readers[0].ReadBytes(6)).Length > 0)
 		{
-			for (int i = 1; i < num_files; i++)
-				ratings[i] = readers[i].ReadBytes(chunk_size);
-			
-			
-			for (int i = 0; i < ratings[0].Length; i++)
-			{
-				double weighted_sum = 0;
-				for (int j = 0; j < num_files; j++)
-					weighted_sum += weights[j] * ratings[j][i];
-				byte weighted_average = (byte) ((weighted_sum / weight_sum) + 0.5);
-				writer.Write(weighted_average);
-			}
+			// TODO
 		}
 	}
 }
