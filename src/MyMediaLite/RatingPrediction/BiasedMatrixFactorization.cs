@@ -90,13 +90,13 @@ namespace MyMediaLite.RatingPrediction
 
 				double gradient_common = err * sig_dot * (1 - sig_dot) * rating_range_size;
 
-				// Adjust biases
+				// adjust biases
 				if (update_user)
 					user_bias[u] += LearnRate * (gradient_common - BiasRegularization * user_bias[u]);
 				if (update_item)
 					item_bias[i] += LearnRate * (gradient_common - BiasRegularization * item_bias[i]);
 
-				// Adjust latent factors
+				// adjust latent factors
 				for (int f = 0; f < NumFactors; f++)
 				{
 				 	double u_f = user_factors[u, f];

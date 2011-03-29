@@ -30,32 +30,61 @@ namespace MyMediaLite.RatingPrediction
 	public class SharedFactorsMatrixFactorization : BiasedMatrixFactorization, IKDDCupRecommender
 	{
 		Matrix<double> user_shared_artist_factors;
-		Matrix<double> user_shared_record_factors;
+		Matrix<double> user_shared_album_factors;
 		Matrix<double> user_shared_genre_factors;
 
 		Matrix<double> item_shared_artist_factors;
-		Matrix<double> item_shared_record_factors;
+		Matrix<double> item_shared_album_factors;
 		Matrix<double> item_shared_genre_factors;
+
+		// TODO add biases
+		// TODO add specific regularization term
 
 		/// <summary>Number of shared factors for common artist</summary>
 		public int NumSharedArtistFactors { get; set; }
 		/// <summary>Number of shared factors for common records</summary>
-		public int NumSharedRecordFactors { get; set; }
+		public int NumSharedAlbumFactors { get; set; }
 		/// <summary>Number of shared factors for common genres</summary>
 		public int NumSharedGenreFactors { get; set; }
 
 		/// <inheritdoc/>
 		public KDDCupItems ItemInfo { get; set; }
 
+		/// <summary>Default constructor</summary>
+		public SharedFactorsMatrixFactorization()
+		{
+			NumSharedArtistFactors = 2;
+			NumSharedAlbumFactors  = 2;
+			NumSharedGenreFactors  = 0;
+		}
+
 		/// <inheritdoc/>
 		protected override void InitModel()
 		{
 			base.InitModel();
+
+			user_shared_artist_factors = new Matrix<double>(MaxUserID + 1, NumSharedArtistFactors);
+			user_shared_album_factors  = new Matrix<double>(MaxUserID + 1, NumSharedAlbumFactors);
+			user_shared_genre_factors  = new Matrix<double>(MaxUserID + 1, NumSharedGenreFactors);
+
+			// TODO this is a bit of a waste of memory, consider using sparse matrices ...
+			item_shared_artist_factors = new Matrix<double>(MaxItemID + 1, NumSharedArtistFactors);
+			item_shared_album_factors  = new Matrix<double>(MaxItemID + 1, NumSharedAlbumFactors);
+			item_shared_genre_factors  = new Matrix<double>(MaxItemID + 1, NumSharedGenreFactors);
+
+			MatrixUtils.InitNormal(user_shared_artist_factors, InitMean, InitStdev / 100);
+			MatrixUtils.InitNormal(item_shared_artist_factors, InitMean, InitStdev / 100);
+			MatrixUtils.InitNormal(user_shared_album_factors, InitMean, InitStdev / 100);
+			MatrixUtils.InitNormal(item_shared_album_factors, InitMean, InitStdev / 100);
+			MatrixUtils.InitNormal(user_shared_genre_factors, InitMean, InitStdev / 100);
+			MatrixUtils.InitNormal(item_shared_genre_factors, InitMean, InitStdev / 100);
 		}
 
 		/// <inheritdoc/>
 		protected override void Iterate(IList<int> rating_indices, bool update_user, bool update_item)
 		{
+			// TODO take update_user and update_item into account
+
 			double rating_range_size = MaxRating - MinRating;
 
 			foreach (int index in rating_indices)
@@ -73,29 +102,35 @@ namespace MyMediaLite.RatingPrediction
 
 				double gradient_common = err * sig_dot * (1 - sig_dot) * rating_range_size;
 
-				// Adjust biases
-				if (update_user)
-					user_bias[u] += LearnRate * (gradient_common - BiasRegularization * user_bias[u]);
-				if (update_item)
-					item_bias[i] += LearnRate * (gradient_common - BiasRegularization * item_bias[i]);
+				// adjust biases
+				user_bias[u] += LearnRate * (gradient_common - BiasRegularization * user_bias[u]);
+				item_bias[i] += LearnRate * (gradient_common - BiasRegularization * item_bias[i]);
 
-				// Adjust latent factors
-				for (int f = 0; f < NumFactors; f++)
-				{
-				 	double u_f = user_factors[u, f];
-					double i_f = item_factors[i, f];
+				// adjust latent factors
+				AdjustFactors(u, i, NumFactors, user_factors, item_factors, gradient_common);
 
-					if (update_user)
-					{
-						double delta_u = gradient_common * i_f - Regularization * u_f;
-						MatrixUtils.Inc(user_factors, u, f, LearnRate * delta_u);
-					}
-					if (update_item)
-					{
-						double delta_i = gradient_common * u_f - Regularization * i_f;
-						MatrixUtils.Inc(item_factors, i, f, LearnRate * delta_i);
-					}
-				}
+				// adjust shared latent factors
+				if (ItemInfo.HasArtist(i))
+					AdjustFactors(u, ItemInfo.GetArtist(i), NumSharedArtistFactors, user_shared_artist_factors, item_shared_artist_factors, gradient_common);
+				if (ItemInfo.HasAlbum(i))
+					AdjustFactors(u, ItemInfo.GetAlbum(i), NumSharedAlbumFactors, user_shared_album_factors, item_shared_album_factors, gradient_common);
+				// TODO genres
+
+			}
+		}
+
+		void AdjustFactors(int u, int i, int num_factors, Matrix<double> u_factors, Matrix<double> i_factors, double gradient_common)
+		{
+			for (int f = 0; f < num_factors; f++)
+			{
+			 	double u_f = u_factors[u, f];
+				double i_f = i_factors[i, f];
+
+				double delta_u = gradient_common * i_f - Regularization * u_f;
+				MatrixUtils.Inc(u_factors, u, f, LearnRate * delta_u);
+
+				double delta_i = gradient_common * u_f - Regularization * i_f;
+				MatrixUtils.Inc(i_factors, i, f, LearnRate * delta_i);
 			}
 		}
 
@@ -110,6 +145,21 @@ namespace MyMediaLite.RatingPrediction
 			// U*V
 			for (int f = 0; f < NumFactors; f++)
 				score += user_factors[user_id, f] * item_factors[item_id, f];
+
+			// shared factors
+			if (ItemInfo.HasArtist(item_id))
+			{
+				int artist_id = ItemInfo.GetArtist(item_id);
+				for (int f = 0; f < NumSharedArtistFactors; f++)
+					score += user_shared_artist_factors[user_id, f] * item_shared_artist_factors[artist_id, f];
+			}
+			if (ItemInfo.HasAlbum(item_id))
+			{
+				int album_id = ItemInfo.GetAlbum(item_id);
+				for (int f = 0; f < NumSharedAlbumFactors; f++)
+					score += user_shared_album_factors[user_id, f] * item_shared_album_factors[album_id, f];
+			}
+			// TODO genres
 
 			return MinRating + ( 1 / (1 + Math.Exp(-score)) ) * (MaxRating - MinRating);
 		}
@@ -169,8 +219,8 @@ namespace MyMediaLite.RatingPrediction
 			ni.NumberDecimalDigits = '.';
 
 			return string.Format(ni,
-								 "SharedFactorsMatrixFactorization NumFactors={0} bias_regularization={1} regularization={2} LearnRate={3} num_iter={4} init_mean={5} init_stdev={6}",
-								 NumFactors, BiasRegularization, Regularization, LearnRate, NumIter, InitMean, InitStdev);
+								 "SharedFactorsMatrixFactorization num_factors={0} num_shared_artist_factors={1} num_shared_album_factors={2} num_shared_genre_factors={3} bias_regularization={4} regularization={5} learn_rate={6} num_iter={7} init_mean={8} init_stdev={9}",
+								 NumFactors, NumSharedArtistFactors, NumSharedAlbumFactors, NumSharedGenreFactors, BiasRegularization, Regularization, LearnRate, NumIter, InitMean, InitStdev);
 		}
 	}
 }
