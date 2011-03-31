@@ -140,6 +140,11 @@ namespace MyMediaLite.Util
 			sparsity = (double) 100L * empty_size / matrix_size;
 			Console.WriteLine(string.Format(ni, "test data:     {0} users, {1} items, {2} ratings, sparsity {3,0:0.#####}", num_users, num_items, test.Count, sparsity));
 
+			// count user/item overlap
+			int num_new_users = test.AllUsers.Except(train.AllUsers).Count();
+			int num_new_items = test.AllItems.Except(train.AllItems).Count();
+			Console.WriteLine("{0} new users, {1} new items", num_new_users, num_new_items);
+
 			// attribute stats
 			if (recommender != null)
 			{
