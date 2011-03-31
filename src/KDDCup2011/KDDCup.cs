@@ -433,7 +433,7 @@ MyMediaLite KDD Cup 2011 tool
 		var rating_predictor = recommender as RatingPredictor;
 
 		Utils.DisplayDataStats(training_data, track1_test_data, rating_predictor);
-
+		
 		if (find_iter != 0)
 		{
 			if ( !(recommender is IIterativeModel) )
