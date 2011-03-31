@@ -67,6 +67,7 @@ FILES =  \
 	Correlation/BinaryCosineTest.cs \
 	Correlation/CorrelationMatrixTest.cs \
 	Correlation/PearsonTest.cs \
+	Data/CombinedRatingsTest.cs \
 	Data/EntityMappingTest.cs \
 	Data/RatingsTest.cs \
 	Data/StaticByteRatingsTest.cs \

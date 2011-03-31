@@ -32,12 +32,12 @@ namespace MyMediaLiteTest
 
 		private IList<int> CreateOddSequence()
 		{
-			return new int[] { 1, 3, 5, 7, 9 };
+			return new List<int>(new int[] { 1, 3, 5, 7, 9 });
 		}
 
 		private IList<int> CreateEvenSequence()
 		{
-			return new int[] { 2, 4, 6, 8, 10 };
+			return new List<int>(new int[] { 2, 4, 6, 8, 10 });
 		}
 
 		[Test()] public void TestIndex()
@@ -55,13 +55,16 @@ namespace MyMediaLiteTest
 			var combined_list = new CombinedList<int>(CreateOddSequence(), CreateEvenSequence());
 
 			Assert.AreEqual(CreateSequence().Count, combined_list.Count);
+			Assert.AreEqual(10, combined_list.Count);
 		}
 
 		[Test()] public void TestIsReadOnly()
 		{
 			var combined_list = new CombinedList<int>(CreateOddSequence(), CreateEvenSequence());
 
-			Assert.IsTrue(combined_list.IsReadOnly);
+			Assert.IsFalse(combined_list.IsReadOnly);
+			
+			Assert.IsTrue( (new CombinedList<int>(CreateSequence(), CreateEvenSequence())).IsReadOnly );
 		}
 
 		[Test()] public void TestContains()
@@ -73,6 +76,21 @@ namespace MyMediaLiteTest
 
 			foreach (int num in CreateOddSequence())
 				Assert.IsTrue(combined_list.Contains(num));
+		}
+
+		[Test()] public void TestRemoveAt()
+		{
+			var combined_list = new CombinedList<int>(CreateOddSequence(), CreateEvenSequence());
+
+			Assert.AreEqual(10, combined_list.Count);
+
+			combined_list.RemoveAt(0);
+			Assert.AreEqual(9, combined_list.Count);
+			Assert.AreEqual(3, combined_list[0]);
+
+			combined_list.RemoveAt(6);
+			Assert.AreEqual(8, combined_list.Count);
+			Assert.AreEqual(8, combined_list[6]);
 		}
 	}
 }

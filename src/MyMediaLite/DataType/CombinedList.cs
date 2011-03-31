@@ -53,10 +53,13 @@ namespace MyMediaLite.DataType
 		public int Count { get { return first.Count + second.Count; } }
 
 		/// <inheritdoc/>
-		public bool IsReadOnly { get { return true; } }
+		public bool IsReadOnly { get { return first.IsReadOnly || second.IsReadOnly; } }
 
 		/// <inheritdoc/>
-		public void Add(T item) { throw new NotSupportedException(); }
+		public void Add(T item)
+		{
+			second.Add(item);
+		}
 
 		/// <inheritdoc/>
 		public void Clear() { throw new NotSupportedException(); }
@@ -85,7 +88,13 @@ namespace MyMediaLite.DataType
 		public bool Remove(T item) { throw new NotSupportedException(); }
 
 		/// <inheritdoc/>
-		public void RemoveAt(int index) { throw new NotSupportedException(); }
+		public void RemoveAt(int index)
+		{
+			if (index < first.Count)
+				first.RemoveAt(index);
+			else
+				second.RemoveAt(index - first.Count);
+		}
 
 		/// <inheritdoc/>
 		IEnumerator IEnumerable.GetEnumerator()
