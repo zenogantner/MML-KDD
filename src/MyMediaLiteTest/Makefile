@@ -72,6 +72,7 @@ FILES =  \
 	Data/StaticByteRatingsTest.cs \
 	Data/StaticFloatRatingsTest.cs \
 	Data/StaticRatingsTest.cs \
+	DataType/CombinedListTest.cs \
 	DataType/ListProxyTest.cs \
 	DataType/MatrixTest.cs \
 	DataType/MatrixUtilsTest.cs \

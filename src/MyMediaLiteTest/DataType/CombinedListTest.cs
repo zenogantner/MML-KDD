@@ -23,11 +23,11 @@ using MyMediaLite.DataType;
 namespace MyMediaLiteTest
 {
 	[TestFixture()]
-	public class ListProxyTest
+	public class CombinedListTest
 	{
 		private IList<int> CreateSequence()
 		{
-			return new int[] { 1, 2, 3, 4, 5, 6, 7, 8, 9, 10 };
+			return new int[] { 1, 3, 5, 7, 9, 2, 4, 6, 8, 10 };
 		}
 
 		private IList<int> CreateOddSequence()
@@ -42,35 +42,37 @@ namespace MyMediaLiteTest
 
 		[Test()] public void TestIndex()
 		{
-			var list_proxy = new ListProxy<int>(CreateSequence(), CreateOddSequence());
+			var combined_list = new CombinedList<int>(CreateOddSequence(), CreateEvenSequence());
 
-			for (int i = 0; i < list_proxy.Count; i++)
-				Assert.AreEqual(i * 2 + 2, list_proxy[i]);
+			var list = CreateSequence();
+
+			for (int i = 0; i < combined_list.Count; i++)
+				Assert.AreEqual(list[i], combined_list[i]);
 		}
 
 		[Test()] public void TestCount()
 		{
-			var list_proxy = new ListProxy<int>(CreateSequence(), CreateOddSequence());
+			var combined_list = new CombinedList<int>(CreateOddSequence(), CreateEvenSequence());
 
-			Assert.AreEqual(CreateOddSequence().Count, list_proxy.Count);
+			Assert.AreEqual(CreateSequence().Count, combined_list.Count);
 		}
 
 		[Test()] public void TestIsReadOnly()
 		{
-			var list_proxy = new ListProxy<int>(CreateSequence(), CreateOddSequence());
+			var combined_list = new CombinedList<int>(CreateOddSequence(), CreateEvenSequence());
 
-			Assert.IsTrue(list_proxy.IsReadOnly);
+			Assert.IsTrue(combined_list.IsReadOnly);
 		}
 
 		[Test()] public void TestContains()
 		{
-			var list_proxy = new ListProxy<int>(CreateSequence(), CreateOddSequence());
+			var combined_list = new CombinedList<int>(CreateOddSequence(), CreateEvenSequence());
 
 			foreach (int num in CreateEvenSequence())
-				Assert.IsTrue(list_proxy.Contains(num));
+				Assert.IsTrue(combined_list.Contains(num));
 
 			foreach (int num in CreateOddSequence())
-				Assert.IsFalse(list_proxy.Contains(num));
+				Assert.IsTrue(combined_list.Contains(num));
 		}
 	}
 }
