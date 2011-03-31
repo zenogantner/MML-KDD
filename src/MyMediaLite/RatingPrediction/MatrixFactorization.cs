@@ -311,7 +311,7 @@ namespace MyMediaLite.RatingPrediction
 			}
 		}
 
-		/// <summary>Compute approximated fit (RMSE) on the training data</summary>
+		/// <summary>Compute fit (RMSE) on the training data</summary>
 		/// <returns>the root mean square error (RMSE) on the training data</returns>
 		public double ComputeFit()
 		{
