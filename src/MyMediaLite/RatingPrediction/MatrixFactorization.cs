@@ -62,7 +62,7 @@ namespace MyMediaLite.RatingPrediction
 		public double LearnRate { get; set; }
 
 		/// <summary>Regularization parameter</summary>
-		public double Regularization { get; set; }
+		public virtual double Regularization { get; set; }
 
 		/// <summary>Number of iterations over the training data</summary>
 		public int NumIter { get; set; }

@@ -33,6 +33,22 @@ namespace MyMediaLite.RatingPrediction
 		/// <summary>regularization constant for the bias terms</summary>
 		public double BiasRegularization { get; set; }
 
+		/// <summary>regularization constant for the user factors</summary>
+		public double RegUser { get; set; }
+		
+		/// <summary>regularization constant for the user factors</summary>
+		public double RegItem { get; set; }
+		
+		/// <inheritdoc/>
+		public override double Regularization
+		{
+			set {
+				base.Regularization = value;
+				RegUser = value;
+				RegItem = value;
+			}
+		}
+		
 		/// <summary>the user biases</summary>
 		protected double[] user_bias;
 		/// <summary>the item biases</summary>
@@ -104,14 +120,14 @@ namespace MyMediaLite.RatingPrediction
 
 					if (update_user)
 					{
-						double delta_u = gradient_common * i_f - Regularization * u_f;
+						double delta_u = gradient_common * i_f - RegUser * u_f;
 						MatrixUtils.Inc(user_factors, u, f, LearnRate * delta_u);
 						// this is faster (190 vs. 260 seconds per iteration on Netflix w/ k=30) than
 						//    user_factors[u, f] += learn_rate * delta_u;
 					}
 					if (update_item)
 					{
-						double delta_i = gradient_common * u_f - Regularization * i_f;
+						double delta_i = gradient_common * u_f - RegItem * i_f;
 						MatrixUtils.Inc(item_factors, i, f, LearnRate * delta_i);
 						// item_factors[i, f] += learn_rate * delta_i;
 					}
