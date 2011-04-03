@@ -63,27 +63,27 @@ MYMEDIALITE_DLL = $(BUILD_DIR)/MyMediaLite.dll
 MATHNET_IRIDIUM_DLL = $(BUILD_DIR)/MathNet.Iridium.dll
 MYMEDIALITETEST_PC = $(BUILD_DIR)/mymedialitetest.pc
 
-FILES =  \
-	Correlation/BinaryCosineTest.cs \
-	Correlation/CorrelationMatrixTest.cs \
-	Correlation/PearsonTest.cs \
-	Data/CombinedRatingsTest.cs \
-	Data/EntityMappingTest.cs \
+FILES = \
 	Data/RatingsTest.cs \
-	Data/StaticByteRatingsTest.cs \
-	Data/StaticFloatRatingsTest.cs \
-	Data/StaticRatingsTest.cs \
-	DataType/CombinedListTest.cs \
-	DataType/ListProxyTest.cs \
-	DataType/MatrixTest.cs \
-	DataType/MatrixUtilsTest.cs \
-	DataType/SkewSymmetricSparseMatrixTest.cs \
+	Correlation/CorrelationMatrixTest.cs \
 	DataType/SparseBooleanMatrixTest.cs \
+	DataType/MatrixTest.cs \
+	DataType/VectorUtilsTest.cs \
+	DataType/MatrixUtilsTest.cs \
+	Data/EntityMappingTest.cs \
+	Correlation/PearsonTest.cs \
 	DataType/SparseMatrixTest.cs \
 	DataType/SymmetricSparseMatrixTest.cs \
-	DataType/VectorUtilsTest.cs \
+	Correlation/BinaryCosineTest.cs \
+	DataType/SkewSymmetricSparseMatrixTest.cs \
+	RatingPrediction/SlopeOneTest.cs \
 	RatingPrediction/BiPolarSlopeOneTest.cs \
-	RatingPrediction/SlopeOneTest.cs 
+	DataType/ListProxyTest.cs \
+	Data/StaticRatingsTest.cs \
+	Data/StaticByteRatingsTest.cs \
+	Data/StaticFloatRatingsTest.cs \
+	DataType/CombinedListTest.cs \
+	Data/CombinedRatingsTest.cs 
 
 DATA_FILES = 
 
@@ -97,7 +97,6 @@ EXTRAS = \
 	mymedialitetest.pc.in 
 
 REFERENCES =  \
-	../MyMediaLite/bin/Debug/MyMediaLite.dll \
 	-pkg:mono-nunit \
 	System.Core
 

@@ -10,28 +10,28 @@ include $(top_srcdir)/config.make
 
 ifeq ($(CONFIG),DEBUG)
 ASSEMBLY_COMPILER_COMMAND = gmcs
-ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize- -debug "-define:DEBUG;TRACE"
-ASSEMBLY = bin/Debug/SVM.dll
+ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize- -debug "-define:DEBUG"
+ASSEMBLY = bin/Debug/MergeTrack2.exe
 ASSEMBLY_MDB = $(ASSEMBLY).mdb
-COMPILE_TARGET = library
+COMPILE_TARGET = exe
 PROJECT_REFERENCES = 
-BUILD_DIR = bin/Debug/
+BUILD_DIR = bin/Debug
 
-SVM_DLL_MDB_SOURCE=bin/Debug/SVM.dll.mdb
-SVM_DLL_MDB=$(BUILD_DIR)/SVM.dll.mdb
+MERGETRACK2_EXE_MDB_SOURCE=bin/Debug/MergeTrack2.exe.mdb
+MERGETRACK2_EXE_MDB=$(BUILD_DIR)/MergeTrack2.exe.mdb
 
 endif
 
 ifeq ($(CONFIG),RELEASE)
 ASSEMBLY_COMPILER_COMMAND = gmcs
-ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize+ "-define:TRACE"
-ASSEMBLY = bin/Release/SVM.dll
+ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize-
+ASSEMBLY = bin/Release/MergeTrack2.exe
 ASSEMBLY_MDB = 
-COMPILE_TARGET = library
+COMPILE_TARGET = exe
 PROJECT_REFERENCES = 
-BUILD_DIR = bin/Release/
+BUILD_DIR = bin/Release
 
-SVM_DLL_MDB=
+MERGETRACK2_EXE_MDB=
 
 endif
 
@@ -39,61 +39,43 @@ AL=al2
 SATELLITE_ASSEMBLY_NAME=$(notdir $(basename $(ASSEMBLY))).resources.dll
 
 PROGRAMFILES = \
-	$(SVM_DLL_MDB)  
+	$(MERGETRACK2_EXE_MDB)  
 
-LINUX_PKGCONFIG = \
-	$(SVM_PC)  
+BINARIES = \
+	$(MERGETRACK2)  
 
 
 RESGEN=resgen2
 
-SVM_PC = $(BUILD_DIR)/svm.pc
+MERGETRACK2 = $(BUILD_DIR)/mergetrack2
 
 FILES = \
-	Cache.cs \
-	IRangeTransform.cs \
-	Kernel.cs \
-	ParameterSelection.cs \
-	Properties/AssemblyInfo.cs \
-	Model.cs \
-	Node.cs \
-	Parameter.cs \
-	Prediction.cs \
-	Problem.cs \
-	RangeTransform.cs \
-	GaussianTransform.cs \
-	Scaling.cs \
-	Solver.cs \
-	PerformanceEvaluator.cs \
-	PrecomputedKernel.cs \
-	SVMExtensions.cs \
-	TemporaryCulture.cs \
-	Training.cs 
+	MergeTrack2.cs \
+	AssemblyInfo.cs 
 
 DATA_FILES = 
 
 RESOURCES = 
 
 EXTRAS = \
-	svm.pc.in 
+	mergetrack2.in 
 
 REFERENCES =  \
-	System \
-	System.Core
+	System
 
 DLL_REFERENCES = 
 
-CLEANFILES = $(PROGRAMFILES) $(LINUX_PKGCONFIG) 
+CLEANFILES = $(PROGRAMFILES) $(BINARIES) 
 
 #Targets
-all: $(ASSEMBLY) $(PROGRAMFILES) $(LINUX_PKGCONFIG)  $(top_srcdir)/config.make
+all: $(ASSEMBLY) $(PROGRAMFILES) $(BINARIES)  $(top_srcdir)/config.make
 
 include $(top_srcdir)/Makefile.include
 #include $(srcdir)/custom-hooks.make
 
 
 
-$(eval $(call emit-deploy-wrapper,SVM_PC,svm.pc))
+$(eval $(call emit-deploy-wrapper,MERGETRACK2,mergetrack2,x))
 
 
 $(eval $(call emit_resgen_targets))
@@ -116,9 +98,9 @@ install-local: $(ASSEMBLY) $(ASSEMBLY_MDB)
 	mkdir -p '$(DESTDIR)$(libdir)/$(PACKAGE)'
 	$(call cp,$(ASSEMBLY),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call cp,$(ASSEMBLY_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
-	$(call cp,$(SVM_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
-	mkdir -p '$(DESTDIR)$(libdir)/pkgconfig'
-	$(call cp,$(SVM_PC),$(DESTDIR)$(libdir)/pkgconfig)
+	$(call cp,$(MERGETRACK2_EXE_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
+	mkdir -p '$(DESTDIR)$(bindir)'
+	$(call cp,$(MERGETRACK2),$(DESTDIR)$(bindir))
 	make post-install-local-hook prefix=$(prefix)
 
 uninstall-local: $(ASSEMBLY) $(ASSEMBLY_MDB)
@@ -126,8 +108,8 @@ uninstall-local: $(ASSEMBLY) $(ASSEMBLY_MDB)
 	make uninstall-satellite-assemblies prefix=$(prefix)
 	$(call rm,$(ASSEMBLY),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call rm,$(ASSEMBLY_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
-	$(call rm,$(SVM_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
-	$(call rm,$(SVM_PC),$(DESTDIR)$(libdir)/pkgconfig)
+	$(call rm,$(MERGETRACK2_EXE_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
+	$(call rm,$(MERGETRACK2),$(DESTDIR)$(bindir))
 	make post-uninstall-local-hook prefix=$(prefix)
 
 install: install-local

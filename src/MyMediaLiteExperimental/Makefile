@@ -95,7 +95,9 @@ FILES = \
 	IO/KDDCup2011/Ratings.cs \
 	Eval/Track2Validation.cs \
 	RatingPrediction/SocialMF.cs \
-	RatingPrediction/NewKNN.cs 
+	RatingPrediction/NewKNN.cs \
+	IKDDCupRecommender.cs \
+	RatingPrediction/SharedFactorsMatrixFactorization.cs 
 
 DATA_FILES = 
 

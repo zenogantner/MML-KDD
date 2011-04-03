@@ -10,8 +10,8 @@ include $(top_srcdir)/config.make
 
 ifeq ($(CONFIG),DEBUG)
 ASSEMBLY_COMPILER_COMMAND = gmcs
-ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize- -debug "-define:DEBUG" "-main:MappingItemPrediction"
-ASSEMBLY = bin/Debug/Mapping.exe
+ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize- -debug "-define:DEBUG"
+ASSEMBLY = bin/Debug/KDDCup2011.exe
 ASSEMBLY_MDB = $(ASSEMBLY).mdb
 COMPILE_TARGET = exe
 PROJECT_REFERENCES =  \
@@ -29,15 +29,15 @@ SVM_DLL_MDB_SOURCE=../SVM/bin/Debug/SVM.dll.mdb
 SVM_DLL_MDB=$(BUILD_DIR)/SVM.dll.mdb
 MYMEDIALITEEXPERIMENTAL_DLL_MDB_SOURCE=../MyMediaLiteExperimental/bin/Debug/MyMediaLiteExperimental.dll.mdb
 MYMEDIALITEEXPERIMENTAL_DLL_MDB=$(BUILD_DIR)/MyMediaLiteExperimental.dll.mdb
-MAPPING_EXE_MDB_SOURCE=bin/Debug/Mapping.exe.mdb
-MAPPING_EXE_MDB=$(BUILD_DIR)/Mapping.exe.mdb
+KDDCUP2011_EXE_MDB_SOURCE=bin/Debug/KDDCup2011.exe.mdb
+KDDCUP2011_EXE_MDB=$(BUILD_DIR)/KDDCup2011.exe.mdb
 
 endif
 
 ifeq ($(CONFIG),RELEASE)
 ASSEMBLY_COMPILER_COMMAND = gmcs
-ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize- "-main:MappingItemPrediction"
-ASSEMBLY = bin/Release/Mapping.exe
+ASSEMBLY_COMPILER_FLAGS =  -noconfig -codepage:utf8 -warn:4 -optimize-
+ASSEMBLY = bin/Release/KDDCup2011.exe
 ASSEMBLY_MDB = 
 COMPILE_TARGET = exe
 PROJECT_REFERENCES =  \
@@ -52,7 +52,7 @@ MYMEDIALITEEXPERIMENTAL_DLL_SOURCE=../MyMediaLiteExperimental/bin/Release/MyMedi
 SVM_DLL_SOURCE=../SVM/bin/Release/SVM.dll
 SVM_DLL_MDB=
 MYMEDIALITEEXPERIMENTAL_DLL_MDB=
-MAPPING_EXE_MDB=
+KDDCUP2011_EXE_MDB=
 
 endif
 
@@ -67,10 +67,10 @@ PROGRAMFILES = \
 	$(SVM_DLL) \
 	$(SVM_DLL_MDB) \
 	$(MYMEDIALITEEXPERIMENTAL_DLL_MDB) \
-	$(MAPPING_EXE_MDB)  
+	$(KDDCUP2011_EXE_MDB)  
 
 BINARIES = \
-	$(MAPPING_ITEM_PREDICTION)  
+	$(KDDCUP2011)  
 
 
 RESGEN=resgen2
@@ -79,22 +79,22 @@ MYMEDIALITE_DLL = $(BUILD_DIR)/MyMediaLite.dll
 MATHNET_IRIDIUM_DLL = $(BUILD_DIR)/MathNet.Iridium.dll
 MYMEDIALITEEXPERIMENTAL_DLL = $(BUILD_DIR)/MyMediaLiteExperimental.dll
 SVM_DLL = $(BUILD_DIR)/SVM.dll
-MAPPING_ITEM_PREDICTION = $(BUILD_DIR)/mapping_item_prediction
+KDDCUP2011 = $(BUILD_DIR)/kddcup2011
 
 FILES = \
-	AssemblyInfo.cs \
-	MappingItemPrediction.cs 
+	KDDCup.cs \
+	AssemblyInfo.cs 
 
 DATA_FILES = 
 
 RESOURCES = 
 
 EXTRAS = \
-	mapping_item_prediction.in 
+	kddcup2011.in 
 
 REFERENCES =  \
-	System.Core \
-	System.Data
+	System \
+	System.Core
 
 DLL_REFERENCES = 
 
@@ -115,7 +115,7 @@ $(eval $(call emit-deploy-target,MYMEDIALITEEXPERIMENTAL_DLL))
 $(eval $(call emit-deploy-target,SVM_DLL))
 $(eval $(call emit-deploy-target,SVM_DLL_MDB))
 $(eval $(call emit-deploy-target,MYMEDIALITEEXPERIMENTAL_DLL_MDB))
-$(eval $(call emit-deploy-wrapper,MAPPING_ITEM_PREDICTION,mapping_item_prediction,x))
+$(eval $(call emit-deploy-wrapper,KDDCUP2011,kddcup2011,x))
 
 
 $(eval $(call emit_resgen_targets))
@@ -145,9 +145,9 @@ install-local: $(ASSEMBLY) $(ASSEMBLY_MDB)
 	$(call cp,$(SVM_DLL),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call cp,$(SVM_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call cp,$(MYMEDIALITEEXPERIMENTAL_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
-	$(call cp,$(MAPPING_EXE_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
+	$(call cp,$(KDDCUP2011_EXE_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	mkdir -p '$(DESTDIR)$(bindir)'
-	$(call cp,$(MAPPING_ITEM_PREDICTION),$(DESTDIR)$(bindir))
+	$(call cp,$(KDDCUP2011),$(DESTDIR)$(bindir))
 	make post-install-local-hook prefix=$(prefix)
 
 uninstall-local: $(ASSEMBLY) $(ASSEMBLY_MDB)
@@ -162,8 +162,8 @@ uninstall-local: $(ASSEMBLY) $(ASSEMBLY_MDB)
 	$(call rm,$(SVM_DLL),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call rm,$(SVM_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call rm,$(MYMEDIALITEEXPERIMENTAL_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
-	$(call rm,$(MAPPING_EXE_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
-	$(call rm,$(MAPPING_ITEM_PREDICTION),$(DESTDIR)$(bindir))
+	$(call rm,$(KDDCUP2011_EXE_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
+	$(call rm,$(KDDCUP2011),$(DESTDIR)$(bindir))
 	make post-uninstall-local-hook prefix=$(prefix)
 
 install: install-local
