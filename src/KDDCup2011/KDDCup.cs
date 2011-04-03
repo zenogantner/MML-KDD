@@ -44,7 +44,6 @@ public static class KDDCupProgram
 	static IRatings combined_ratings;
 	static IRatings track1_test_data;
 	static Dictionary<int, IList<int>> track2_test_data;
-	static KDDCupItems item_relations;
 
 	// recommenders
 	static IRecommender recommender = null;
@@ -202,12 +201,6 @@ MyMediaLite KDD Cup 2011 tool
 			var item_recommender = recommender as ItemRecommender;
 			training_data_posonly = CreateFeedback(training_ratings);
 			item_recommender.Feedback = training_data_posonly;
-		}
-
-		if (recommender is IKDDCupRecommender)
-		{
-			var kddcup_recommender = recommender as IKDDCupRecommender;
-			kddcup_recommender.ItemInfo = item_relations;
 		}
 
 		if (track_no == 1)
@@ -606,7 +599,11 @@ MyMediaLite KDD Cup 2011 tool
 			track2_test_data = Track2Candidates.Read(test_file);
 
 		// read item data
-		item_relations = Items.Read(track_file, album_file, artist_file, genre_file, track_no);
+		if (recommender is IKDDCupRecommender)
+		{
+			var kddcup_recommender = recommender as IKDDCupRecommender;
+			kddcup_recommender.ItemInfo = Items.Read(track_file, album_file, artist_file, genre_file, track_no);
+		}
 	}
 
 	static void AbortHandler(object sender, ConsoleCancelEventArgs args)
