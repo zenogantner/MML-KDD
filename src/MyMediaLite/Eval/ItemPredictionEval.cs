@@ -124,7 +124,7 @@ namespace MyMediaLite.Eval
 			result.Add("prec@5",  prec_5_sum / num_users);
 			result.Add("prec@10", prec_10_sum / num_users);
 			result.Add("prec@15", prec_15_sum / num_users);
-			result.Add("num_users", relevant_users.Count);
+			result.Add("num_users", num_users);
 			result.Add("num_items", relevant_items.Count);
 
 			return result;
