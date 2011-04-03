@@ -54,6 +54,7 @@ public static class KDDCupProgram
 	static List<double> fit_time_stats      = new List<double>();
 	static List<double> eval_time_stats     = new List<double>();
 	static List<double> rmse_eval_stats     = new List<double>();
+	//static List<double> prec_eval_stats     = new List<double>();
 
 	// global command line parameters
 	static bool compute_fit;
@@ -294,26 +295,25 @@ MyMediaLite KDD Cup 2011 tool
 					if ( !(recommender is IIterativeModel) )
 						Usage("Only iterative recommenders support find_iter.");
 
-					IIterativeModel iterative_recommender = (MF) item_recommender;
+					IIterativeModel iterative_recommender_validate = (MF) item_recommender;
+					IIterativeModel iterative_recommender_final    = (MF) item_recommender.Clone();
 					Console.WriteLine(recommender.ToString() + " ");
-
-					//var auc_eval_stats = new List<double>();
 
 					if (load_model_file.Equals(string.Empty))
 						recommender.Train();
 					else
-						Recommender.LoadModel(iterative_recommender, load_model_file);
+						Recommender.LoadModel(iterative_recommender_validate, load_model_file);
 
 					if (compute_fit)
-						Console.Write(string.Format(ni, "fit {0,0:0.#####} ", iterative_recommender.ComputeFit()));
+						Console.Write(string.Format(ni, "fit {0,0:0.#####} ", iterative_recommender_validate.ComputeFit()));
 
 					ItemPredictionEval.DisplayResults(ItemPredictionEval.Evaluate(item_recommender, split.Test[0], split.Train[0], relevant_users, relevant_items));
-					Console.WriteLine(" " + iterative_recommender.NumIter);
+					Console.WriteLine(" " + iterative_recommender_validate.NumIter);
 
-					for (int i = iterative_recommender.NumIter + 1; i <= max_iter; i++)
+					for (int i = iterative_recommender_validate.NumIter + 1; i <= max_iter; i++)
 					{
 						TimeSpan time = Utils.MeasureTime(delegate() {
-							iterative_recommender.Iterate();
+							iterative_recommender_validate.Iterate();
 						});
 						training_time_stats.Add(time.TotalSeconds);
 
@@ -323,7 +323,7 @@ MyMediaLite KDD Cup 2011 tool
 							{
 								double fit = 0;
 								time = Utils.MeasureTime(delegate() {
-									fit = iterative_recommender.ComputeFit();
+									fit = iterative_recommender_validate.ComputeFit();
 								});
 								fit_time_stats.Add(time.TotalSeconds);
 								Console.Write(string.Format(ni, "fit {0,0:0.#####} ", fit));
@@ -421,11 +421,14 @@ MyMediaLite KDD Cup 2011 tool
 			Console.WriteLine(recommender.ToString() + " ");
 
 			if (load_model_file == string.Empty)
-				recommender.Train();
+			{
+				iterative_recommender_validate.Train();
+				iterative_recommender_final.Train();
+			}
 			else
 			{
-				Recommender.LoadModel(iterative_recommender_validate, load_model_file);
-				Recommender.LoadModel(iterative_recommender_final, load_model_file + "-final");
+				Recommender.LoadModel(rating_predictor_validate, load_model_file);
+				Recommender.LoadModel(rating_predictor_final, load_model_file + "-final");
 			}
 
 			if (compute_fit)
@@ -438,8 +441,11 @@ MyMediaLite KDD Cup 2011 tool
 			{
 				TimeSpan time = Utils.MeasureTime(delegate() {
 					iterative_recommender_validate.Iterate();
+					
+					iterative_recommender_final.Iterate(); // TODO parallelize this
 				});
 				training_time_stats.Add(time.TotalSeconds);
+				
 
 				if (i % find_iter == 0)
 				{
@@ -454,6 +460,7 @@ MyMediaLite KDD Cup 2011 tool
 					}
 
 					// evaluate and save stats
+					// TODO parallelize
 					Dictionary<string, double> results = null;
 					time = Utils.MeasureTime(delegate() {
 						results = RatingEval.Evaluate(rating_predictor_validate, validation_ratings);
@@ -466,9 +473,13 @@ MyMediaLite KDD Cup 2011 tool
 					// if best result so far, write out model file and predictions
 					if (results["RMSE"] == rmse_eval_stats.Min())
 					{
-						Recommender.SaveModel(recommender, save_model_file, i);
-						if (!prediction_file.Equals(string.Empty))
-							KDDCup.PredictTrack1(recommender, track1_test_data, prediction_file + "-it-" + i);
+						if (save_model_file != string.Empty)
+						{
+							Recommender.SaveModel(rating_predictor_validate, save_model_file, i);
+							Recommender.SaveModel(rating_predictor_final, save_model_file + "-final", i);
+						}
+						if (prediction_file != string.Empty)
+							KDDCup.PredictTrack1(rating_predictor_final, track1_test_data, prediction_file + "-it-" + i);
 					}
 
 					// check whether we should abort
