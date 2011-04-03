@@ -296,11 +296,13 @@ MyMediaLite KDD Cup 2011 tool
 						Usage("Only iterative recommenders support find_iter.");
 
 					IIterativeModel iterative_recommender_validate = (MF) item_recommender;
-					IIterativeModel iterative_recommender_final    = (MF) item_recommender.Clone();
+					//IIterativeModel iterative_recommender_final    = (MF) item_recommender.Clone();
 					Console.WriteLine(recommender.ToString() + " ");
 
 					if (load_model_file.Equals(string.Empty))
+					{
 						recommender.Train();
+					}
 					else
 						Recommender.LoadModel(iterative_recommender_validate, load_model_file);
 
@@ -411,7 +413,7 @@ MyMediaLite KDD Cup 2011 tool
 		Utils.DisplayDataStats(training_ratings, validation_ratings, rating_predictor_validate);
 		Console.WriteLine("Test split:");
 		Utils.DisplayDataStats(combined_ratings, track1_test_data, rating_predictor_final);
-		
+
 		if (find_iter != 0)
 		{
 			if ( !(recommender is IIterativeModel) )
@@ -441,11 +443,11 @@ MyMediaLite KDD Cup 2011 tool
 			{
 				TimeSpan time = Utils.MeasureTime(delegate() {
 					iterative_recommender_validate.Iterate();
-					
+
 					iterative_recommender_final.Iterate(); // TODO parallelize this
 				});
 				training_time_stats.Add(time.TotalSeconds);
-				
+
 
 				if (i % find_iter == 0)
 				{
@@ -539,12 +541,15 @@ MyMediaLite KDD Cup 2011 tool
 
 			if (prediction_file != string.Empty)
 			{
-				seconds = Utils.MeasureTime(
-			    	delegate() {
-						Console.WriteLine();
-						KDDCup.PredictTrack1(recommender, track1_test_data, prediction_file);
-					}
-				);
+				Console.WriteLine("Prediction for KDD Cup Track 1:");
+				seconds = Utils.MeasureTime( delegate() { rating_predictor_final.Train(); } );
+        		Console.Write(" training_time " + seconds + " ");
+				Recommender.SaveModel(rating_predictor_final, save_model_file + "-final");
+
+				Console.WriteLine();
+				seconds = Utils.MeasureTime( delegate() {
+						KDDCup.PredictTrack1(rating_predictor_final, track1_test_data, prediction_file);
+				});
 				Console.Error.Write("predicting_time " + seconds);
 			}
 
@@ -584,7 +589,7 @@ MyMediaLite KDD Cup 2011 tool
 			validation_ratings = MyMediaLite.IO.KDDCup2011.Ratings.Read(validation_file, num_validation_ratings);
 			combined_ratings = new CombinedRatings(training_ratings, validation_ratings);
 		}
-			
+
 		// read test data
 		if (track_no == 1)
 			track1_test_data = MyMediaLite.IO.KDDCup2011.Ratings.ReadTest(test_file, num_test_ratings);
