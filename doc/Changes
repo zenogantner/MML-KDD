@@ -3,6 +3,8 @@
           - do track 2 validation on a subset of 10,000 users
           - add IKDDCupRecommender interface for recommenders that use the
             KDDCup item data
+        - recommenders
+          - make ItemRecommender and RatingPredictor clonable
         - evaluation
           - add relevant_users feature for item prediction
 
