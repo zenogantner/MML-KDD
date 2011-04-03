@@ -152,6 +152,10 @@ MyMediaLite KDD Cup 2011 tool
 
 		// data arguments
 		string data_dir  = parameters.GetRemoveString( "data_dir");
+		if (data_dir != string.Empty)
+			data_dir = data_dir + "/track" + track_no;
+		else
+			data_dir = "track" + track_no;
 		sample_data      = parameters.GetRemoveBool(   "sample_data", false);
 
 		// other arguments
@@ -331,14 +335,14 @@ MyMediaLite KDD Cup 2011 tool
 								Console.Write(string.Format(ni, "fit {0,0:0.#####} ", fit));
 							}
 
-							Dictionary<string, double> results = null;
 							time = Utils.MeasureTime(delegate() {
-								results = ItemPredictionEval.Evaluate(item_recommender, split.Test[0], split.Train[0], relevant_users, relevant_items);
+								var results = ItemPredictionEval.Evaluate(item_recommender, split.Test[0], split.Train[0], relevant_users, relevant_items);
 								ItemPredictionEval.DisplayResults(results);
 								//auc_eval_stats.Add(results["AUC"]);
 								Console.WriteLine(" " + i);
 							});
 							eval_time_stats.Add(time.TotalSeconds);
+
 						}
 					} // for
 
@@ -472,6 +476,10 @@ MyMediaLite KDD Cup 2011 tool
 					});
 					eval_time_stats.Add(time.TotalSeconds);
 
+					// TODO measure time needed for this
+					if (prediction_file != string.Empty)
+						KDDCup.PredictTrack1(rating_predictor_validate, validation_ratings, prediction_file + "-validation");
+
 					// if best result so far, write out model file and predictions
 					if (results["RMSE"] == rmse_eval_stats.Min())
 					{
@@ -544,7 +552,8 @@ MyMediaLite KDD Cup 2011 tool
 				Console.WriteLine("Prediction for KDD Cup Track 1:");
 				seconds = Utils.MeasureTime( delegate() { rating_predictor_final.Train(); } );
         		Console.Write(" training_time " + seconds + " ");
-				Recommender.SaveModel(rating_predictor_final, save_model_file + "-final");
+				if (save_model_file != string.Empty)
+					Recommender.SaveModel(rating_predictor_final, save_model_file + "-final");
 
 				Console.WriteLine();
 				seconds = Utils.MeasureTime( delegate() {
