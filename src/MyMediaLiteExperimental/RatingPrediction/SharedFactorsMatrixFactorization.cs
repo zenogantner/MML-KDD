@@ -35,11 +35,11 @@ namespace MyMediaLite.RatingPrediction
 
 		Matrix<double> item_shared_artist_factors;
 		Matrix<double> item_shared_album_factors;
-		Matrix<double> item_shared_genre_factors;
+		//Matrix<double> item_shared_genre_factors;
 
-		double[] artist_biases;
-		double[] album_biases;
-		double[] genre_biases;
+		//double[] artist_biases;
+		//double[] album_biases;
+		//double[] genre_biases;
 
 		// TODO add specific regularization term
 
@@ -82,17 +82,12 @@ namespace MyMediaLite.RatingPrediction
 			genre_biases  = new double[MaxItemID + 1];
 			*/
 
-			// KDD Cup hack (should be configurable for all MF recommenders)
-			MatrixUtils.InitNormal(item_factors, 0, 0);
-
-			// TODO something about initialization -- we need to differentiate features!!
-
-			MatrixUtils.InitNormal(user_shared_artist_factors, InitMean, InitStdev / 10000);
-			//MatrixUtils.InitNormal(item_shared_artist_factors, InitMean, InitStdev);
-			MatrixUtils.InitNormal(user_shared_album_factors, InitMean, InitStdev / 10000);
-			//MatrixUtils.InitNormal(item_shared_album_factors, InitMean, InitStdev);
-			MatrixUtils.InitNormal(user_shared_genre_factors, InitMean, InitStdev / 10000);
-			//MatrixUtils.InitNormal(item_shared_genre_factors, InitMean, InitStdev);
+			MatrixUtils.InitNormal(user_shared_artist_factors, InitMean, InitStdev);
+			MatrixUtils.InitNormal(item_shared_artist_factors, InitMean, InitStdev);
+			MatrixUtils.InitNormal(user_shared_album_factors, InitMean, InitStdev);
+			MatrixUtils.InitNormal(item_shared_album_factors, InitMean, InitStdev);
+			MatrixUtils.InitNormal(user_shared_genre_factors, InitMean, InitStdev);
+			MatrixUtils.InitNormal(item_shared_genre_factors, InitMean, InitStdev);
 		}
 
 		/// <inheritdoc/>
