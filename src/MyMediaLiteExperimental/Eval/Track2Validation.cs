@@ -104,12 +104,11 @@ namespace MyMediaLite.Eval
 
 			// create training part of the ratings (without the validation items)
 			var kept_indices = ratings.RandomIndex.Except(left_out_indices).ToArray();
-			Console.Error.WriteLine("kept_indices {0}", Memory.Usage);
+			Console.Error.WriteLine("memory {0}", Memory.Usage);
 			left_out_indices = null;
-			Console.Error.WriteLine("rm left_out_indices {0}", Memory.Usage);
+			Console.Error.WriteLine("memory after rm left_out_indices {0}", Memory.Usage);
 			Training = new RatingsProxy(ratings, kept_indices);
-			Console.Error.WriteLine("training {0}", Memory.Usage);
+			Console.Error.WriteLine("memory after training creation {0}", Memory.Usage);
 		}
 	}
 }
-
