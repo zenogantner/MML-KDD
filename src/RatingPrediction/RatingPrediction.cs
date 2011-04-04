@@ -154,7 +154,7 @@ MyMediaLite rating prediction
 			rating_type = RatingType.FLOAT;
 		if (use_byte)
 			rating_type = RatingType.BYTE;
-		
+
 		// other arguments
 		string save_model_file = parameters.GetRemoveString( "save_model");
 		string load_model_file = parameters.GetRemoveString( "load_model");
@@ -295,23 +295,18 @@ MyMediaLite rating prediction
 
 			if (!no_eval)
 			{
-				seconds = Utils.MeasureTime(
-			    	delegate()
-				    {
+				seconds = Utils.MeasureTime(delegate() {
 						RatingEval.DisplayResults(RatingEval.Evaluate(recommender, test_data));
-					}
-				);
+				});
 				Console.Write(" testing_time " + seconds);
 			}
 
 			if (!prediction_file.Equals(string.Empty))
 			{
-				seconds = Utils.MeasureTime(
-			    	delegate() {
+				seconds = Utils.MeasureTime(delegate() {
 						Console.WriteLine();
 						MyMediaLite.Eval.RatingPrediction.WritePredictions(recommender, test_data, user_mapping, item_mapping, prediction_file);
-					}
-				);
+				});
 				Console.Error.Write("predicting_time " + seconds);
 			}
 
