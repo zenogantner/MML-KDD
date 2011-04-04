@@ -20,8 +20,12 @@ using MyMediaLite.DataType;
 
 namespace MyMediaLite.Data
 {
+	/// <summary>Combine two IRatings objects</summary>
 	public class CombinedRatings : Ratings
 	{
+		/// <summary>Create a CombinedRatings object from to existing IRatings objects</summary>
+		/// <param name="ratings1">the first data set</param>
+		/// <param name="ratings2">the second data set</param>
 		public CombinedRatings(IRatings ratings1, IRatings ratings2)
 		{
 			Users = new CombinedList<int>(ratings1.Users, ratings2.Users);

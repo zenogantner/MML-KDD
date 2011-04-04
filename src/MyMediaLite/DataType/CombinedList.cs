@@ -21,6 +21,7 @@ using System.Collections.Generic;
 
 namespace MyMediaLite.DataType
 {
+	/// <summary>Combines two List objects</summary>
 	public class CombinedList<T> : IList<T>
 	{
 		IList<T> first;
