@@ -11,6 +11,8 @@ die "arguments: TRACK_NO FILE_NAME DESCRIPTION USER PASSWORD\n" if @ARGV < 5;
 
 my ($track_no, $filename, $description, $user, $password) = shift @ARGV;
 
+# TODO add some sanity checks: file size etc.
+
 my $mech = WWW::Mechanize->new();
 
 $mech->credentials($user, $password);
