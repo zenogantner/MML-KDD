@@ -141,17 +141,21 @@ namespace MyMediaLite.Util
 			Console.WriteLine(string.Format(ni, "test data:     {0} users, {1} items, {2} ratings, sparsity {3,0:0.#####}", num_users, num_items, test.Count, sparsity));
 
 			// count user/item overlap
-			int num_new_users = test.AllUsers.Except(train.AllUsers).Count();
-			int num_new_items = test.AllItems.Except(train.AllItems).Count();
-			Console.WriteLine("{0} new users, {1} new items", num_new_users, num_new_items);
+			int num_new_users = 0;
+			int num_new_items = 0;
+			TimeSpan seconds = Utils.MeasureTime(delegate() {
+						num_new_users = test.AllUsers.Except(train.AllUsers).Count();
+						num_new_items = test.AllItems.Except(train.AllItems).Count();
+			});
+			Console.WriteLine("{0} new users, {1} new items ({2} seconds)", num_new_users, num_new_items, seconds);
 
 			// attribute stats
 			if (recommender != null)
 			{
 				if (recommender is IUserAttributeAwareRecommender)
-					Console.WriteLine("{0} user attributes", ((IUserAttributeAwareRecommender)recommender).NumUserAttributes);
+					Console.WriteLine("{0} user attributes", ((IUserAttributeAwareRecommender) recommender).NumUserAttributes);
 				if (recommender is IItemAttributeAwareRecommender)
-					Console.WriteLine("{0} item attributes", ((IItemAttributeAwareRecommender)recommender).NumItemAttributes);
+					Console.WriteLine("{0} item attributes", ((IItemAttributeAwareRecommender) recommender).NumItemAttributes);
 			}
 		}
 	}
