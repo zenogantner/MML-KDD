@@ -500,30 +500,30 @@ MyMediaLite KDD Cup 2011 tool
 		{
 			TimeSpan seconds;
 
-			if (load_model_file == string.Empty)
-			{
-				Console.Write(recommender.ToString());
-				if (cross_validation > 0)
-				{
-					Console.WriteLine();
-					var split = new RatingCrossValidationSplit(training_ratings, cross_validation);
-					var results = RatingEval.EvaluateOnSplit(rating_predictor_validate, split);
-					RatingEval.DisplayResults(results);
-					no_eval = true;
-					rating_predictor_validate.Ratings = training_ratings;
-				}
-				else
-				{
-					seconds = Utils.MeasureTime( delegate() { recommender.Train(); } );
-        			Console.Write(" training_time " + seconds + " ");
-					Recommender.SaveModel(recommender, save_model_file);
-				}
-			}
-
-			Console.Write(recommender.ToString() + " ");
-
 			if (!no_eval)
-			{
+			{			
+				if (load_model_file == string.Empty)
+				{
+					Console.Write(recommender.ToString());
+					if (cross_validation > 0) // TODO cross-validation could also be performed on the complete dataset
+					{
+						Console.WriteLine();
+						var split = new RatingCrossValidationSplit(training_ratings, cross_validation);
+						var results = RatingEval.EvaluateOnSplit(rating_predictor_validate, split);
+						RatingEval.DisplayResults(results);
+						no_eval = true;
+						rating_predictor_validate.Ratings = training_ratings;
+					}
+					else
+					{
+						seconds = Utils.MeasureTime( delegate() { recommender.Train(); } );
+	        			Console.Write(" training_time " + seconds + " ");
+						Recommender.SaveModel(recommender, save_model_file);
+					}
+				}
+	
+				Console.Write(recommender.ToString() + " ");
+			
 				seconds = Utils.MeasureTime(
 			    	delegate() { RatingEval.DisplayResults(RatingEval.Evaluate(rating_predictor_validate, validation_ratings)); }
 				);
