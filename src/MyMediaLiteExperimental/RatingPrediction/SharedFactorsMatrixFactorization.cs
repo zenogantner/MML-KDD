@@ -87,11 +87,11 @@ namespace MyMediaLite.RatingPrediction
 
 			// TODO something about initialization -- we need to differentiate features!!
 
-			//MatrixUtils.InitNormal(user_shared_artist_factors, InitMean, InitStdev);
+			MatrixUtils.InitNormal(user_shared_artist_factors, InitMean, InitStdev / 10000);
 			//MatrixUtils.InitNormal(item_shared_artist_factors, InitMean, InitStdev);
-			//MatrixUtils.InitNormal(user_shared_album_factors, InitMean, InitStdev);
+			MatrixUtils.InitNormal(user_shared_album_factors, InitMean, InitStdev / 10000);
 			//MatrixUtils.InitNormal(item_shared_album_factors, InitMean, InitStdev);
-			//MatrixUtils.InitNormal(user_shared_genre_factors, InitMean, InitStdev);
+			MatrixUtils.InitNormal(user_shared_genre_factors, InitMean, InitStdev / 10000);
 			//MatrixUtils.InitNormal(item_shared_genre_factors, InitMean, InitStdev);
 		}
 
@@ -141,10 +141,10 @@ namespace MyMediaLite.RatingPrediction
 			 	double u_f = u_factors[u, f];
 				double i_f = i_factors[i, f];
 
-				double delta_u = gradient_common * i_f - Regularization * u_f;
+				double delta_u = gradient_common * i_f - RegUser * u_f;
 				MatrixUtils.Inc(u_factors, u, f, LearnRate * delta_u);
 
-				double delta_i = gradient_common * u_f - Regularization * i_f;
+				double delta_i = gradient_common * u_f - RegItem * i_f;
 				MatrixUtils.Inc(i_factors, i, f, LearnRate * delta_i);
 			}
 		}
@@ -175,6 +175,7 @@ namespace MyMediaLite.RatingPrediction
 					score += user_shared_album_factors[user_id, f] * item_shared_album_factors[album_id, f];
 			}
 			// TODO genres
+			// TODO biases
 
 			return MinRating + ( 1 / (1 + Math.Exp(-score)) ) * (MaxRating - MinRating);
 		}
@@ -234,8 +235,8 @@ namespace MyMediaLite.RatingPrediction
 			ni.NumberDecimalDigits = '.';
 
 			return string.Format(ni,
-								 "SharedFactorsMatrixFactorization num_factors={0} num_shared_artist_factors={1} num_shared_album_factors={2} num_shared_genre_factors={3} bias_regularization={4} regularization={5} learn_rate={6} num_iter={7} init_mean={8} init_stdev={9}",
-								 NumFactors, NumSharedArtistFactors, NumSharedAlbumFactors, NumSharedGenreFactors, BiasRegularization, Regularization, LearnRate, NumIter, InitMean, InitStdev);
+								 "SharedFactorsMatrixFactorization num_factors={0} num_shared_artist_factors={1} num_shared_album_factors={2} num_shared_genre_factors={3} bias_regularization={4} reg_user={5} reg_item={6} learn_rate={7} num_iter={8} init_mean={9} init_stdev={10}",
+								 NumFactors, NumSharedArtistFactors, NumSharedAlbumFactors, NumSharedGenreFactors, BiasRegularization, RegUser, RegItem, LearnRate, NumIter, InitMean, InitStdev);
 		}
 	}
 }

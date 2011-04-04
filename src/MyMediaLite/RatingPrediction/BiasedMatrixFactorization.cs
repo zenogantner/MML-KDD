@@ -35,10 +35,10 @@ namespace MyMediaLite.RatingPrediction
 
 		/// <summary>regularization constant for the user factors</summary>
 		public double RegUser { get; set; }
-		
+
 		/// <summary>regularization constant for the user factors</summary>
 		public double RegItem { get; set; }
-		
+
 		/// <inheritdoc/>
 		public override double Regularization
 		{
@@ -48,7 +48,7 @@ namespace MyMediaLite.RatingPrediction
 				RegItem = value;
 			}
 		}
-		
+
 		/// <summary>the user biases</summary>
 		protected double[] user_bias;
 		/// <summary>the item biases</summary>
@@ -281,8 +281,8 @@ namespace MyMediaLite.RatingPrediction
 			ni.NumberDecimalDigits = '.';
 
 			return string.Format(ni,
-								 "BiasedMatrixFactorization num_factors={0} bias_regularization={1} regularization={2} learn_rate={3} num_iter={4} init_mean={5} init_stdev={6}",
-								 NumFactors, BiasRegularization, Regularization, LearnRate, NumIter, InitMean, InitStdev);
+								 "BiasedMatrixFactorization num_factors={0} bias_regularization={1} reg_user={2} reg_item={3} learn_rate={4} num_iter={5} init_mean={6} init_stdev={7}",
+								 NumFactors, BiasRegularization, RegUser, RegItem, LearnRate, NumIter, InitMean, InitStdev);
 		}
 	}
 }
