@@ -79,9 +79,7 @@ Architecture
  - source code organization
    - use one repository per component, instead of having everything in one repository
  - IO and storage
-   - allow storage of models in database in addition to text files
-   - store models via reflection (can save a lot of code)
-   - faster reading of text files (less checks, at user request)
+   - save model files using reflection (binary and XML)
 GUI demo
  - display a fixed number of movies on the screen, let the user browse
  - tabs
