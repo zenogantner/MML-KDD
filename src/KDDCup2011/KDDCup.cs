@@ -298,7 +298,7 @@ MyMediaLite KDD Cup 2011 tool
 				//IIterativeModel iterative_recommender_final    = (MF) item_recommender.Clone();
 				Console.WriteLine(recommender.ToString() + " ");
 
-				if (load_model_file.Equals(string.Empty))
+				if (load_model_file == string.Empty)
 				{
 					recommender.Train();
 				}
@@ -368,24 +368,24 @@ MyMediaLite KDD Cup 2011 tool
 
 			Console.WriteLine();
 		}
-
-		// do complete training + testing
-		if (load_model_file != string.Empty)
+		
+		if (prediction_file != string.Empty)
 		{
-			Console.Write(recommender.ToString());
-
-			seconds = Utils.MeasureTime( delegate() { recommender.Train(); } );
-   			Console.Write(" training_time " + seconds + " ");
-			Recommender.SaveModel(recommender, save_model_file);
-		}
-		else
-		{
-			Recommender.LoadModel(recommender, load_model_file);
-			Console.Write(recommender.ToString() + " ");
-		}
-
-		if (!prediction_file.Equals(string.Empty))
-		{
+			// do complete training + testing
+			if (load_model_file != string.Empty)
+			{
+				Console.Write(recommender.ToString());
+	
+				seconds = Utils.MeasureTime( delegate() { recommender.Train(); } );
+	   			Console.Write(" training_time " + seconds + " ");
+				Recommender.SaveModel(recommender, save_model_file);
+			}
+			else
+			{
+				Recommender.LoadModel(recommender, load_model_file);
+				Console.Write(recommender.ToString() + " ");
+			}
+	
 			seconds = Utils.MeasureTime(
 		    	delegate() {
 					Console.WriteLine();
@@ -394,7 +394,7 @@ MyMediaLite KDD Cup 2011 tool
 			);
 			Console.Error.Write("predicting_time " + seconds);
 		}
-
+		
 		Console.WriteLine();
 	}
 
