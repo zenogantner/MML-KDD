@@ -229,105 +229,109 @@ MyMediaLite KDD Cup 2011 tool
 
 		TimeSpan seconds;
 
-		// do training + testing on generated validation data
-		if (!no_eval)
+		// do training (+ testing) on generated validation data
+		if (recommender is RatingPredictor)
 		{
-			if (recommender is RatingPredictor)
+			var rating_predictor = recommender as RatingPredictor;
+
+			var split = new RatingsSimpleSplit(training_ratings, 0.2);
+			rating_predictor.Ratings = split.Train[0];
+
+			seconds = Utils.MeasureTime(delegate() {
+				rating_predictor.Train();
+			});
+			Console.Write(" training_time " + seconds + " ");
+
+			// TODO compute fit if requested
+			
+			if (!no_eval)
 			{
-				var rating_predictor = recommender as RatingPredictor;
-
-				var split = new RatingsSimpleSplit(training_ratings, 0.2);
-				rating_predictor.Ratings = split.Train[0];
-
-				seconds = Utils.MeasureTime(delegate() {
-					rating_predictor.Train();
-				});
-				Console.Write(" training_time " + seconds + " ");
-
 				seconds = Utils.MeasureTime(delegate() {
 					var results = RatingEval.Evaluate(rating_predictor, split.Test[0]);
 					RatingEval.DisplayResults(results);
 				});
 				Console.Write(" evaluation_time " + seconds + " ");
-
 			}
-			if (recommender is ItemRecommender)
+		}
+		if (recommender is ItemRecommender)
+		{
+			var item_recommender = recommender as ItemRecommender;
+
+			// create split
+			var split = new PosOnlyFeedbackSimpleSplit(training_data_posonly, 0.2);
+			item_recommender.Feedback = split.Train[0];
+
+			// use candidate items intersected with test items as relevant items
+			var relevant_items = new HashSet<int>();
+			foreach (int user_id in track2_test_data.Keys)
+				foreach (int item_id in track2_test_data[user_id])
+					relevant_items.Add(item_id);
+			relevant_items.IntersectWith(split.Test[0].AllItems);
+
+			int[] relevant_users;
+			if (sample_data)
 			{
-				var item_recommender = recommender as ItemRecommender;
-
+				relevant_users = split.Test[0].AllUsers.ToArray();
+			}
+			else
+			{
+				// use corresponding intersection for relevant users, and sample from them
+				var relevant_users_set = new HashSet<int>(split.Test[0].AllUsers);
+				relevant_users_set.IntersectWith(split.Test[0].AllItems);
+				var relevant_users_list = new List<int>(relevant_users_set);
+				relevant_users = new int[10000];
+				
 				var random = new System.Random();
+				for (int i = 0; i < relevant_users.Length; i++)
+					relevant_users[i] = relevant_users_list[random.Next(0, relevant_users_list.Count - 1)];
 
-				// create split
-				var split = new PosOnlyFeedbackSimpleSplit(training_data_posonly, 0.2);
-				item_recommender.Feedback = split.Train[0];
+				Console.Error.WriteLine("{0} relevant users, {1} relevant items", relevant_users_list.Count, relevant_items.Count);
+				Console.Error.WriteLine("Use subset of 10000 users for validation.");
+			}
 
-				// use candidate items intersected with test items as relevant items
-				var relevant_items = new HashSet<int>();
-				foreach (int user_id in track2_test_data.Keys)
-					foreach (int item_id in track2_test_data[user_id])
-						relevant_items.Add(item_id);
-				relevant_items.IntersectWith(split.Test[0].AllItems);
+			if (find_iter != 0)
+			{   // make this more abstract ...
+				if ( !(recommender is IIterativeModel) )
+					Usage("Only iterative recommenders support find_iter.");
 
-				int[] relevant_users;
-				if (sample_data)
+				IIterativeModel iterative_recommender_validate = (MF) item_recommender;
+				//IIterativeModel iterative_recommender_final    = (MF) item_recommender.Clone();
+				Console.WriteLine(recommender.ToString() + " ");
+
+				if (load_model_file.Equals(string.Empty))
 				{
-					relevant_users = split.Test[0].AllUsers.ToArray();
+					recommender.Train();
 				}
 				else
+					Recommender.LoadModel(iterative_recommender_validate, load_model_file);
+
+				if (compute_fit)
+					Console.Write(string.Format(ni, "fit {0,0:0.#####} ", iterative_recommender_validate.ComputeFit()));
+
+				ItemPredictionEval.DisplayResults(ItemPredictionEval.Evaluate(item_recommender, split.Test[0], split.Train[0], relevant_users, relevant_items));
+				Console.WriteLine(" " + iterative_recommender_validate.NumIter);
+
+				for (int i = iterative_recommender_validate.NumIter + 1; i <= max_iter; i++)
 				{
-					// use corresponding intersection for relevant users, and sample from them
-					var relevant_users_set = new HashSet<int>(split.Test[0].AllUsers);
-					relevant_users_set.IntersectWith(split.Test[0].AllItems);
-					var relevant_users_list = new List<int>(relevant_users_set);
-					relevant_users = new int[10000];
-					for (int i = 0; i < relevant_users.Length; i++)
-						relevant_users[i] = relevant_users_list[random.Next(0, relevant_users_list.Count - 1)];
+					TimeSpan time = Utils.MeasureTime(delegate() {
+						iterative_recommender_validate.Iterate();
+					});
+					training_time_stats.Add(time.TotalSeconds);
 
-					Console.Error.WriteLine("{0} relevant users, {1} relevant items", relevant_users_list.Count, relevant_items.Count);
-					Console.Error.WriteLine("Use subset of 10000 users for validation.");
-				}
-
-				if (find_iter != 0)
-				{   // make this more abstract ...
-					if ( !(recommender is IIterativeModel) )
-						Usage("Only iterative recommenders support find_iter.");
-
-					IIterativeModel iterative_recommender_validate = (MF) item_recommender;
-					//IIterativeModel iterative_recommender_final    = (MF) item_recommender.Clone();
-					Console.WriteLine(recommender.ToString() + " ");
-
-					if (load_model_file.Equals(string.Empty))
+					if (i % find_iter == 0)
 					{
-						recommender.Train();
-					}
-					else
-						Recommender.LoadModel(iterative_recommender_validate, load_model_file);
-
-					if (compute_fit)
-						Console.Write(string.Format(ni, "fit {0,0:0.#####} ", iterative_recommender_validate.ComputeFit()));
-
-					ItemPredictionEval.DisplayResults(ItemPredictionEval.Evaluate(item_recommender, split.Test[0], split.Train[0], relevant_users, relevant_items));
-					Console.WriteLine(" " + iterative_recommender_validate.NumIter);
-
-					for (int i = iterative_recommender_validate.NumIter + 1; i <= max_iter; i++)
-					{
-						TimeSpan time = Utils.MeasureTime(delegate() {
-							iterative_recommender_validate.Iterate();
-						});
-						training_time_stats.Add(time.TotalSeconds);
-
-						if (i % find_iter == 0)
+						if (compute_fit)
 						{
-							if (compute_fit)
-							{
-								double fit = 0;
-								time = Utils.MeasureTime(delegate() {
-									fit = iterative_recommender_validate.ComputeFit();
-								});
-								fit_time_stats.Add(time.TotalSeconds);
-								Console.Write(string.Format(ni, "fit {0,0:0.#####} ", fit));
-							}
+							double fit = 0;
+							time = Utils.MeasureTime(delegate() {
+								fit = iterative_recommender_validate.ComputeFit();
+							});
+							fit_time_stats.Add(time.TotalSeconds);
+							Console.Write(string.Format(ni, "fit {0,0:0.#####} ", fit));
+						}
 
+						if (!no_eval)
+						{
 							time = Utils.MeasureTime(delegate() {
 								var results = ItemPredictionEval.Evaluate(item_recommender, split.Test[0], split.Train[0], relevant_users, relevant_items);
 								ItemPredictionEval.DisplayResults(results);
@@ -335,44 +339,38 @@ MyMediaLite KDD Cup 2011 tool
 								Console.WriteLine(" " + i);
 							});
 							eval_time_stats.Add(time.TotalSeconds);
-
 						}
-					} // for
+					}
+				} // for
 
-					DisplayIterationStats();
-					Recommender.SaveModel(recommender, save_model_file);
-				}
-				else {
-					seconds = Utils.MeasureTime(delegate() {
-						item_recommender.Train();
-					});
-					Console.Write(" training_time " + seconds + " ");
+				DisplayIterationStats();
+				Recommender.SaveModel(recommender, save_model_file);
+			}
+			else if (!no_eval) // only do this if we want to evaluate, otherwise it makes no sense
+			{
+				seconds = Utils.MeasureTime(delegate() {
+					item_recommender.Train();
+				});
+				Console.Write(" training_time " + seconds + " ");
 
-					seconds = Utils.MeasureTime(delegate() {
-						var results = ItemPredictionEval.Evaluate(item_recommender, split.Test[0], split.Train[0], relevant_users, relevant_items);
-						ItemPredictionEval.DisplayResults(results);
-					});
-					Console.Write(" evaluation_time " + seconds + " ");
-				}
+				seconds = Utils.MeasureTime(delegate() {
+					var results = ItemPredictionEval.Evaluate(item_recommender, split.Test[0], split.Train[0], relevant_users, relevant_items);
+					ItemPredictionEval.DisplayResults(results);
+				});
+				Console.Write(" evaluation_time " + seconds + " ");
 			}
 
 			// reset training data
 			if (recommender is RatingPredictor)
-			{
-				var rating_predictor = recommender as RatingPredictor;
-				rating_predictor.Ratings = training_ratings;
-			}
+				((RatingPredictor) recommender).Ratings = training_ratings;
 			if (recommender is ItemRecommender)
-			{
-				var item_recommender = recommender as ItemRecommender;
-				item_recommender.Feedback = training_data_posonly;
-			}
+				((ItemRecommender) recommender).Feedback = training_data_posonly;
 
 			Console.WriteLine();
 		}
 
 		// do complete training + testing
-		if (load_model_file.Equals(string.Empty))
+		if (load_model_file != string.Empty)
 		{
 			Console.Write(recommender.ToString());
 
@@ -540,6 +538,8 @@ MyMediaLite KDD Cup 2011 tool
 				Console.Write(" testing_time " + seconds);
 			}
 
+			Console.WriteLine();
+
 			if (prediction_file != string.Empty)
 			{
 				Console.WriteLine("Prediction for KDD Cup Track 1:");
@@ -552,10 +552,8 @@ MyMediaLite KDD Cup 2011 tool
 				seconds = Utils.MeasureTime( delegate() {
 						KDDCup.PredictTrack1(rating_predictor_final, track1_test_data, prediction_file);
 				});
-				Console.Error.Write("predicting_time " + seconds);
+				Console.Error.WriteLine("predicting_time " + seconds);
 			}
-
-			Console.WriteLine();
 		}
 	}
 
