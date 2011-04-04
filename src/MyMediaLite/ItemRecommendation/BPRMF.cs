@@ -131,19 +131,19 @@ namespace MyMediaLite.ItemRecommendation
 			{
 				if (item_is_positive)
 				{
-					int rindex = random.Next (0, user_neg_items[u].Length);
+					int rindex = random.Next(0, user_neg_items[u].Length);
 					j = user_neg_items[u][rindex];
 				}
 				else
 				{
-					int rindex = random.Next (0, user_pos_items[u].Length);
+					int rindex = random.Next(0, user_pos_items[u].Length);
 					j = user_pos_items[u][rindex];
 				}
 			}
 			else
 			{
 				do
-					j = random.Next (0, MaxItemID + 1);
+					j = random.Next(0, MaxItemID + 1);
 				while (user_items.Contains(j) != item_is_positive);
 			}
 
@@ -160,18 +160,18 @@ namespace MyMediaLite.ItemRecommendation
 			{
 				int rindex;
 
-				rindex = random.Next (0, user_pos_items[u].Length);
+				rindex = random.Next(0, user_pos_items[u].Length);
 				i = user_pos_items[u][rindex];
 
-				rindex = random.Next (0, user_neg_items[u].Length);
+				rindex = random.Next(0, user_neg_items[u].Length);
 				j = user_neg_items[u][rindex];
 			}
 			else
 			{
 				HashSet<int> user_items = Feedback.UserMatrix[u];
-				i = user_items.ElementAt(random.Next (0, user_items.Count));
+				i = user_items.ElementAt(random.Next(0, user_items.Count));
 				do
-					j = random.Next (0, MaxItemID + 1);
+					j = random.Next(0, MaxItemID + 1);
 				while (user_items.Contains(j));
 			}
 		}
