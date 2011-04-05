@@ -21,6 +21,7 @@ using MyMediaLite.Util;
 
 namespace MyMediaLite.ItemRecommendation
 {
+	/// <summary>BPRMF with frequency-adjusted sampling, prototype for KDD Cup 2011</summary>
 	public class BPRMF_KDD : BPRMF
 	{
 		int[] users;
@@ -33,7 +34,7 @@ namespace MyMediaLite.ItemRecommendation
 			
 			base.InitModel();
 			
-			Console.Error.WriteLine("memory before adding data structure: {0}", Memory.Usage);
+			//Console.Error.WriteLine("memory before adding data structure: {0}", Memory.Usage);
 			
 			users = new int[Feedback.Count];
 			items = new int[Feedback.Count];
@@ -48,7 +49,7 @@ namespace MyMediaLite.ItemRecommendation
 					index++;
 				}
 			
-			Console.Error.WriteLine("memory after adding data structure: {0}", Memory.Usage);
+			//Console.Error.WriteLine("memory after adding data structure: {0}", Memory.Usage);
 		}
 		
 		/// <inheritdoc/>
