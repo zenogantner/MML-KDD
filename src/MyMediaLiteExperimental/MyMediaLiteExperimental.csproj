@@ -74,6 +74,7 @@
     <Compile Include="RatingPrediction\NewKNN.cs" />
     <Compile Include="IKDDCupRecommender.cs" />
     <Compile Include="RatingPrediction\SharedFactorsMatrixFactorization.cs" />
+    <Compile Include="ItemRecommender\BPRMF_KDD.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AttrToFactor\" />

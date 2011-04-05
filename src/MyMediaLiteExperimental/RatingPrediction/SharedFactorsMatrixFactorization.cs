@@ -31,7 +31,7 @@ namespace MyMediaLite.RatingPrediction
 	{
 		Matrix<double> user_shared_artist_factors;
 		Matrix<double> user_shared_album_factors;
-		Matrix<double> user_shared_genre_factors;
+		//Matrix<double> user_shared_genre_factors;
 
 		Matrix<double> item_shared_artist_factors;
 		Matrix<double> item_shared_album_factors;
@@ -68,12 +68,12 @@ namespace MyMediaLite.RatingPrediction
 
 			user_shared_artist_factors = new Matrix<double>(MaxUserID + 1, NumSharedArtistFactors);
 			user_shared_album_factors  = new Matrix<double>(MaxUserID + 1, NumSharedAlbumFactors);
-			user_shared_genre_factors  = new Matrix<double>(MaxUserID + 1, NumSharedGenreFactors);
+			//user_shared_genre_factors  = new Matrix<double>(MaxUserID + 1, NumSharedGenreFactors);
 
 			// TODO this is a bit of a waste of memory, consider using sparse matrices ...
 			item_shared_artist_factors = new Matrix<double>(MaxItemID + 1, NumSharedArtistFactors);
 			item_shared_album_factors  = new Matrix<double>(MaxItemID + 1, NumSharedAlbumFactors);
-			item_shared_genre_factors  = new Matrix<double>(MaxItemID + 1, NumSharedGenreFactors);
+			//item_shared_genre_factors  = new Matrix<double>(MaxItemID + 1, NumSharedGenreFactors);
 
 			// init biases
 			/*
@@ -86,8 +86,8 @@ namespace MyMediaLite.RatingPrediction
 			MatrixUtils.InitNormal(item_shared_artist_factors, InitMean, InitStdev);
 			MatrixUtils.InitNormal(user_shared_album_factors, InitMean, InitStdev);
 			MatrixUtils.InitNormal(item_shared_album_factors, InitMean, InitStdev);
-			MatrixUtils.InitNormal(user_shared_genre_factors, InitMean, InitStdev);
-			MatrixUtils.InitNormal(item_shared_genre_factors, InitMean, InitStdev);
+			//MatrixUtils.InitNormal(user_shared_genre_factors, InitMean, InitStdev);
+			//MatrixUtils.InitNormal(item_shared_genre_factors, InitMean, InitStdev);
 		}
 
 		/// <inheritdoc/>

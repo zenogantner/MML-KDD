@@ -201,6 +201,9 @@ MyMediaLite KDD Cup 2011 tool
 			var item_recommender = recommender as ItemRecommender;
 			training_data_posonly = CreateFeedback(training_ratings);
 			item_recommender.Feedback = training_data_posonly;
+			Console.Error.WriteLine("memory before deleting training_ratings: {0}", Memory.Usage);
+			training_ratings = null;
+			Console.Error.WriteLine("memory after deleting training_ratings:  {0}", Memory.Usage);
 		}
 
 		if (load_model_file != string.Empty)
