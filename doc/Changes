@@ -5,6 +5,9 @@
             KDDCup item data
         - recommenders
           - make ItemRecommender and RatingPredictor clonable
+          - BPRMF:
+            - get rid of unnecessary IterationLength parameter
+            -only interate once over relevant data points in online learning
         - evaluation
           - add relevant_users feature for item prediction
 
