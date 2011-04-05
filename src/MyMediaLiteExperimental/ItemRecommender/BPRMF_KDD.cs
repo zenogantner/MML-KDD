@@ -22,7 +22,7 @@ using MyMediaLite.Util;
 namespace MyMediaLite.ItemRecommendation
 {
 	/// <summary>BPRMF with frequency-adjusted sampling, prototype for KDD Cup 2011</summary>
-	public class BPRMF_KDD : BPRMF
+	public sealed class BPRMF_KDD : BPRMF
 	{
 		int[] users;
 		int[] items;
@@ -60,9 +60,19 @@ namespace MyMediaLite.ItemRecommendation
 			i = items[random_index];
 			
 			do
-				j = items[random.Next(0, users.Length - 1)];
+				j = items[random.Next(0, items.Length - 1)];
 			while (Feedback.UserMatrix[u, j]);
 		}
+		
+		/// <inheritdoc/>
+		public override string ToString()
+		{
+			var ni = new NumberFormatInfo();
+			ni.NumberDecimalDigits = '.';
+
+			return string.Format(ni, "BPRMF_KDD num_factors={0} item_bias={1} reg_u={2} reg_i={3} reg_j={4} num_iter={5} learn_rate={6} init_mean={7} init_stdev={8}",
+								 num_factors, item_bias, reg_u, reg_i, reg_j, NumIter, learn_rate, InitMean, InitStdev);
+		}		
 	}
 }
 

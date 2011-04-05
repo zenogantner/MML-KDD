@@ -85,7 +85,7 @@ namespace MyMediaLite.DataType
 			}
 			set
 			{
-				row_list[x] = value; // TODO think about getting rid of this
+				row_list[x] = value; // TODO get rid of this?
 			}
 		}
 

@@ -225,6 +225,8 @@ MyMediaLite KDD Cup 2011 tool
 			if (ratings[i] >= 80)
 				feedback.Add(ratings.Users[i], ratings.Items[i]);
 
+		Console.Error.WriteLine("{0} ratings > 80", feedback.Count);
+		
 		return feedback;
 	}
 
