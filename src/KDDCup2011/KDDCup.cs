@@ -388,7 +388,7 @@ MyMediaLite KDD Cup 2011 tool
 					KDDCup.PredictTrack2(recommender, track2_test_data, prediction_file);
 				}
 			);
-			Console.Error.Write("predicting_time " + seconds);
+			Console.Write("predicting_time " + seconds);
 		}
 
 		Console.WriteLine();
