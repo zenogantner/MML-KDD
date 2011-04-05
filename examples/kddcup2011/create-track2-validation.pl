@@ -22,21 +22,27 @@ while (<$fh>) {
 
         my ($user_id, $num_ratings) = @fields;
         
-        my $user_ratings = {};
+        my %user_ratings = ();
         
         for (my $i = 0; $i < $num_ratings; $i++) {
                 $line = <$fh>;
                 chomp $line;
                 
                 my ($item_id, $rating) = split /\t/, $line;
-                if ($rating >= 80) {
-                        $user_ratings->{$item_id} = $rating;
+                
+                $user_ratings{$item_id} = $rating;
+                
+                if ($rating >= 80) {                        
                         push @items, $item_id;
                 }
         }
-        $ratings_by_user{$user_id} = $user_ratings;
+        $ratings_by_user{$user_id} = \%user_ratings;
 }
 close $fh;
+
+my $num_ratings = scalar @items;
+my $num_users   = scalar keys %ratings_by_user;
+print STDERR "Read in $num_ratings ratings by $num_users users.\n";
 
 # read in test data
 open $fh, '<', $candidates_file;
@@ -49,18 +55,24 @@ while (<$fh>) {
 
         my ($user_id, $num_canidates) = @fields;
         
-        my $user_candidates = [];
+        my @user_candidates = ();
         
         for (my $i = 0; $i < $num_canidates; $i++) {
                 my $item_id = <$fh>;
                 chomp $item_id;
                 
-                push @$user_candidates, $item_id;
+                push @user_candidates, $item_id;
         }
-        $candidates_by_user{$user_id} = $user_candidates;
+        $candidates_by_user{$user_id} = \@user_candidates;
 }
+close $fh;
+
+$num_users   = scalar keys %candidates_by_user;
+print STDERR "Read in candidate items for $num_users users.\n";
+
 
 # sample validation data set
+print STDERR "Sampling ...\n";
 my %validation_ratings_by_user    = ();
 my %validation_candidates_by_user = ();
 my %validation_hits_by_user       = ();
@@ -70,22 +82,22 @@ USER:
 foreach my $user_id (keys %candidates_by_user) {
         # create a set of all positively rated items by the user
 	my %user_pos_items = ();
-	foreach my $item_id (keys %{$ratings_by_user{user_id}}) {
-		if ($ratings_by_user{user_id}->{item_id} >= 80) {
+	foreach my $item_id (keys %{$ratings_by_user{$user_id}}) {
+		if ($ratings_by_user{$user_id}->{$item_id} >= 80) {
                         $user_pos_items{$item_id} = 1;
                 }
         }
-	
-	# abort this user if we do not have enough positive items
-	next USER if scalar keys %user_pos_items < 3;
 		
         my @user_pos_items = keys %user_pos_items;
+
+	# abort this user if we do not have enough positive items
+	next USER if scalar @user_pos_items < 3;
 
 	# sample positive items
 	my %sampled_pos_items = ();
 	while (scalar keys %sampled_pos_items < 3) {
 		my $random_item = $user_pos_items[int rand(scalar @user_pos_items)];
-		$sampled_pos_items{random_item} = 1;
+		$sampled_pos_items{$random_item} = 1;
 	}
 
 	# sample negative items
@@ -98,18 +110,19 @@ foreach my $user_id (keys %candidates_by_user) {
 	}
 
 	# add to data sets
-	$validation_hits_by_user{$user_id}       = [ sort keys %sampled_pos_items ];
-	$validation_candidates_by_user{$user_id} = [ sort ($validation_hits_by_user{$user_id}, keys %sampled_neg_items) ];
+	$validation_hits_by_user{$user_id}       = [ keys %sampled_pos_items ];
+	$validation_candidates_by_user{$user_id} = [ keys %sampled_pos_items, keys %sampled_neg_items ];
 	
 	# add to validation ratings, remove from training ratings
 	$validation_ratings_by_user{$user_id} = { map { $_ => $ratings_by_user{$user_id}->{$_} } keys %sampled_pos_items };
 	delete $ratings_by_user{$user_id}->{ keys %sampled_pos_items };
 
         # give out progress
-	print STDERR '.'          if $counter %  1_000 ==    999;
-	print STDERR "$user_id\n" if $counter % 20_000 == 19_999;
+	print STDERR '.'  if $counter %  1_000 ==    999;
+	print STDERR "\n" if $counter % 40_000 == 39_999;
 	$counter++;
 }
+print STDERR "\n\n";
 
 # write out data set
 write_ratings(\%ratings_by_user,            'trainIdx2.txt');
@@ -123,32 +136,34 @@ sub write_ratings {
 	my ($ratings_ref, $filename) = @_;
 	
 	my $num_users = scalar keys %$ratings_ref;
-	print STDERR "Writing ratings of $num_users to $dataset_dir/$filename ...";
+	print STDERR "Writing ratings of $num_users users to $dataset_dir/$filename ...";
 	
 	open my $fh, '>', "$dataset_dir/$filename";
+	my $counter = 0;
         foreach my $user_id (keys %$ratings_ref) {
                 my $num_ratings = scalar keys %{$ratings_ref->{$user_id}};
                 print $fh "$user_id|$num_ratings\n";
                 foreach my $item_id (keys %{$ratings_ref->{$user_id}}) {
-                        print "$item_id\t$ratings_ref->{$user_id}->{$item_id}\n";
+                        print $fh "$item_id\t$ratings_ref->{$user_id}->{$item_id}\n";
+                        $counter++;
                 }
         }
         
-        print STDERR "done.\n";
+        print STDERR "done ($counter).\n";
 }
 
 sub write_items {
 	my ($items_ref, $filename) = @_;
 
 	my $num_users = scalar keys %$items_ref;
-	print STDERR "Writing items of $num_users to $dataset_dir/$filename ...";
+	print STDERR "Writing items of $num_users users to $dataset_dir/$filename ...";
 	
 	open my $fh, '>', "$dataset_dir/$filename";
         foreach my $user_id (keys %$items_ref) {
-                my $num_items = scalar keys %{$items_ref->{$user_id}};
+                my $num_items = scalar @{$items_ref->{$user_id}};
                 print $fh "$user_id|$num_items\n";
-                foreach my $item_id (keys %{$items_ref->{$user_id}}) {
-                        print "$item_id\n";
+                foreach my $item_id (@{$items_ref->{$user_id}}) {
+                        print $fh "$item_id\n";
                 }
         }
         
