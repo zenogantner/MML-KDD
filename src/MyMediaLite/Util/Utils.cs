@@ -114,12 +114,22 @@ namespace MyMediaLite.Util
 			return types.ToArray();
 		}
 
-		// TODO get rid of recommender argument
 		/// <summary>Display dataset statistics</summary>
 		/// <param name="train">the training data</param>
 		/// <param name="test">the test data</param>
 		/// <param name="recommender">the recommender (to get attribute information)</param>
 		public static void DisplayDataStats(IRatings train, IRatings test, RatingPredictor recommender)
+		{
+			DisplayDataStats(train, test, recommender, false);
+		}
+		
+		// TODO get rid of recommender argument
+		/// <summary>Display dataset statistics</summary>
+		/// <param name="train">the training data</param>
+		/// <param name="test">the test data</param>
+		/// <param name="recommender">the recommender (to get attribute information)</param>
+		/// <param nume="display_overlap">if set true, display the user/item overlap between train and test</param>
+		public static void DisplayDataStats(IRatings train, IRatings test, RatingPredictor recommender, bool display_overlap)
 		{
 			var ni = new NumberFormatInfo();
 			ni.NumberDecimalDigits = '.';
@@ -140,15 +150,18 @@ namespace MyMediaLite.Util
 			sparsity = (double) 100L * empty_size / matrix_size;
 			Console.WriteLine(string.Format(ni, "test data:     {0} users, {1} items, {2} ratings, sparsity {3,0:0.#####}", num_users, num_items, test.Count, sparsity));
 
-			// count user/item overlap
-			int num_new_users = 0;
-			int num_new_items = 0;
-			TimeSpan seconds = Utils.MeasureTime(delegate() {
-						num_new_users = test.AllUsers.Except(train.AllUsers).Count();
-						num_new_items = test.AllItems.Except(train.AllItems).Count();
-			});
-			Console.WriteLine("{0} new users, {1} new items ({2} seconds)", num_new_users, num_new_items, seconds);
-
+			// count and display the overlap between train and test
+			if (display_overlap)
+			{
+				int num_new_users = 0;
+				int num_new_items = 0;
+				TimeSpan seconds = Utils.MeasureTime(delegate() {
+							num_new_users = test.AllUsers.Except(train.AllUsers).Count();
+							num_new_items = test.AllItems.Except(train.AllItems).Count();
+				});
+				Console.WriteLine("{0} new users, {1} new items ({2} seconds)", num_new_users, num_new_items, seconds);
+			}
+				
 			// attribute stats
 			if (recommender != null)
 			{
