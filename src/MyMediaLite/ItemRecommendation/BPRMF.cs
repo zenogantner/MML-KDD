@@ -55,11 +55,6 @@ namespace MyMediaLite.ItemRecommendation
 		/// <summary>Use the first item latent factor as a bias term if set to true</summary>
 		protected bool item_bias = false;
 
-		/// <summary>One iteration is <see cref="iteration_length"/> * number of entries in the training matrix</summary>
-		public int IterationLength { get { return iteration_length; } set { iteration_length = value; }	}
-		/// <summary>One iteration is <see cref="iteration_length"/> * number of entries in the training matrix</summary>
-		protected int iteration_length = 5;
-
 		/// <summary>Learning rate alpha</summary>
 		public double LearnRate { get {	return learn_rate; } set { learn_rate = value; } }
 		/// <summary>Learning rate alpha</summary>
@@ -89,31 +84,36 @@ namespace MyMediaLite.ItemRecommendation
 		protected System.Random random;
 
 		/// <inheritdoc/>
-		public override void Train()
+		protected override void InitModel()
 		{
+			base.InitModel();
+			
 			random = Util.Random.GetInstance();
-			CheckSampling();
+			CheckSampling(); // TODO rename
 
 			// if necessary, set the bias counterparts to 1
 			if (item_bias)
 				user_factors.SetColumnToOneValue(0, 1.0);
-
-			base.Train();
 		}
 
 		/// <summary>Perform one iteration of stochastic gradient ascent over the training data</summary>
 		/// <remarks>
-		/// One iteration is <see cref="iteration_length"/> * number of entries in the training matrix
+		/// One iteration is samples number of positive entries in the training matrix times
 		/// </remarks>
 		public override void Iterate()
 		{
 			int num_pos_events = Feedback.Count;
 
-			for (int i = 0; i < num_pos_events * iteration_length; i++)
+			for (int i = 0; i < num_pos_events; i++)
 			{
 				int user_id, item_id_1, item_id_2;
 				SampleTriple(out user_id, out item_id_1, out item_id_2);
 				UpdateFactors(user_id, item_id_1, item_id_2, true, true, true);
+				
+				if (i % 10000 == 1)
+					Console.Error.Write('.');
+				if (i % 200000 == 1)
+					Console.Error.WriteLine();
 			}
 		}
 
@@ -194,7 +194,7 @@ namespace MyMediaLite.ItemRecommendation
 		/// <param name="u">the user ID</param>
 		/// <param name="i">the ID of the first item</param>
 		/// <param name="j">the ID of the second item</param>
-		protected void SampleTriple(out int u, out int i, out int j)
+		protected virtual void SampleTriple(out int u, out int i, out int j)
 		{
 			u = SampleUser();
 			SampleItemPair(u, out i, out j);
@@ -344,7 +344,7 @@ namespace MyMediaLite.ItemRecommendation
 			MatrixUtils.InitNormal(user_factors, InitMean, InitStdev, user_id);
 
 			HashSet<int> user_items = Feedback.UserMatrix[user_id];
-			for (int i = 0; i < user_items.Count * iteration_length * NumIter; i++)
+			for (int i = 0; i < user_items.Count; i++)
 			{
 				int item_id_1, item_id_2;
 				SampleItemPair(user_id, out item_id_1, out item_id_2);
@@ -359,7 +359,7 @@ namespace MyMediaLite.ItemRecommendation
 			MatrixUtils.InitNormal(item_factors, InitMean, InitStdev, item_id);
 
 			int num_pos_events = Feedback.UserMatrix.NumberOfEntries;
-			int num_item_iterations = num_pos_events * iteration_length * NumIter / (MaxItemID + 1);
+			int num_item_iterations = num_pos_events  / (MaxItemID + 1);
 			for (int i = 0; i < num_item_iterations; i++) {
 				// remark: the item may be updated more or less frequently than in the normal from-scratch training
 				int user_id = SampleUser();

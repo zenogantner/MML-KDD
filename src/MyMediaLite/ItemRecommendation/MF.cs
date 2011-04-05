@@ -51,14 +51,21 @@ namespace MyMediaLite.ItemRecommendation
 		public int NumIter { get { return num_iter; } set { num_iter = value; } }
 		int num_iter = 30;
 
+		// TODO push upwards in class hierarchy
 		/// <inheritdoc/>
-		public override void Train()
+		protected virtual void InitModel()
 		{
-			this.user_factors = new Matrix<double>(MaxUserID + 1, num_factors);
-			this.item_factors = new Matrix<double>(MaxItemID + 1, num_factors);
+			user_factors = new Matrix<double>(MaxUserID + 1, num_factors);
+			item_factors = new Matrix<double>(MaxItemID + 1, num_factors);
 
 			MatrixUtils.InitNormal(user_factors, init_mean, init_stdev);
 			MatrixUtils.InitNormal(item_factors, init_mean, init_stdev);
+		}			
+		
+		/// <inheritdoc/>
+		public override void Train()
+		{
+			InitModel();
 
 			for (int i = 0; i < num_iter; i++)
 				Iterate();
