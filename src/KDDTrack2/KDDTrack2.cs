@@ -251,7 +251,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 						// evaluate
 						error = KDDCup.EvaluateTrack2(recommender_validate, validation_candidates, validation_hits);
 						err_eval_stats.Add(error);
-						Console.WriteLine("ERR {0} {1}", error.ToString(ni), i);
+						Console.WriteLine("ERR {0,0:0.####} {1}", error.ToString(ni), i);
 						
 						if (prediction_file != string.Empty)
 						{
@@ -283,7 +283,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 			seconds = Utils.MeasureTime(delegate() {
 					// evaluate
 					double error = KDDCup.EvaluateTrack2(recommender_validate, validation_candidates, validation_hits);
-					Console.Write("ERR {0}", error.ToString(ni));
+					Console.Write("ERR {0,0:0.####}", error.ToString(ni));
 					
 					if (prediction_file != string.Empty)
 					{

@@ -91,7 +91,7 @@ namespace MyMediaLite.Eval
 			}
 
 			int num_pos = candidates.Count * 3;
-			Console.Error.WriteLine("{0}/{1} = {2}", hit_count, num_pos, (double) hit_count / num_pos);
+			//Console.Error.WriteLine("{0}/{1} = {2}", hit_count, num_pos, (double) hit_count / num_pos);
 			return (double) hit_count / num_pos;
 		}
 
