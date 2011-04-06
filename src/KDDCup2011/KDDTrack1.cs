@@ -162,7 +162,9 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 			MyMediaLite.Util.Random.InitInstance(random_seed);
 
 		recommender = Recommender.CreateRatingPredictor(method);
-
+		if (recommender == null)
+			Usage(string.Format("Unknown method: '{0}'", method));
+		
 		Recommender.Configure(recommender, parameters, Usage);
 
 		if (parameters.CheckForLeftovers())
