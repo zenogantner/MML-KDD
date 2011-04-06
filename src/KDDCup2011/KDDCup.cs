@@ -152,9 +152,9 @@ MyMediaLite KDD Cup 2011 tool
 		// data arguments
 		string data_dir  = parameters.GetRemoveString( "data_dir");
 		if (data_dir != string.Empty)
-			data_dir = data_dir + "/track" + track_no;
+			data_dir = data_dir + "/track" + track_no; // TODO augment with "-mml"
 		else
-			data_dir = "track" + track_no;
+			data_dir = "track" + track_no; // TODO augment with "-mml"
 		sample_data      = parameters.GetRemoveBool(   "sample_data", false);
 
 		// other arguments
@@ -563,6 +563,7 @@ MyMediaLite KDD Cup 2011 tool
 		string album_file      = Path.Combine(data_dir, string.Format("albumData{0}.txt",  track_no));
 		string artist_file     = Path.Combine(data_dir, string.Format("artistData{0}.txt", track_no));
 		string genre_file      = Path.Combine(data_dir, string.Format("genreData{0}.txt",  track_no));
+		//int num_ratings            = track_no == 1 ? 262810175 : 62551438;
 		int num_ratings            = track_no == 1 ? 262810175 : 62551438;
 		int num_validation_ratings = 4003960;
 		int num_test_ratings       = 6005940;
