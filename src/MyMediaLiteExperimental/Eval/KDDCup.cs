@@ -74,6 +74,8 @@ namespace MyMediaLite.Eval
 			{
 				IList<int> user_candidates = candidates[user_id];
 
+				// TODO  CHECK THIS !!!!!!
+				
 				var predictions = new double[user_candidates.Count];
 				for (int i = 0; i < user_candidates.Count; i++)
 					predictions[i] = recommender.Predict(user_id, user_candidates[i]);
@@ -88,7 +90,9 @@ namespace MyMediaLite.Eval
 						hit_count++;
 			}
 
-			return (double) (hit_count / (candidates.Count * 3));
+			int num_pos = candidates.Count * 3;
+			Console.Error.WriteLine("{0}/{1} = {2}", hit_count, num_pos, (double) hit_count / num_pos);
+			return (double) hit_count / num_pos;
 		}
 
 		/// <summary>Predict items for Track 1</summary>

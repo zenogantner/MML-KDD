@@ -258,20 +258,20 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 					});
 					eval_time_stats.Add(time.TotalSeconds);
 
-					// TODO measure time needed for this
-					if (prediction_file != string.Empty)
-						KDDCup.PredictTrack1(rating_predictor_validate, validation_ratings, prediction_file + "-validation");
 
 					// if best result so far, write out model file and predictions
 					if (results["RMSE"] == rmse_eval_stats.Min())
 					{
 						if (save_model_file != string.Empty)
 						{
-							Recommender.SaveModel(rating_predictor_validate, save_model_file, i);
-							Recommender.SaveModel(rating_predictor_final, "final-" + save_model_file, i);
+							Recommender.SaveModel(rating_predictor_validate, save_model_file + "-validate", i);
+							Recommender.SaveModel(rating_predictor_final, save_model_file, i);
 						}
 						if (prediction_file != string.Empty)
-							KDDCup.PredictTrack1(rating_predictor_final, track1_test_data, prediction_file + "-it-" + i);
+						{					// TODO measure time needed for this
+							KDDCup.PredictTrack1(rating_predictor_validate, validation_ratings, prediction_file + "validate-it-" + i);
+							KDDCup.PredictTrack1(rating_predictor_final,    track1_test_data, prediction_file + "-it-" + i);
+						}
 					}
 
 					// check whether we should abort

@@ -59,7 +59,7 @@ public static class KDDTrack2
 	// time statistics
 	static List<double> training_time_stats = new List<double>();
 	static List<double> eval_time_stats     = new List<double>();
-	static List<double> acc_eval_stats      = new List<double>();
+	static List<double> err_eval_stats      = new List<double>();
 
 	// global command line parameters
 	static string save_model_file;
@@ -67,7 +67,7 @@ public static class KDDTrack2
 	static int max_iter;
 	static int find_iter;
 	static double epsilon;
-	static double acc_cutoff;
+	static double err_cutoff;
 	static string prediction_file;
 	static bool sample_data;
 
@@ -106,8 +106,8 @@ MyMediaLite KDD Cup 2011 Track 2 tool
   options for finding the right number of iterations (MF methods)
    - find_iter=N                give out statistics every N iterations
    - max_iter=N                 perform at most N iterations
-   - epsilon=NUM                abort iterations if accuracy is less than best result plus NUM
-   - acc_cutoff=NUM             abort if accuracy is above NUM");
+   - epsilon=NUM                abort iterations if error is more than best result plus NUM
+   - err_cutoff=NUM             abort if error is above NUM");
 
 		Environment.Exit(exit_code);
 	}
@@ -141,7 +141,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		find_iter   = parameters.GetRemoveInt32(  "find_iter",   0);
 		max_iter    = parameters.GetRemoveInt32(  "max_iter",    500);
 		epsilon     = parameters.GetRemoveDouble( "epsilon",     0);
-		acc_cutoff  = parameters.GetRemoveDouble( "acc_cutoff",  double.NegativeInfinity);
+		err_cutoff  = parameters.GetRemoveDouble( "err_cutoff",  double.NegativeInfinity);
 
 		// data arguments
 		string data_dir  = parameters.GetRemoveString( "data_dir");
@@ -234,8 +234,8 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 
 			// evaluate and display results
 			Console.WriteLine(" " + iterative_recommender_validate.NumIter);
-			double accuracy = KDDCup.EvaluateTrack2(recommender_validate, validation_candidates, validation_hits);
-			Console.WriteLine("ACC {0} {1}", accuracy, 0);
+			double error = KDDCup.EvaluateTrack2(recommender_validate, validation_candidates, validation_hits);
+			Console.WriteLine("ERR {0} {1}", error, 0);
 			
 			for (int i = iterative_recommender_validate.NumIter + 1; i <= max_iter; i++)
 			{
@@ -249,9 +249,9 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 				{
 					time = Utils.MeasureTime(delegate() { // TODO parallelize
 						// evaluate
-						accuracy = KDDCup.EvaluateTrack2(recommender_validate, validation_candidates, validation_hits);
-						acc_eval_stats.Add(accuracy);
-						Console.WriteLine("ACC {0} {1}", accuracy, i);
+						error = KDDCup.EvaluateTrack2(recommender_validate, validation_candidates, validation_hits);
+						err_eval_stats.Add(error);
+						Console.WriteLine("ERR {0} {1}", error.ToString(ni), i);
 						
 						if (prediction_file != string.Empty)
 						{
@@ -282,8 +282,8 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 				
 			seconds = Utils.MeasureTime(delegate() {
 					// evaluate
-					double accuracy = KDDCup.EvaluateTrack2(recommender_validate, validation_candidates, validation_hits);
-					Console.Write("ACC {0}", accuracy);
+					double error = KDDCup.EvaluateTrack2(recommender_validate, validation_candidates, validation_hits);
+					Console.Write("ERR {0}", error.ToString(ni));
 					
 					if (prediction_file != string.Empty)
 					{
