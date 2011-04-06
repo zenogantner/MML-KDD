@@ -75,9 +75,9 @@ public static class KDDCupProgram
 	static void Usage(int exit_code)
 	{
 		Console.WriteLine(@"
-MyMediaLite KDD Cup 2011 tool
+MyMediaLite KDD Cup 2011 Track 1 tool
 
- usage:  RatingPrediction.exe METHOD [ARGUMENTS] [OPTIONS]
+ usage:  KDDCup.exe METHOD [ARGUMENTS] [OPTIONS]
 
   use '-' for either TRAINING_FILE or TEST_FILE to read the data from STDIN
 
