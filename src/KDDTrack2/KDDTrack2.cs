@@ -53,7 +53,8 @@ public static class KDDTrack2
 	static Dictionary<int, IList<int>> test_candidates;
 
 	// recommenders
-	static ItemRecommender recommender = null;
+	static ItemRecommender recommender_validate = null;
+	static ItemRecommender recommender_final    = null;
 
 	// time statistics
 	static List<double> training_time_stats = new List<double>();
@@ -116,8 +117,10 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		Assembly assembly = Assembly.GetExecutingAssembly();
 		Assembly.LoadFile(Path.GetDirectoryName(assembly.Location) + Path.DirectorySeparatorChar + "MyMediaLiteExperimental.dll");
 
+		/*
 		double min_rating = 0;
 		double max_rating = 100;
+		*/
 
 		AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(Handlers.UnhandledExceptionHandler);
 		Console.CancelKeyPress += new ConsoleCancelEventHandler(AbortHandler);
@@ -143,7 +146,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		// data arguments
 		string data_dir  = parameters.GetRemoveString( "data_dir");
 		if (data_dir != string.Empty)
-			data_dir = data_dir + "/mml-track-2";
+			data_dir = data_dir + "/mml-track2";
 		else
 			data_dir = "mml-track2";
 		sample_data      = parameters.GetRemoveBool(   "sample_data", false);
@@ -157,11 +160,11 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		if (random_seed != -1)
 			MyMediaLite.Util.Random.InitInstance(random_seed);
 
-		recommender = Recommender.CreateItemRecommender(method);
-		if (recommender == null)
+		recommender_validate = Recommender.CreateItemRecommender(method);
+		if (recommender_validate == null)
 			Usage(string.Format("Unknown method: '{0}'", method));
 
-		Recommender.Configure(recommender, parameters, Usage);
+		Recommender.Configure(recommender_validate, parameters, Usage);
 
 		if (parameters.CheckForLeftovers())
 			Usage(-1);
@@ -174,13 +177,23 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 
 		// prepare recommenders
 		training_posonly = CreateFeedback(training_ratings);
-		recommender.Feedback = training_posonly;
-		Console.Error.WriteLine("memory before deleting training_ratings: {0}", Memory.Usage);
+		recommender_validate.Feedback = training_posonly;
+		
+		recommender_final = recommender_validate.Clone() as ItemRecommender;
+		complete_posonly = CreateFeedback(complete_ratings);
+		recommender_final.Feedback = complete_posonly;
+		
+		Console.Error.WriteLine("memory before deleting ratings: {0}", Memory.Usage);
 		training_ratings = null;
-		Console.Error.WriteLine("memory after deleting training_ratings:  {0}", Memory.Usage);
+		validation_ratings = null;
+		complete_ratings = null;
+		Console.Error.WriteLine("memory after deleting ratings:  {0}", Memory.Usage);
 
 		if (load_model_file != string.Empty)
-			Recommender.LoadModel(recommender, load_model_file);
+		{
+			Recommender.LoadModel(recommender_validate, load_model_file + "-validate");
+			Recommender.LoadModel(recommender_final,    load_model_file + "-final");
+		}
 
 		DoTrack2();
 
@@ -204,89 +217,91 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 	{
 		TimeSpan seconds;
 
-		var item_recommender = recommender as ItemRecommender;
-
-		// TODO have two different recommenders
-		
 		if (find_iter != 0)
 		{
-			if ( !(recommender is IIterativeModel) )
+			if ( !(recommender_validate is IIterativeModel) )
 				Usage("Only iterative recommenders support find_iter.");
 
-			IIterativeModel iterative_recommender_validate = (MF) item_recommender;
-			//IIterativeModel iterative_recommender_final    = (MF) item_recommender.Clone();
-			Console.WriteLine(recommender.ToString() + " ");
+			IIterativeModel iterative_recommender_validate = (MF) recommender_validate;
+			IIterativeModel iterative_recommender_final    = (MF) recommender_final;
+			Console.WriteLine(recommender_validate.ToString() + " ");
 
 			if (load_model_file == string.Empty)
-				recommender.Train();
+			{
+				recommender_validate.Train(); // TODO parallelize
+				recommender_final.Train();
+			}
 
-			// TODO evaluate and display results
+			// evaluate and display results
 			Console.WriteLine(" " + iterative_recommender_validate.NumIter);
-
+			double accuracy = KDDCup.EvaluateTrack2(recommender_validate, validation_candidates, validation_hits);
+			Console.WriteLine("ACC {0} {1}", accuracy, 0);
+			
 			for (int i = iterative_recommender_validate.NumIter + 1; i <= max_iter; i++)
 			{
 				TimeSpan time = Utils.MeasureTime(delegate() {
-					iterative_recommender_validate.Iterate();
+					iterative_recommender_validate.Iterate(); // TODO parallelize
+					iterative_recommender_final.Iterate();
 				});
 				training_time_stats.Add(time.TotalSeconds);
 
 				if (i % find_iter == 0)
 				{
-					time = Utils.MeasureTime(delegate() {
-						// TODO evaluate + output + add to stats
-						Console.WriteLine(" " + i);
+					time = Utils.MeasureTime(delegate() { // TODO parallelize
+						// evaluate
+						accuracy = KDDCup.EvaluateTrack2(recommender_validate, validation_candidates, validation_hits);
+						acc_eval_stats.Add(accuracy);
+						Console.WriteLine("ACC {0} {1}", accuracy, i);
+						
+						if (prediction_file != string.Empty)
+						{
+							// TODO predict validation set
+						
+							// predict test set
+							KDDCup.PredictTrack2(recommender_final, test_candidates, prediction_file + "it-" + i);
+						}
 					});
 					eval_time_stats.Add(time.TotalSeconds);
+					
+					// TODO save both models
 				}
 			} // for
 
 			DisplayIterationStats();
-			Recommender.SaveModel(recommender, save_model_file);
 		}
 		else
 		{
+			if (load_model_file == string.Empty)
+			{
+				seconds = Utils.MeasureTime(delegate() { // TODO parallelize
+					recommender_validate.Train();
+					recommender_final.Train();
+				});
+				Console.Write(" training_time " + seconds + " ");
+			}
+				
 			seconds = Utils.MeasureTime(delegate() {
-				item_recommender.Train();
-			});
-			Console.Write(" training_time " + seconds + " ");
-
-			seconds = Utils.MeasureTime(delegate() {
-				// TODO evaluate + output
+					// evaluate
+					double accuracy = KDDCup.EvaluateTrack2(recommender_validate, validation_candidates, validation_hits);
+					Console.Write("ACC {0}", accuracy);
+					
+					if (prediction_file != string.Empty)
+					{
+						// predict validation set
+					
+						// predict test set
+						KDDCup.PredictTrack2(recommender_final, test_candidates, prediction_file);
+					}
 			});
 			Console.Write(" evaluation_time " + seconds + " ");
 		}
 
-		// reset training data
-		if (recommender is RatingPredictor)
-			((RatingPredictor) recommender).Ratings = training_ratings;
-		if (recommender is ItemRecommender)
-			((ItemRecommender) recommender).Feedback = training_posonly;
-
-		Console.WriteLine();
-
-		if (prediction_file != string.Empty)
+		if (save_model_file != string.Empty)
 		{
-			// do complete training + testing
-			if (load_model_file != string.Empty)
-			{
-				Console.Write(recommender.ToString());
-
-				seconds = Utils.MeasureTime( delegate() { recommender.Train(); } );
-	   			Console.Write(" training_time " + seconds + " ");
-				Recommender.SaveModel(recommender, save_model_file);
-			}
-
-			Console.Write(recommender.ToString() + " ");
-
-			seconds = Utils.MeasureTime(
-		    	delegate() {
-					Console.WriteLine();
-					KDDCup.PredictTrack2(recommender, test_candidates, prediction_file);
-				}
-			);
-			Console.Write("predicting_time " + seconds);
+			Recommender.SaveModel(recommender_validate, save_model_file + "-validate");
+			Recommender.SaveModel(recommender_final,    save_model_file + "-final");
 		}
-
+		
 		Console.WriteLine();
 	}
 
@@ -305,12 +320,12 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 
 		if (sample_data)
 		{
-			num_ratings                = 8824; // these are not true values, just upper bounds // TODO add correct numbers
+			num_ratings                = 8824; // these are not true values, just upper bounds
 			training_file              = Path.Combine(data_dir, "trainIdx2.firstLines.txt");
 			test_file                  = Path.Combine(data_dir, "testIdx2.firstLines.txt");
-			validation_candidates_file = Path.Combine(data_dir, "validationIdxCandidates2.txt");
-			validation_ratings_file    = Path.Combine(data_dir, "validationIdxRatings2.txt");
-			validation_hits_file       = Path.Combine(data_dir, "validationIdxHits2.txt");
+			validation_candidates_file = Path.Combine(data_dir, "validationCandidatesIdx2.firstLines.txt");
+			validation_ratings_file    = Path.Combine(data_dir, "validationRatingsIdx2.firstLines.txt");
+			validation_hits_file       = Path.Combine(data_dir, "validationHitsIdx2.firstLines.txt");
 		}
 
 		// read training data
@@ -331,9 +346,9 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		test_candidates = Track2Items.Read(test_file);
 
 		// read item data
-		if (recommender is IKDDCupRecommender)
+		if (recommender_validate is IKDDCupRecommender)
 		{
-			var kddcup_recommender = recommender as IKDDCupRecommender;
+			var kddcup_recommender = recommender_validate as IKDDCupRecommender;
 			kddcup_recommender.ItemInfo = Items.Read(track_file, album_file, artist_file, genre_file, 2);
 		}
 	}

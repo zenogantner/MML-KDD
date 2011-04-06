@@ -68,7 +68,6 @@
     <Compile Include="Taxonomy\KDDCupItemType.cs" />
     <Compile Include="IO\KDDCup2011\Items.cs" />
     <Compile Include="IO\KDDCup2011\Ratings.cs" />
-    <Compile Include="Eval\Track2Validation.cs" />
     <Compile Include="RatingPrediction\SocialMF.cs" />
     <Compile Include="RatingPrediction\NewKNN.cs" />
     <Compile Include="IKDDCupRecommender.cs" />

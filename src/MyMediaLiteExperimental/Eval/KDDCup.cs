@@ -63,15 +63,16 @@ namespace MyMediaLite.Eval
 
 		/// <summary>Evaluate Track 2 on a validation set</summary>
 		/// <param name="recommender">the recommender to use</param>
-		/// <param name="validation_split">the validation split to use</param>
+		/// <param name="candidates">the candidate items (per user)</param>
+		/// <param name="hits">the real items (per user)</param>
 		/// <returns>the error rate on this validation split</returns>
-		public static double EvaluateTrack2(IRecommender recommender, Track2Validation validation_split)
+		public static double EvaluateTrack2(IRecommender recommender, Dictionary<int, IList<int>> candidates, Dictionary<int, IList<int>> hits)
 		{
 			int hit_count = 0;
 
-			foreach (int user_id in validation_split.Candidates.Keys)
+			foreach (int user_id in candidates.Keys)
 			{
-				IList<int> user_candidates = validation_split.Candidates[user_id];
+				IList<int> user_candidates = candidates[user_id];
 
 				var predictions = new double[user_candidates.Count];
 				for (int i = 0; i < user_candidates.Count; i++)
@@ -80,14 +81,14 @@ namespace MyMediaLite.Eval
 				var positions = new List<int>(new int[] { 0, 1, 2, 3, 4, 5 });
 				positions.Sort(delegate(int pos1, int pos2) { return predictions[pos2].CompareTo(predictions[pos1]); } );
 
-				var user_true_items = new HashSet<int>(validation_split.Hits[user_id]);
+				var user_true_items = new HashSet<int>(hits[user_id]);
 
 				for (int i = 0; i < 3; i++)
 					if (user_true_items.Contains(user_candidates[positions[i]]))
 						hit_count++;
 			}
 
-			return (double) (hit_count / (validation_split.Candidates.Count * 3));
+			return (double) (hit_count / (candidates.Count * 3));
 		}
 
 		/// <summary>Predict items for Track 1</summary>

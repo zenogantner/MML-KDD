@@ -64,6 +64,8 @@ namespace MyMediaLite.RatingPrediction
 		/// <inheritdoc/>
 		protected override void InitModel()
 		{
+			Console.Error.WriteLine("SharedMF.InitModel()");
+			
 			base.InitModel();
 
 			user_shared_artist_factors = new Matrix<double>(MaxUserID + 1, NumSharedArtistFactors);
@@ -102,10 +104,10 @@ namespace MyMediaLite.RatingPrediction
 				int u = ratings.Users[index];
 				int i = ratings.Items[index];
 
-				double dot_product = global_bias + user_bias[u] + item_bias[i];
+				double score = global_bias + user_bias[u] + item_bias[i];
 				for (int f = 0; f < NumFactors; f++)
-					dot_product += user_factors[u, f] * item_factors[i, f];
-				double sig_dot = 1 / (1 + Math.Exp(-dot_product));
+					score += user_factors[u, f] * item_factors[i, f];
+				double sig_dot = 1 / (1 + Math.Exp(-score));
 
 				double p = MinRating + sig_dot * rating_range_size;
 				double err = ratings[index] - p;
