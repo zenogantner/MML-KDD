@@ -43,7 +43,7 @@ public static class KDDTrack1
 	static IRatings track1_test_data;
 
 	// recommenders
-	static IRecommender recommender = null;
+	static RatingPredictor recommender = null;
 
 	// time statistics
 	static List<double> training_time_stats = new List<double>();
@@ -162,10 +162,6 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 			MyMediaLite.Util.Random.InitInstance(random_seed);
 
 		recommender = Recommender.CreateRatingPredictor(method);
-		if (recommender == null)
-			recommender = Recommender.CreateItemRecommender(method);
-		if (recommender == null)
-			Usage(string.Format("Unknown method: '{0}'", method));
 
 		Recommender.Configure(recommender, parameters, Usage);
 
@@ -178,16 +174,11 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 		});
 		Console.WriteLine(string.Format(ni, "loading_time {0,0:0.##}", loading_time.TotalSeconds));
 
-		if (recommender is RatingPredictor)
-		{
-			var rating_predictor = recommender as RatingPredictor;
+		recommender.Ratings = training_ratings;
 
-			rating_predictor.Ratings = training_ratings;
-
-			rating_predictor.MinRating = min_rating;
-			rating_predictor.MaxRating = max_rating;
-			Console.Error.WriteLine(string.Format(ni, "ratings range: [{0}, {1}]", rating_predictor.MinRating, rating_predictor.MaxRating));
-		}
+		recommender.MinRating = min_rating;
+		recommender.MaxRating = max_rating;
+		Console.Error.WriteLine(string.Format(ni, "ratings range: [{0}, {1}]", recommender.MinRating, recommender.MaxRating));
 
 		if (load_model_file != string.Empty)
 			Recommender.LoadModel(recommender, load_model_file);
