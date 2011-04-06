@@ -35,8 +35,8 @@
     <Reference Include="System.Core" />
   </ItemGroup>
   <ItemGroup>
-    <Compile Include="KDDCup.cs" />
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="KDDTrack1.cs" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MyMediaLite\MyMediaLite.csproj">

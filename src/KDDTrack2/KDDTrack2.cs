@@ -33,7 +33,7 @@ using MyMediaLite.RatingPrediction;
 using MyMediaLite.Util;
 
 /// <summary>Rating prediction program, see Usage() method for more information</summary>
-public static class KDDCupProgram
+public static class KDDTrack2
 {
 	static NumberFormatInfo ni = new NumberFormatInfo();
 
