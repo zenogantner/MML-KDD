@@ -57,12 +57,10 @@ public static class KDDCupProgram
 
 	// time statistics
 	static List<double> training_time_stats = new List<double>();
-	static List<double> fit_time_stats      = new List<double>();
 	static List<double> eval_time_stats     = new List<double>();
 	static List<double> acc_eval_stats      = new List<double>();
 
 	// global command line parameters
-	static bool compute_fit;
 	static string save_model_file;
 	static string load_model_file;
 	static int max_iter;
@@ -110,8 +108,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
    - find_iter=N                give out statistics every N iterations
    - max_iter=N                 perform at most N iterations
    - epsilon=NUM                abort iterations if accuracy is less than best result plus NUM
-   - acc_cutoff=NUM             abort if accuracy is above NUM
-   - compute_fit=BOOL           display fit on training data every find_iter iterations");
+   - acc_cutoff=NUM             abort if accuracy is above NUM");
 
 		Environment.Exit(exit_code);
 	}
@@ -142,7 +139,6 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		// arguments for iteration search
 		find_iter   = parameters.GetRemoveInt32(  "find_iter",   0);
 		max_iter    = parameters.GetRemoveInt32(  "max_iter",    500);
-		compute_fit = parameters.GetRemoveBool(   "compute_fit", false);
 		epsilon     = parameters.GetRemoveDouble( "epsilon",     0);
 		acc_cutoff  = parameters.GetRemoveDouble( "acc_cutoff",  double.NegativeInfinity);
 
@@ -239,8 +235,6 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 			});
 			Console.Write(" training_time " + seconds + " ");
 
-			// TODO compute fit if requested
-
 			seconds = Utils.MeasureTime(delegate() {
 				var results = RatingEval.Evaluate(rating_predictor, split.Test[0]);
 				RatingEval.DisplayResults(results);
@@ -266,9 +260,6 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 				if (load_model_file == string.Empty)
 					recommender.Train();
 
-				if (compute_fit)
-					Console.Write(string.Format(ni, "fit {0,0:0.#####} ", iterative_recommender_validate.ComputeFit()));
-
 				// TODO evaluate and display results
 				Console.WriteLine(" " + iterative_recommender_validate.NumIter);
 
@@ -281,16 +272,6 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 
 					if (i % find_iter == 0)
 					{
-						if (compute_fit)
-						{
-							double fit = 0;
-							time = Utils.MeasureTime(delegate() {
-								fit = iterative_recommender_validate.ComputeFit();
-							});
-							fit_time_stats.Add(time.TotalSeconds);
-							Console.Write(string.Format(ni, "fit {0,0:0.#####} ", fit));
-						}
-
 						time = Utils.MeasureTime(delegate() {
 							// TODO evaluate + output + add to stats
 							Console.WriteLine(" " + i);
@@ -416,12 +397,6 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 			    ni,
 				"eval_time: min={0,0:0.##}, max={1,0:0.##}, avg={2,0:0.##}",
 	            eval_time_stats.Min(), eval_time_stats.Max(), eval_time_stats.Average()
-			));
-		if (compute_fit && fit_time_stats.Count > 0)
-			Console.Error.WriteLine(string.Format(
-			    ni,
-				"fit_time: min={0,0:0.##}, max={1,0:0.##}, avg={2,0:0.##}",
-            	fit_time_stats.Min(), fit_time_stats.Max(), fit_time_stats.Average()
 			));
 	}
 }
