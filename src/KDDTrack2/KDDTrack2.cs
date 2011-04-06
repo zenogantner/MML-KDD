@@ -89,8 +89,6 @@ MyMediaLite KDD Cup 2011 Track 2 tool
   methods (plus arguments and their defaults):");
 
 			Console.Write("   - ");
-			Console.WriteLine(string.Join("\n   - ", Recommender.List("MyMediaLite.RatingPrediction")));
-			Console.Write("   - ");
 			Console.WriteLine(string.Join("\n   - ", Recommender.List("MyMediaLite.ItemRecommendation")));
 
 			Console.WriteLine(@"method ARGUMENTS have the form name=value
@@ -222,88 +220,65 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 	{
 		TimeSpan seconds;
 
-		// do training (+ testing) on generated validation data
-		if (recommender is RatingPredictor)
+		var item_recommender = recommender as ItemRecommender;
+
+		// TODO have two different recommenders
+		
+		if (find_iter != 0)
 		{
-			var rating_predictor = recommender as RatingPredictor;
+			if ( !(recommender is IIterativeModel) )
+				Usage("Only iterative recommenders support find_iter.");
 
-			var split = new RatingsSimpleSplit(training_ratings, 0.2);
-			rating_predictor.Ratings = split.Train[0];
+			IIterativeModel iterative_recommender_validate = (MF) item_recommender;
+			//IIterativeModel iterative_recommender_final    = (MF) item_recommender.Clone();
+			Console.WriteLine(recommender.ToString() + " ");
 
+			if (load_model_file == string.Empty)
+				recommender.Train();
+
+			// TODO evaluate and display results
+			Console.WriteLine(" " + iterative_recommender_validate.NumIter);
+
+			for (int i = iterative_recommender_validate.NumIter + 1; i <= max_iter; i++)
+			{
+				TimeSpan time = Utils.MeasureTime(delegate() {
+					iterative_recommender_validate.Iterate();
+				});
+				training_time_stats.Add(time.TotalSeconds);
+
+				if (i % find_iter == 0)
+				{
+					time = Utils.MeasureTime(delegate() {
+						// TODO evaluate + output + add to stats
+						Console.WriteLine(" " + i);
+					});
+					eval_time_stats.Add(time.TotalSeconds);
+				}
+			} // for
+
+			DisplayIterationStats();
+			Recommender.SaveModel(recommender, save_model_file);
+		}
+		else
+		{
 			seconds = Utils.MeasureTime(delegate() {
-				rating_predictor.Train();
+				item_recommender.Train();
 			});
 			Console.Write(" training_time " + seconds + " ");
 
 			seconds = Utils.MeasureTime(delegate() {
-				var results = RatingEval.Evaluate(rating_predictor, split.Test[0]);
-				RatingEval.DisplayResults(results);
+				// TODO evaluate + output
 			});
 			Console.Write(" evaluation_time " + seconds + " ");
-
 		}
+
+		// reset training data
+		if (recommender is RatingPredictor)
+			((RatingPredictor) recommender).Ratings = training_ratings;
 		if (recommender is ItemRecommender)
-		{
-			var item_recommender = recommender as ItemRecommender;
+			((ItemRecommender) recommender).Feedback = training_posonly;
 
-			// TODO have two different recommenders
-			
-			if (find_iter != 0)
-			{
-				if ( !(recommender is IIterativeModel) )
-					Usage("Only iterative recommenders support find_iter.");
-
-				IIterativeModel iterative_recommender_validate = (MF) item_recommender;
-				//IIterativeModel iterative_recommender_final    = (MF) item_recommender.Clone();
-				Console.WriteLine(recommender.ToString() + " ");
-
-				if (load_model_file == string.Empty)
-					recommender.Train();
-
-				// TODO evaluate and display results
-				Console.WriteLine(" " + iterative_recommender_validate.NumIter);
-
-				for (int i = iterative_recommender_validate.NumIter + 1; i <= max_iter; i++)
-				{
-					TimeSpan time = Utils.MeasureTime(delegate() {
-						iterative_recommender_validate.Iterate();
-					});
-					training_time_stats.Add(time.TotalSeconds);
-
-					if (i % find_iter == 0)
-					{
-						time = Utils.MeasureTime(delegate() {
-							// TODO evaluate + output + add to stats
-							Console.WriteLine(" " + i);
-						});
-						eval_time_stats.Add(time.TotalSeconds);
-					}
-				} // for
-
-				DisplayIterationStats();
-				Recommender.SaveModel(recommender, save_model_file);
-			}
-			else
-			{
-				seconds = Utils.MeasureTime(delegate() {
-					item_recommender.Train();
-				});
-				Console.Write(" training_time " + seconds + " ");
-
-				seconds = Utils.MeasureTime(delegate() {
-					// TODO evaluate + output
-				});
-				Console.Write(" evaluation_time " + seconds + " ");
-			}
-
-			// reset training data
-			if (recommender is RatingPredictor)
-				((RatingPredictor) recommender).Ratings = training_ratings;
-			if (recommender is ItemRecommender)
-				((ItemRecommender) recommender).Feedback = training_posonly;
-
-			Console.WriteLine();
-		}
+		Console.WriteLine();
 
 		if (prediction_file != string.Empty)
 		{
