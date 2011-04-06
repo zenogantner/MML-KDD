@@ -45,6 +45,7 @@ public static class KDDCupProgram
 	static PosOnlyFeedback complete_posonly;
 	
 	//  validation
+	static IRatings validation_ratings;
 	static Dictionary<int, IList<int>> validation_candidates;
 	static Dictionary<int, IList<int>> validation_hits;
 	
@@ -58,7 +59,7 @@ public static class KDDCupProgram
 	static List<double> training_time_stats = new List<double>();
 	static List<double> fit_time_stats      = new List<double>();
 	static List<double> eval_time_stats     = new List<double>();
-	static List<double> acc_eval_stats     = new List<double>();
+	static List<double> acc_eval_stats      = new List<double>();
 
 	// global command line parameters
 	static bool compute_fit;
@@ -351,33 +352,43 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 
     static void LoadData(string data_dir)
 	{
-		string training_file   = Path.Combine(data_dir, "trainIdx2.txt");
-		string test_file       = Path.Combine(data_dir, "testIdx2.txt");
-		string validation_file = Path.Combine(data_dir, "validationIdx2.txt");
-		string track_file      = Path.Combine(data_dir, "trackData2.txt");
-		string album_file      = Path.Combine(data_dir, "albumData2.txt");
-		string artist_file     = Path.Combine(data_dir, "artistData2.txt");
-		string genre_file      = Path.Combine(data_dir, "genreData2.txt");
-		int num_ratings            = 62551438; // TODO fill in correct values
-		int num_validation_ratings = 11111111; // TODO fill in correct values
+		string training_file              = Path.Combine(data_dir, "trainIdx2.txt");
+		string test_file                  = Path.Combine(data_dir, "testIdx2.txt");
+		string validation_candidates_file = Path.Combine(data_dir, "validationIdxCandidates2.txt");
+		string validation_ratings_file    = Path.Combine(data_dir, "validationIdxRatings2.txt");
+		string validation_hits_file       = Path.Combine(data_dir, "validationIdxHits2.txt");
+		string track_file                 = Path.Combine(data_dir, "trackData2.txt");
+		string album_file                 = Path.Combine(data_dir, "albumData2.txt");
+		string artist_file                = Path.Combine(data_dir, "artistData2.txt");
+		string genre_file                 = Path.Combine(data_dir, "genreData2.txt");
+		int num_ratings                   = 61943733;
 
 		if (sample_data)
 		{
-			num_ratings            = 8824; // these are not true values, just upper bounds
-			num_validation_ratings = 220;  // these are not true values, just upper bounds
-			training_file   = Path.Combine(data_dir, "trainIdx2.firstLines.txt");
-			test_file       = Path.Combine(data_dir, "testIdx2.firstLines.txt");
-			validation_file = Path.Combine(data_dir, "validationIdx1.firstLines.txt");
+			num_ratings                = 8824; // these are not true values, just upper bounds // TODO add correct numbers
+			training_file              = Path.Combine(data_dir, "trainIdx2.firstLines.txt");
+			test_file                  = Path.Combine(data_dir, "testIdx2.firstLines.txt");
+			validation_candidates_file = Path.Combine(data_dir, "validationIdxCandidates2.txt");
+			validation_ratings_file    = Path.Combine(data_dir, "validationIdxRatings2.txt");
+			validation_hits_file       = Path.Combine(data_dir, "validationIdxHits2.txt");
 		}
 
 		// read training data
 		training_ratings = MyMediaLite.IO.KDDCup2011.Ratings.Read(training_file, num_ratings);
 
 		// read validation data
-		// TODO
-
+		validation_candidates = Track2Items.Read(validation_candidates_file);
+		validation_hits       = Track2Items.Read(validation_hits_file);
+		
+		if (validation_hits.Count != validation_candidates.Count)
+			throw new Exception("inconsistent number of users in hits and candidates");
+		int num_validation_users = validation_hits.Count;
+		int num_validation_ratings = 3 * num_validation_users;
+		validation_ratings = MyMediaLite.IO.KDDCup2011.Ratings.Read(validation_ratings_file, num_validation_ratings);
+		complete_ratings = new CombinedRatings(training_ratings, validation_ratings);	
+		
 		// read test data
-		test_candidates = Track2Candidates.Read(test_file);
+		test_candidates = Track2Items.Read(test_file);
 
 		// read item data
 		if (recommender is IKDDCupRecommender)

@@ -63,7 +63,6 @@
     <Compile Include="Diversification\SequentialDiversification.cs" />
     <Compile Include="AttrToFactor\BPRMF_ItemMappingKNN.cs" />
     <Compile Include="AttrToFactor\BPRMF_ItemMappingSVR.cs" />
-    <Compile Include="IO\KDDCup2011\Track2Candidates.cs" />
     <Compile Include="Eval\KDDCup.cs" />
     <Compile Include="Data\KDDCupItems.cs" />
     <Compile Include="Taxonomy\KDDCupItemType.cs" />
@@ -74,6 +73,7 @@
     <Compile Include="RatingPrediction\NewKNN.cs" />
     <Compile Include="IKDDCupRecommender.cs" />
     <Compile Include="RatingPrediction\SharedFactorsMatrixFactorization.cs" />
+    <Compile Include="IO\KDDCup2011\Track2Items.cs" />
     <Compile Include="ItemRecommender\BPRMF_KDD.cs" />
   </ItemGroup>
   <ItemGroup>

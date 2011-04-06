@@ -23,7 +23,7 @@ using System.IO;
 namespace MyMediaLite.IO.KDDCup2011
 {
 	/// <summary>Class that offers static methods for reading in test data from the KDD Cup 2011 files</summary>
-	public class Track2Candidates
+	public class Track2Items
 	{
 		/// <summary>Read track 2 candidates from a file</summary>
 		/// <param name="filename">the name of the file to read from, "-" if STDIN</param>
