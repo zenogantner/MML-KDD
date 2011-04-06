@@ -309,9 +309,9 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 	{
 		string training_file              = Path.Combine(data_dir, "trainIdx2.txt");
 		string test_file                  = Path.Combine(data_dir, "testIdx2.txt");
-		string validation_candidates_file = Path.Combine(data_dir, "validationIdxCandidates2.txt");
-		string validation_ratings_file    = Path.Combine(data_dir, "validationIdxRatings2.txt");
-		string validation_hits_file       = Path.Combine(data_dir, "validationIdxHits2.txt");
+		string validation_candidates_file = Path.Combine(data_dir, "validationCandidatesIdx2.txt");
+		string validation_ratings_file    = Path.Combine(data_dir, "validationRatingsIdx2.txt");
+		string validation_hits_file       = Path.Combine(data_dir, "validationHitsIdx2.txt");
 		string track_file                 = Path.Combine(data_dir, "trackData2.txt");
 		string album_file                 = Path.Combine(data_dir, "albumData2.txt");
 		string artist_file                = Path.Combine(data_dir, "artistData2.txt");
