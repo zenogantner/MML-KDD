@@ -110,11 +110,6 @@ namespace MyMediaLite.ItemRecommendation
 			{
 				SampleTriple(out user_id, out item_id_1, out item_id_2);
 				UpdateFactors(user_id, item_id_1, item_id_2, true, true, true);
-
-				if (i % 10000 == 9999)
-					Console.Error.Write(".");
-				if (i % 200000 == 199999)
-					Console.Error.WriteLine();
 			}
 		}
 
