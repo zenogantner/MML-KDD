@@ -3,7 +3,7 @@
 use strict;
 use warnings;
 
-die "arguments: RATING_FILE_1 RATING_FILE_2\n" unless scalar @ARGV == 2;
+die "arguments: RATING_FILE_HOLDOUT RATING_FILE_TRAINING\n" unless scalar @ARGV == 2;
 
 my ($file1, $file2) = @ARGV;
 
@@ -19,24 +19,31 @@ while (<$fh1>) {
         my ($user_id, $num_ratings) = @fields;
         my $user_ratings_ref = read_user_ratings($num_ratings, $fh1);
 
-        $line = <$fh2>; chomp $line;
+        my ($user_id2, $num_ratings2, $user_ratings2_ref);
+        do {
 
-        @fields = split /\|/, $line;
-        die "Cannot read line '$line'\n" unless @fields == 2;
+                $line = <$fh2>; chomp $line;
 
-        my ($user_id2, $num_ratings2) = @fields;
-        my $user_ratings2_ref = read_user_ratings($num_ratings2, $fh2);        
+                @fields = split /\|/, $line;
+                die "Cannot read line '$line'\n" unless @fields == 2;
+                
+                ($user_id2, $num_ratings2) = @fields;
+                $user_ratings2_ref = read_user_ratings($num_ratings2, $fh2);                        
+        } while ($user_id > $user_id2);
         
         die "different users: $user_id, $user_id2\n" if $user_id != $user_id2;
-        
+                
         foreach my $key (keys %$user_ratings2_ref) {
-                warn "Overlap: user $user_id, item $key\n" if exists $user_ratings_ref->{$key};
+                #warn "Overlap: user $user_id, item $key\n" if exists $user_ratings_ref->{$key};
                 
                 $user_ratings_ref->{$key} = $user_ratings2_ref->{$key};
         }
 
-        $num_ratings = scalar keys %$user_ratings_ref;
-        print "$user_id|$num_ratings\n";
+        my $combined_num_ratings = scalar keys %$user_ratings_ref;
+        
+        print STDERR "$user_id: $num_ratings + $num_ratings2 =?= $combined_num_ratings\n";
+        
+        print "$user_id|$combined_num_ratings\n";
         foreach my $key (sort keys %$user_ratings_ref) {
                 print "$key\t$user_ratings_ref->{$key}\n";
         }

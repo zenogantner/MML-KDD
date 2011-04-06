@@ -1,5 +1,7 @@
 #!/usr/bin/perl
 
+# takes about 70 minutes
+
 use strict;
 use warnings;
 
@@ -12,6 +14,7 @@ my @items              = (); # all items related to rating events >=80
 my %candidates_by_user = ();
 
 # read in ratings
+my $num_ratings = 0;
 open my $fh, '<', $training_file;
 while (<$fh>) {
         my $line = $_;
@@ -30,9 +33,11 @@ while (<$fh>) {
                 
                 my ($item_id, $rating) = split /\t/, $line;
                 
+                die "problem in line '$line'\n" unless defined $rating;
+                
                 $user_ratings{$item_id} = $rating;
                 
-                if ($rating >= 80) {                        
+                if ($rating >= 80) {
                         push @items, $item_id;
                 }
         }
@@ -40,9 +45,9 @@ while (<$fh>) {
 }
 close $fh;
 
-my $num_ratings = scalar @items;
-my $num_users   = scalar keys %ratings_by_user;
-print STDERR "Read in $num_ratings ratings by $num_users users.\n";
+my $num_pos_ratings = scalar @items;
+my $num_users       = scalar keys %ratings_by_user;
+print STDERR "Read in $num_ratings ratings ($num_pos_ratings positive) by $num_users users.\n";
 
 # read in test data
 open $fh, '<', $candidates_file;
@@ -115,7 +120,7 @@ foreach my $user_id (keys %candidates_by_user) {
 	
 	# add to validation ratings, remove from training ratings
 	$validation_ratings_by_user{$user_id} = { map { $_ => $ratings_by_user{$user_id}->{$_} } keys %sampled_pos_items };
-	delete $ratings_by_user{$user_id}->{ keys %sampled_pos_items };
+	delete @{$ratings_by_user{$user_id}}{ keys %sampled_pos_items };
 
         # give out progress
 	print STDERR '.'  if $counter %  1_000 ==    999;
@@ -126,9 +131,9 @@ print STDERR "\n\n";
 
 # write out data set
 write_ratings(\%ratings_by_user,            'trainIdx2.txt');
-write_ratings(\%validation_ratings_by_user, 'validationIdx2.txt');
-write_items(\%validation_candidates_by_user, 'testIdx2.txt');
-write_items(\%validation_hits_by_user,       'hitsIdx2.txt');
+write_ratings(\%validation_ratings_by_user, 'validationRatingsIdx2.txt');
+write_items(\%validation_candidates_by_user, 'validationCandidatesIdx2.txt');
+write_items(\%validation_hits_by_user,       'validationHitsIdx2.txt');
 
 
 
@@ -140,7 +145,7 @@ sub write_ratings {
 	
 	open my $fh, '>', "$dataset_dir/$filename";
 	my $counter = 0;
-        foreach my $user_id (keys %$ratings_ref) {
+        foreach my $user_id (sort { $a <=> $b } keys %$ratings_ref) {
                 my $num_ratings = scalar keys %{$ratings_ref->{$user_id}};
                 print $fh "$user_id|$num_ratings\n";
                 foreach my $item_id (keys %{$ratings_ref->{$user_id}}) {
@@ -159,7 +164,7 @@ sub write_items {
 	print STDERR "Writing items of $num_users users to $dataset_dir/$filename ...";
 	
 	open my $fh, '>', "$dataset_dir/$filename";
-        foreach my $user_id (keys %$items_ref) {
+        foreach my $user_id (sort { $a <=> $b } keys %$items_ref) {
                 my $num_items = scalar @{$items_ref->{$user_id}};
                 print $fh "$user_id|$num_items\n";
                 foreach my $item_id (@{$items_ref->{$user_id}}) {
