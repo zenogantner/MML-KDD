@@ -53,7 +53,7 @@ public static class KDDTrack2
 	static Dictionary<int, IList<int>> test_candidates;
 
 	// recommenders
-	static IRecommender recommender = null;
+	static ItemRecommender recommender = null;
 
 	// time statistics
 	static List<double> training_time_stats = new List<double>();
@@ -157,9 +157,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		if (random_seed != -1)
 			MyMediaLite.Util.Random.InitInstance(random_seed);
 
-		recommender = Recommender.CreateRatingPredictor(method);
-		if (recommender == null)
-			recommender = Recommender.CreateItemRecommender(method);
+		recommender = Recommender.CreateItemRecommender(method);
 		if (recommender == null)
 			Usage(string.Format("Unknown method: '{0}'", method));
 
@@ -174,26 +172,12 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		});
 		Console.WriteLine(string.Format(ni, "loading_time {0,0:0.##}", loading_time.TotalSeconds));
 
-		if (recommender is RatingPredictor)
-		{
-			var rating_predictor = recommender as RatingPredictor;
-
-			rating_predictor.Ratings = training_ratings;
-
-			rating_predictor.MinRating = min_rating;
-			rating_predictor.MaxRating = max_rating;
-			Console.Error.WriteLine(string.Format(ni, "ratings range: [{0}, {1}]", rating_predictor.MinRating, rating_predictor.MaxRating));
-		}
-
-		if (recommender is ItemRecommender)
-		{
-			var item_recommender = recommender as ItemRecommender;
-			training_posonly = CreateFeedback(training_ratings);
-			item_recommender.Feedback = training_posonly;
-			Console.Error.WriteLine("memory before deleting training_ratings: {0}", Memory.Usage);
-			training_ratings = null;
-			Console.Error.WriteLine("memory after deleting training_ratings:  {0}", Memory.Usage);
-		}
+		// prepare recommenders
+		training_posonly = CreateFeedback(training_ratings);
+		recommender.Feedback = training_posonly;
+		Console.Error.WriteLine("memory before deleting training_ratings: {0}", Memory.Usage);
+		training_ratings = null;
+		Console.Error.WriteLine("memory after deleting training_ratings:  {0}", Memory.Usage);
 
 		if (load_model_file != string.Empty)
 			Recommender.LoadModel(recommender, load_model_file);
