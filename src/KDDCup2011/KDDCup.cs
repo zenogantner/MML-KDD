@@ -39,7 +39,7 @@ public static class KDDCupProgram
 	// data sets
 	static IRatings training_ratings;
 	static IRatings validation_ratings;
-	static IRatings combined_ratings;
+	static IRatings complete_ratings;
 	static IRatings track1_test_data;
 
 	// recommenders
@@ -201,12 +201,12 @@ MyMediaLite KDD Cup 2011 tool
 	{
 		var rating_predictor_validate  = recommender as RatingPredictor;
 		var rating_predictor_final     = rating_predictor_validate.Clone() as RatingPredictor;
-		rating_predictor_final.Ratings = combined_ratings;
+		rating_predictor_final.Ratings = complete_ratings;
 
 		Console.WriteLine("Validation split:");
 		Utils.DisplayDataStats(training_ratings, validation_ratings, rating_predictor_validate);
 		Console.WriteLine("Test split:");
-		Utils.DisplayDataStats(combined_ratings, track1_test_data, rating_predictor_final);
+		Utils.DisplayDataStats(complete_ratings, track1_test_data, rating_predictor_final);
 
 		if (find_iter != 0)
 		{
@@ -380,7 +380,7 @@ MyMediaLite KDD Cup 2011 tool
 
 		// read validation data (track 1)
 		validation_ratings = MyMediaLite.IO.KDDCup2011.Ratings.Read(validation_file, num_validation_ratings);
-		combined_ratings = new CombinedRatings(training_ratings, validation_ratings);
+		complete_ratings = new CombinedRatings(training_ratings, validation_ratings);
 
 		// read test data
 		track1_test_data = MyMediaLite.IO.KDDCup2011.Ratings.ReadTest(test_file, num_test_ratings);
