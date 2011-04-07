@@ -182,13 +182,15 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		recommender_final = recommender_validate.Clone() as ItemRecommender;
 		complete_posonly = CreateFeedback(complete_ratings);
 		recommender_final.Feedback = complete_posonly;
-		
+				
 		Console.Error.WriteLine("memory before deleting ratings: {0}", Memory.Usage);
 		training_ratings = null;
 		validation_ratings = null;
 		complete_ratings = null;
 		Console.Error.WriteLine("memory after deleting ratings:  {0}", Memory.Usage);
 
+		Utils.DisplayDataStats(recommender_final.Feedback, null, recommender_final);
+		
 		if (load_model_file != string.Empty)
 		{
 			Recommender.LoadModel(recommender_validate, load_model_file + "-validate");
@@ -259,7 +261,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 							// TODO predict validation set
 						
 							// predict test set
-							KDDCup.PredictTrack2(recommender_final, test_candidates, prediction_file + "it-" + i);
+							KDDCup.PredictTrack2(recommender_final, test_candidates, prediction_file + "-it-" + i);
 						}
 					});
 					eval_time_stats.Add(time.TotalSeconds);
