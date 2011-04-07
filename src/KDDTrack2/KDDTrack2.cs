@@ -143,7 +143,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		find_iter   = parameters.GetRemoveInt32(  "find_iter",   0);
 		max_iter    = parameters.GetRemoveInt32(  "max_iter",    500);
 		epsilon     = parameters.GetRemoveDouble( "epsilon",     0);
-		err_cutoff  = parameters.GetRemoveDouble( "err_cutoff",  0);
+		err_cutoff  = parameters.GetRemoveDouble( "err_cutoff",  2);
 
 		// data arguments
 		string data_dir  = parameters.GetRemoveString( "data_dir");
@@ -175,7 +175,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		TimeSpan loading_time = Utils.MeasureTime(delegate() {
 			LoadData(data_dir);
 		});
-		Console.WriteLine(string.Format(ni, "loading_time {0,0:0.##}", loading_time.TotalSeconds));
+		Console.WriteLine("loading_time {0,0:0.##}", loading_time.TotalSeconds.ToString(ni));
 
 		// prepare recommenders
 		training_posonly = CreateFeedback(training_ratings);
@@ -271,6 +271,18 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 					eval_time_stats.Add(time.TotalSeconds);
 					
 					// TODO save both models
+					
+					if (err_eval_stats.Last() > err_cutoff)
+					{
+						Console.Error.WriteLine("Reached cutoff after {0} iterations.", i);
+						break;
+					}
+					
+					if (err_eval_stats.Last() > err_eval_stats.Min() + epsilon)
+					{
+						Console.Error.WriteLine("Reached convergence on training/validation data after {0} iterations.", i);
+						break;						
+					}
 				}
 			} // for
 
