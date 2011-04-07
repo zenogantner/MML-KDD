@@ -262,7 +262,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 						
 						if (prediction_file != string.Empty)
 						{
-							KDDCup.PredictTrack2(recommender_validate, validation_candidates, prediction_file + "validate-it-" + i);
+							KDDCup.PredictTrack2(recommender_validate, validation_candidates, prediction_file + "-validate-it-" + i);
 						
 							// predict test set
 							KDDCup.PredictTrack2(recommender_final, test_candidates, prediction_file + "-it-" + i);
