@@ -195,6 +195,8 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 			Recommender.LoadModel(recommender_final,    load_model_file + "-final");
 		}
 
+		Console.Write(recommender_validate.ToString());
+		
 		DoTrack2();
 
 		Console.Error.WriteLine("memory {0}", Memory.Usage);
@@ -224,7 +226,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 
 			IIterativeModel iterative_recommender_validate = (MF) recommender_validate;
 			IIterativeModel iterative_recommender_final    = (MF) recommender_final;
-			Console.WriteLine(recommender_validate.ToString() + " ");
+			Console.WriteLine();
 
 			if (load_model_file == string.Empty)
 			{
@@ -233,9 +235,8 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 			}
 
 			// evaluate and display results
-			Console.WriteLine(" " + iterative_recommender_validate.NumIter);
 			double error = KDDCup.EvaluateTrack2(recommender_validate, validation_candidates, validation_hits);
-			Console.WriteLine("ERR {0} {1}", error, 0);
+			Console.WriteLine("ERR {0,0:0.####} {1}", error.ToString(ni), iterative_recommender_validate.NumIter);
 			
 			for (int i = iterative_recommender_validate.NumIter + 1; i <= max_iter; i++)
 			{
