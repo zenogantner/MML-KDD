@@ -33,24 +33,6 @@ namespace MyMediaLite.ItemRecommendation
 		}
 
 		/// <inheritdoc/>
-		public override void AddFeedback(int user_id, int item_id) { }
-
-		/// <inheritdoc/>
-		public override void RemoveFeedback(int user_id, int item_id) { }
-
-		/// <inheritdoc/>
-		public override void AddUser(int user_id) { }
-
-		/// <inheritdoc/>
-		public override void AddItem(int item_id) { }
-
-		/// <inheritdoc/>
-		public override void RemoveUser(int user_id) { }
-
-		/// <inheritdoc/>
-		public override void RemoveItem(int item_id) { }
-
-		/// <inheritdoc/>
 		public override void SaveModel(string filename)
 		{
 			// do nothing

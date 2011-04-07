@@ -8,7 +8,8 @@
           - make ItemRecommender and RatingPredictor clonable
           - BPRMF:
             - get rid of unnecessary IterationLength parameter
-            -only interate once over relevant data points in online learning
+            - only interate once over relevant data points in online learning
+          - Random: remove unnecessary methods
         - command-line tools
           - move DisplayDataStats() for item recommendation from the program
             to the library
