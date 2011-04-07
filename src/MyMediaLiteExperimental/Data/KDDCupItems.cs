@@ -28,6 +28,8 @@ namespace MyMediaLite.Data
 		IList<int> albums;
 		IList<KDDCupItemType> types;
 
+		static int[] empty_list = new int[0];
+		
 		/// <summary>Create item information object</summary>
 		/// <param name="size">the number of items</param>
 		public KDDCupItems(int size)
@@ -36,6 +38,13 @@ namespace MyMediaLite.Data
 			artists = new int[size];
 			albums  = new int[size];
 			types   = new KDDCupItemType[size];
+			
+			for (int i = 0; i < size; i++)
+			{
+				artists[i] = -1;
+				albums[i]  = -1;
+				types[i]   = KDDCupItemType.None;
+			}
 		}
 
 		/// <summary>Insert information about an entry to the data structure</summary>
@@ -65,7 +74,7 @@ namespace MyMediaLite.Data
 		/// <returns>a list of genres</returns>
 		public IList<int> GetGenres(int item_id)
 		{
-			return genres[item_id];
+			return genres[item_id] != null ? genres[item_id] : empty_list;
 		}
 
 		/// <summary>Get the artist for a given item</summary>
