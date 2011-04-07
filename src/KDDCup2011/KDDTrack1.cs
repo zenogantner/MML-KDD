@@ -259,19 +259,16 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 					eval_time_stats.Add(time.TotalSeconds);
 
 
-					// if best result so far, write out model file and predictions
-					if (results["RMSE"] == rmse_eval_stats.Min())
+					// write out model files and predictions
+					if (save_model_file != string.Empty)
 					{
-						if (save_model_file != string.Empty)
-						{
-							Recommender.SaveModel(rating_predictor_validate, save_model_file + "-validate", i);
-							Recommender.SaveModel(rating_predictor_final, save_model_file, i);
-						}
-						if (prediction_file != string.Empty)
-						{					// TODO measure time needed for this
-							KDDCup.PredictTrack1(rating_predictor_validate, validation_ratings, prediction_file + "validate-it-" + i);
-							KDDCup.PredictTrack1(rating_predictor_final,    track1_test_data, prediction_file + "-it-" + i);
-						}
+						Recommender.SaveModel(rating_predictor_validate, save_model_file + "-validate", i);
+						Recommender.SaveModel(rating_predictor_final, save_model_file, i);
+					}
+					if (prediction_file != string.Empty)
+					{					// TODO measure time needed for this
+						KDDCup.PredictTrack1(rating_predictor_validate, validation_ratings, prediction_file + "validate-it-" + i);
+						KDDCup.PredictTrack1(rating_predictor_final,    track1_test_data, prediction_file + "-it-" + i);
 					}
 
 					// check whether we should abort
@@ -334,7 +331,10 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 				seconds = Utils.MeasureTime( delegate() { rating_predictor_final.Train(); } );
         		Console.Write(" training_time " + seconds + " ");
 				if (save_model_file != string.Empty)
-					Recommender.SaveModel(rating_predictor_final, "final-" + save_model_file);
+				{
+					Recommender.SaveModel(rating_predictor_validate, save_model_file + "-validate");
+					Recommender.SaveModel(rating_predictor_final, save_model_file);
+				}
 
 				Console.WriteLine();
 				seconds = Utils.MeasureTime( delegate() {

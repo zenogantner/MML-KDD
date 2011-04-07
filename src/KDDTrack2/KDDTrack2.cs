@@ -262,7 +262,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 						
 						if (prediction_file != string.Empty)
 						{
-							// TODO predict validation set
+							KDDCup.PredictTrack2(recommender_validate, validation_candidates, prediction_file + "validate-it-" + i);
 						
 							// predict test set
 							KDDCup.PredictTrack2(recommender_final, test_candidates, prediction_file + "-it-" + i);
@@ -270,7 +270,12 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 					});
 					eval_time_stats.Add(time.TotalSeconds);
 					
-					// TODO save both models
+					if (save_model_file != string.Empty)
+					{
+						Recommender.SaveModel(recommender_validate, save_model_file + "-validate", i);
+						if (prediction_file != string.Empty)
+							Recommender.SaveModel(recommender_final, save_model_file, i);
+					}
 					
 					if (err_eval_stats.Last() > err_cutoff)
 					{
@@ -294,7 +299,8 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 			{
 				seconds = Utils.MeasureTime(delegate() { // TODO parallelize
 					recommender_validate.Train();
-					recommender_final.Train();
+					if (prediction_file != string.Empty)					
+						recommender_final.Train();
 				});
 				Console.Write(" training_time " + seconds + " ");
 			}
@@ -307,20 +313,22 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 					if (prediction_file != string.Empty)
 					{
 						// predict validation set
+						KDDCup.PredictTrack2(recommender_validate, validation_candidates, prediction_file + "validate-it-");					
 					
 						// predict test set
 						KDDCup.PredictTrack2(recommender_final, test_candidates, prediction_file);
 					}
 			});
 			Console.Write(" evaluation_time " + seconds + " ");
+			
+			if (save_model_file != string.Empty)
+			{
+				Recommender.SaveModel(recommender_validate, save_model_file + "-validate");
+				if (prediction_file != string.Empty)
+					Recommender.SaveModel(recommender_final,    save_model_file);
+			}
 		}
 
-		if (save_model_file != string.Empty)
-		{
-			Recommender.SaveModel(recommender_validate, save_model_file + "-validate");
-			Recommender.SaveModel(recommender_final,    save_model_file + "-final");
-		}
-		
 		Console.WriteLine();
 	}
 
