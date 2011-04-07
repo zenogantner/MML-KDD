@@ -191,13 +191,16 @@ namespace MyMediaLite.Util
 			Console.WriteLine(string.Format(ni, "training data: {0} users, {1} items, {2} events, sparsity {3,0:0.#####}", num_users, num_items, training_data.Count, sparsity));
 	
 			// test data stats
-			num_users = test_data.AllUsers.Count;
-			num_items = test_data.AllItems.Count;
-			matrix_size = (long) num_users * num_items;
-			empty_size  = (long) matrix_size - test_data.Count;
-			sparsity = (double) 100L * empty_size / matrix_size;
-			Console.WriteLine(string.Format(ni, "test data:     {0} users, {1} items, {2} events, sparsity {3,0:0.#####}", num_users, num_items, test_data.Count, sparsity));
-	
+			if (test_data != null)
+			{
+				num_users = test_data.AllUsers.Count;
+				num_items = test_data.AllItems.Count;
+				matrix_size = (long) num_users * num_items;
+				empty_size  = (long) matrix_size - test_data.Count;
+				sparsity = (double) 100L * empty_size / matrix_size;
+				Console.WriteLine(string.Format(ni, "test data:     {0} users, {1} items, {2} events, sparsity {3,0:0.#####}", num_users, num_items, test_data.Count, sparsity));
+			}
+				
 			// attribute stats
 			if (recommender is IUserAttributeAwareRecommender)
 				Console.WriteLine("{0} user attributes for {1} users",
