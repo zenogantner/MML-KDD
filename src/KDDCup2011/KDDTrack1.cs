@@ -267,7 +267,7 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 					}
 					if (prediction_file != string.Empty)
 					{					// TODO measure time needed for this
-						KDDCup.PredictTrack1(rating_predictor_validate, validation_ratings, prediction_file + "validate-it-" + i);
+						KDDCup.PredictTrack1(rating_predictor_validate, validation_ratings, prediction_file + "-validate-it-" + i);
 						KDDCup.PredictTrack1(rating_predictor_final,    track1_test_data, prediction_file + "-it-" + i);
 					}
 
