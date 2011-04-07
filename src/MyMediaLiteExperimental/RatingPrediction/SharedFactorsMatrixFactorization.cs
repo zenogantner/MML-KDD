@@ -93,20 +93,6 @@ namespace MyMediaLite.RatingPrediction
 		/// <inheritdoc/>
 		protected override void Iterate(IList<int> rating_indices, bool update_user, bool update_item)
 		{
-			/*
-			Console.Error.Write("artist factors user 0:    ");
-			for (int f = 0; f < NumSharedArtistFactors; f++)
-				Console.Error.Write(" " + user_shared_artist_factors[0, f]);
-			Console.Error.WriteLine();
-			
-			Console.Error.Write("artist factors item 22757:");
-			for (int f = 0; f < NumSharedArtistFactors; f++)
-				Console.Error.Write(" " + item_shared_artist_factors[22757, f]);
-			Console.Error.WriteLine();
-			
-			Console.Error.WriteLine();
-			*/
-			
 			// TODO take update_user and update_item into account
 
 			double rating_range_size = MaxRating - MinRating;

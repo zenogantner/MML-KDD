@@ -35,8 +35,6 @@ namespace MyMediaLite.ItemRecommendation
 			
 			base.InitModel();
 			
-			//Console.Error.WriteLine("memory before adding data structure: {0}", Memory.Usage);
-			
 			users = new int[Feedback.Count];
 			items = new int[Feedback.Count];
 			
@@ -49,8 +47,6 @@ namespace MyMediaLite.ItemRecommendation
 					
 					index++;
 				}
-			
-			//Console.Error.WriteLine("memory after adding data structure: {0}", Memory.Usage);
 		}
 		
 		/// <inheritdoc/>
