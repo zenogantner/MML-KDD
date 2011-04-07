@@ -172,7 +172,7 @@ public class ItemPrediction
 		});
 		Console.WriteLine(string.Format(ni, "loading_time {0,0:0.##}", loading_time.TotalSeconds));
 
-		DisplayDataStats();
+		Utils.DisplayDataStats(training_data, test_data, recommender);
 
 		TimeSpan time_span;
 
@@ -386,36 +386,6 @@ public class ItemPrediction
 	static void AbortHandler(object sender, ConsoleCancelEventArgs args)
 	{
 		DisplayIterationStats();
-	}
-
-	// TODO move to a class in the MyMediaLite base library
-	static void DisplayDataStats()
-	{
-		// training data stats
-		int num_users = training_data.AllUsers.Count;
-		int num_items = training_data.AllItems.Count;
-		long matrix_size = (long) num_users * num_items;
-		long empty_size  = (long) matrix_size - training_data.Count;
-		double sparsity = (double) 100L * empty_size / matrix_size;
-		Console.WriteLine(string.Format(ni, "training data: {0} users, {1} items, {2} events, sparsity {3,0:0.#####}", num_users, num_items, training_data.Count, sparsity));
-
-		// test data stats
-		num_users = test_data.AllUsers.Count;
-		num_items = test_data.AllItems.Count;
-		matrix_size = (long) num_users * num_items;
-		empty_size  = (long) matrix_size - test_data.Count;
-		sparsity = (double) 100L * empty_size / matrix_size;
-		Console.WriteLine(string.Format(ni, "test data:     {0} users, {1} items, {2} events, sparsity {3,0:0.#####}", num_users, num_items, test_data.Count, sparsity));
-
-		// attribute stats
-		if (recommender is IUserAttributeAwareRecommender)
-			Console.WriteLine("{0} user attributes for {1} users",
-			                  ((IUserAttributeAwareRecommender)recommender).NumUserAttributes,
-			                  ((IUserAttributeAwareRecommender)recommender).UserAttributes.NumberOfRows);
-		if (recommender is IItemAttributeAwareRecommender)
-			Console.WriteLine("{0} item attributes for {1} items",
-			                  ((IItemAttributeAwareRecommender)recommender).NumItemAttributes,
-			                  ((IItemAttributeAwareRecommender)recommender).ItemAttributes.NumberOfRows);
 	}
 
 	static void DisplayIterationStats()
