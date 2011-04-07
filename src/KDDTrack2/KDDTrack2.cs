@@ -78,6 +78,8 @@ public static class KDDTrack2
 		Usage(-1);
 	}
 
+	// TODO add compute_fit again
+	
 	static void Usage(int exit_code)
 	{
 		Console.WriteLine(@"
@@ -141,7 +143,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		find_iter   = parameters.GetRemoveInt32(  "find_iter",   0);
 		max_iter    = parameters.GetRemoveInt32(  "max_iter",    500);
 		epsilon     = parameters.GetRemoveDouble( "epsilon",     0);
-		err_cutoff  = parameters.GetRemoveDouble( "err_cutoff",  double.NegativeInfinity);
+		err_cutoff  = parameters.GetRemoveDouble( "err_cutoff",  0);
 
 		// data arguments
 		string data_dir  = parameters.GetRemoveString( "data_dir");
@@ -233,7 +235,8 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 			if (load_model_file == string.Empty)
 			{
 				recommender_validate.Train(); // TODO parallelize
-				recommender_final.Train();
+				if (prediction_file != string.Empty)
+					recommender_final.Train();
 			}
 
 			// evaluate and display results
@@ -244,7 +247,8 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 			{
 				TimeSpan time = Utils.MeasureTime(delegate() {
 					iterative_recommender_validate.Iterate(); // TODO parallelize
-					iterative_recommender_final.Iterate();
+					if (prediction_file != string.Empty)
+						iterative_recommender_final.Iterate();
 				});
 				training_time_stats.Add(time.TotalSeconds);
 
