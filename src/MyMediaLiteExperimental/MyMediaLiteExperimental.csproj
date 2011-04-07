@@ -76,6 +76,8 @@
     <Compile Include="ItemRecommender\BPRMF_KDD.cs" />
     <Compile Include="ItemRecommender\AttributeCounter.cs" />
     <Compile Include="ItemRecommender\GenreCounter.cs" />
+    <Compile Include="ItemRecommender\AlbumCounter.cs" />
+    <Compile Include="ItemRecommender\ArtistCounter.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AttrToFactor\" />
