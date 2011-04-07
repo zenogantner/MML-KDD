@@ -74,6 +74,8 @@
     <Compile Include="RatingPrediction\SharedFactorsMatrixFactorization.cs" />
     <Compile Include="IO\KDDCup2011\Track2Items.cs" />
     <Compile Include="ItemRecommender\BPRMF_KDD.cs" />
+    <Compile Include="ItemRecommender\AttributeCounter.cs" />
+    <Compile Include="ItemRecommender\GenreCounter.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AttrToFactor\" />
