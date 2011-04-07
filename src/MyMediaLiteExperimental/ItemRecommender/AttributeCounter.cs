@@ -44,13 +44,15 @@ namespace MyMediaLite.ItemRecommendation
 		/// <inheritdoc/>
 		public override double Predict(int user_id, int item_id)
 		{
+			IList<int> attributes = GetAttributes(item_id);
+			
 			int sum = 0;
 			int a_count;
-			foreach (int a in GetAttributes(item_id))
+			foreach (int a in attributes)
 				if (attribute_count_by_user[user_id].TryGetValue(a, out a_count))
 					sum += a_count;
 
-			return sum;
+			return (double) sum / attributes.Count;
 		}
 
 		/// <inheritdoc/>

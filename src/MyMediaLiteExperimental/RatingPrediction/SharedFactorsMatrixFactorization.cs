@@ -64,8 +64,6 @@ namespace MyMediaLite.RatingPrediction
 		/// <inheritdoc/>
 		protected override void InitModel()
 		{
-			Console.Error.WriteLine("SharedMF.InitModel()");
-			
 			base.InitModel();
 
 			user_shared_artist_factors = new Matrix<double>(MaxUserID + 1, NumSharedArtistFactors);
@@ -95,6 +93,20 @@ namespace MyMediaLite.RatingPrediction
 		/// <inheritdoc/>
 		protected override void Iterate(IList<int> rating_indices, bool update_user, bool update_item)
 		{
+			/*
+			Console.Error.Write("artist factors user 0:    ");
+			for (int f = 0; f < NumSharedArtistFactors; f++)
+				Console.Error.Write(" " + user_shared_artist_factors[0, f]);
+			Console.Error.WriteLine();
+			
+			Console.Error.Write("artist factors item 22757:");
+			for (int f = 0; f < NumSharedArtistFactors; f++)
+				Console.Error.Write(" " + item_shared_artist_factors[22757, f]);
+			Console.Error.WriteLine();
+			
+			Console.Error.WriteLine();
+			*/
+			
 			// TODO take update_user and update_item into account
 
 			double rating_range_size = MaxRating - MinRating;
@@ -103,10 +115,27 @@ namespace MyMediaLite.RatingPrediction
 			{
 				int u = ratings.Users[index];
 				int i = ratings.Items[index];
+				int album_id =  -1;
+				int artist_id = -1;
 
 				double score = global_bias + user_bias[u] + item_bias[i];
 				for (int f = 0; f < NumFactors; f++)
 					score += user_factors[u, f] * item_factors[i, f];
+				
+				// shared factors
+				if (ItemInfo.HasArtist(i))
+				{
+					artist_id = ItemInfo.GetArtist(i);
+					for (int f = 0; f < NumSharedArtistFactors; f++)
+						score += user_shared_artist_factors[u, f] * item_shared_artist_factors[artist_id, f];
+				}
+				if (ItemInfo.HasAlbum(i))
+				{
+					album_id = ItemInfo.GetAlbum(i);
+					for (int f = 0; f < NumSharedAlbumFactors; f++)
+						score += user_shared_album_factors[u, f] * item_shared_album_factors[album_id, f];
+				}
+
 				double sig_dot = 1 / (1 + Math.Exp(-score));
 
 				double p = MinRating + sig_dot * rating_range_size;
@@ -123,9 +152,9 @@ namespace MyMediaLite.RatingPrediction
 
 				// adjust shared latent factors
 				if (ItemInfo.HasArtist(i))
-					AdjustFactors(u, ItemInfo.GetArtist(i), NumSharedArtistFactors, user_shared_artist_factors, item_shared_artist_factors, gradient_common);
+					AdjustFactors(u, artist_id, NumSharedArtistFactors, user_shared_artist_factors, item_shared_artist_factors, gradient_common);
 				if (ItemInfo.HasAlbum(i))
-					AdjustFactors(u, ItemInfo.GetAlbum(i), NumSharedAlbumFactors, user_shared_album_factors, item_shared_album_factors, gradient_common);
+					AdjustFactors(u, album_id, NumSharedAlbumFactors, user_shared_album_factors, item_shared_album_factors, gradient_common);
 				// TODO genres
 
 			}
