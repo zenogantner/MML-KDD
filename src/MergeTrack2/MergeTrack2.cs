@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.IO;
 
 class MegeTrack2
@@ -31,32 +32,35 @@ class MegeTrack2
 		var ni = new NumberFormatInfo();
 		ni.NumberDecimalDigits = '.';
 
-		// TODO check args.Length
-
 		double weight_sum = 0;
 
 		// parse command-line parameters
-		int num_files = int.Parse(args[0]);
-		var weights = new double[num_files];
-		var files   = new string[num_files];
-		for (int i = 0; i < num_files; i++)
+		var weights = new List<double>();
+		var files   = new List<string>();
+		for (int i = 0; i < args.Length - 1; i++)
 		{
-			weights[i] = double.Parse(args[i + 1]);
-			weight_sum += weights[i];
-			files[i]   = args[i + num_files + 1];
+			string[] tokens = args[i].Split(':');
+						
+			if (tokens.Length == 2)
+				weights.Add(double.Parse(tokens[1]));
+			else
+				weights.Add(1);
+			weight_sum += weights.Last();
+			
+			files.Add(tokens[0]);
 		}
-		string output_filename = args[2 * num_files + 1];
-
+		string output_filename = args.Last();
+		
 		// open files
-		var readers = new BinaryReader[num_files];
-		for (int i = 0; i < num_files; i++)
+		var readers = new BinaryReader[files.Count];
+		for (int i = 0; i < files.Count; i++)
 			readers[i] = new BinaryReader(new FileStream(files[i], FileMode.Open, FileAccess.Read));
 
 		using (var writer = new StreamWriter(output_filename))
 			try
 			{
 				// read, merge, and write
-				var votes = new char[num_files][];
+				var votes = new char[files.Count][];
 				while ( (votes[0] = readers[0].ReadChars(NUM_CANDIDATES)).Length > 0 )
 				{
 					for (int i = 1; i < readers.Length; i++)
