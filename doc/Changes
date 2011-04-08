@@ -15,6 +15,9 @@
             to the library
         - evaluation
           - add relevant_users feature for item prediction
+        - data types
+          - fix incorrect error message in Matrix class (reported by
+            Chris Newell)
 
 1.0	2011-03-19
 	- recommenders
