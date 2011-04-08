@@ -16,7 +16,9 @@
 //  along with MyMediaLite.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
+using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using System.IO;
 
 class MergeRatings
@@ -35,37 +37,42 @@ class MergeRatings
 		double weight_sum = 0;
 		
 		// parse command-line parameters
-		int num_files = int.Parse(args[0]);
-		var weights = new double[num_files];
-		var files   = new string[num_files];
-		for (int i = 0; i < num_files; i++)
+		var weights = new List<double>();
+		var files   = new List<string>();
+		for (int i = 0; i < args.Length - 1; i++)
 		{
-			weights[i] = double.Parse(args[i + 1]);
-			weight_sum += weights[i];
-			files[i]   = args[i + num_files + 1];
+			string[] tokens = args[i].Split(':');
+						
+			if (tokens.Length == 2)
+				weights.Add(double.Parse(tokens[1]));
+			else
+				weights.Add(1);
+			weight_sum += weights.Last();
+			
+			files.Add(tokens[0]);
 		}
-		string output_filename = args[2 * num_files + 1];
+		string output_filename = args.Last();
 		
 		// open files
-		var readers = new BinaryReader[num_files];
-		for (int i = 0; i < num_files; i++)
+		var readers = new BinaryReader[files.Count];
+		for (int i = 0; i < files.Count; i++)
 			readers[i] = new BinaryReader(new FileStream(files[i], FileMode.Open, FileAccess.Read));
 		
 		// create writer
 		var writer = new BinaryWriter(new FileStream(output_filename, FileMode.Create));
 		
 		// read, merge, and write
-		byte[][] ratings = new byte[num_files][];
+		byte[][] ratings = new byte[files.Count][];
 		while ( (ratings[0] = readers[0].ReadBytes(chunk_size)).Length > 0)
 		{
-			for (int i = 1; i < num_files; i++)
+			for (int i = 1; i < ratings.Length; i++)
 				ratings[i] = readers[i].ReadBytes(chunk_size);
 			
 			
 			for (int i = 0; i < ratings[0].Length; i++)
 			{
 				double weighted_sum = 0;
-				for (int j = 0; j < num_files; j++)
+				for (int j = 0; j < weights.Count; j++)
 					weighted_sum += weights[j] * ratings[j][i];
 				byte weighted_average = (byte) ((weighted_sum / weight_sum) + 0.5);
 				writer.Write(weighted_average);
