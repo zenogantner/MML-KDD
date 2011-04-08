@@ -20,6 +20,7 @@ using System.Collections.Generic;
 
 namespace MyMediaLite.ItemRecommendation
 {
+	/// <summary>Predict item that has the genres that a user accessed most</summary>
 	public class GenreCounter : AttributeCounter
 	{
 		/// <inheritdoc/>

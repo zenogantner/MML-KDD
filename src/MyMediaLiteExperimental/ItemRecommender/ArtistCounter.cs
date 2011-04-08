@@ -20,6 +20,7 @@ using System.Collections.Generic;
 
 namespace MyMediaLite.ItemRecommendation
 {
+	/// <summary>Predict item that has the artist that a user accessed most</summary>	
 	public class ArtistCounter : AttributeCounter
 	{
 		static int[] empty_list = new int[0];

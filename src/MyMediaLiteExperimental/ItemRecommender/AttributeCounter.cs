@@ -21,7 +21,7 @@ using MyMediaLite.Data;
 
 namespace MyMediaLite.ItemRecommendation
 {
-	/// <summary></summary>
+	/// <summary>Simple recommender that counts attributes</summary>
 	public abstract class AttributeCounter : ItemRecommender, IKDDCupRecommender
 	{
 		Dictionary<int, int>[] attribute_count_by_user;
