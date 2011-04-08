@@ -220,7 +220,7 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 			}
 
 			if (compute_fit)
-				Console.Write(string.Format(ni, "fit {0,0:0.#####} ", iterative_recommender_validate.ComputeFit()));
+				Console.Write(string.Format(ni, "fit {0:0.#####} ", iterative_recommender_validate.ComputeFit()));
 
 			RatingEval.DisplayResults(RatingEval.Evaluate(rating_predictor_validate, validation_ratings));
 			Console.WriteLine(" " + iterative_recommender_validate.NumIter);
@@ -244,7 +244,7 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 							fit = iterative_recommender_validate.ComputeFit();
 						});
 						fit_time_stats.Add(time.TotalSeconds);
-						Console.Write(string.Format(ni, "fit {0,0:0.#####} ", fit));
+						Console.Write(string.Format(ni, "fit {0:0.#####} ", fit));
 					}
 
 					// evaluate and save stats
