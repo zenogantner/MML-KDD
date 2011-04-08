@@ -6,6 +6,7 @@ Recommender functionality
  - directly support MovieLens u.item and u.user files
  - support for more relation types: weighted, ternary, multiple relations
  - additional recommenders
+   - memory: just give out ratings in the training set, exception otherwise
    - item-to-item CF (Linden et al., 2003)
    - non-negative matrix factorization
    - matrix factorization learned with alternating least squares/batch gradient descent
