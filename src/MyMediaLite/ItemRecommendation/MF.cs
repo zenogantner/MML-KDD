@@ -78,9 +78,7 @@ namespace MyMediaLite.ItemRecommendation
 		/// <returns>a double representing the fit, lower is better</returns>
 		public abstract double ComputeFit();
 
-		/// <summary>
-		/// Predict the weight for a given user-item combination.
-		/// </summary>
+		/// <summary>Predict the weight for a given user-item combination</summary>
 		/// <remarks>
 		/// If the user or the item are not known to the engine, zero is returned.
 		/// To avoid this behavior for unknown entities, use CanPredict() to check before.
