@@ -175,7 +175,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		TimeSpan loading_time = Utils.MeasureTime(delegate() {
 			LoadData(data_dir);
 		});
-		Console.WriteLine("loading_time {0,0:0.##}", loading_time.TotalSeconds.ToString(ni));
+		Console.WriteLine("loading_time {0:0.##}", loading_time.TotalSeconds.ToString(ni));
 
 		// prepare recommenders
 		training_posonly = CreateFeedback(training_ratings);

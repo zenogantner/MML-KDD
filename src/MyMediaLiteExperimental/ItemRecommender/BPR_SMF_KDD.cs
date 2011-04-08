@@ -26,7 +26,7 @@ namespace MyMediaLite.ItemRecommendation
 {
 	/// <summary>BPRMF with frequency-adjusted sampling and shared factors</summary>
 	/// <remarks>prototype for KDD Cup 2011</remarks>
-	public sealed class BPRMF_SMF_KDD : BPRMF
+	public sealed class BPR_SMF_KDD : BPRMF, IKDDCupRecommender
 	{
 		int[] users;
 		int[] items;
@@ -50,7 +50,7 @@ namespace MyMediaLite.ItemRecommendation
 		public KDDCupItems ItemInfo { get; set; }
 
 		/// <summary>Default constructor</summary>
-		public BPRMF_SMF_KDD()
+		public BPR_SMF_KDD()
 		{
 			NumSharedArtistFactors = 2;
 			NumSharedAlbumFactors  = 2;
@@ -230,8 +230,8 @@ namespace MyMediaLite.ItemRecommendation
 			ni.NumberDecimalDigits = '.';
 
 			// TODO
-			return string.Format(ni, "BPRMF_KDD num_factors={0} item_bias={1} reg_u={2} reg_i={3} reg_j={4} num_iter={5} learn_rate={6} init_mean={7} init_stdev={8}",
-								 num_factors, item_bias, reg_u, reg_i, reg_j, NumIter, learn_rate, InitMean, InitStdev);
+			return string.Format(ni, "BPR_SMF_KDD num_factors={0} num_shared_artist_factors={1} num_shared_album_factors={2} num_shared_genre_factors={3} item_bias={4} reg_u={5} reg_i={6} reg_j={7} num_iter={8} learn_rate={9} init_mean={10} init_stdev={11}",
+								 num_factors, NumSharedArtistFactors, NumSharedAlbumFactors, NumSharedGenreFactors, item_bias, reg_u, reg_i, reg_j, NumIter, learn_rate, InitMean, InitStdev);
 		}		
 	}
 }
