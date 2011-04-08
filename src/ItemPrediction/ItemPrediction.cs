@@ -31,7 +31,7 @@ using MyMediaLite.ItemRecommendation;
 using MyMediaLite.Util;
 
 /// <summary>Item prediction program, see Usage() method for more information</summary>
-public class ItemPrediction
+class ItemPrediction
 {
 	static PosOnlyFeedback training_data;
 	static PosOnlyFeedback test_data;

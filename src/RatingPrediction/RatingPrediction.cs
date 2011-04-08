@@ -31,7 +31,7 @@ using MyMediaLite.RatingPrediction;
 using MyMediaLite.Util;
 
 /// <summary>Rating prediction program, see Usage() method for more information</summary>
-public static class RatingPrediction
+class RatingPrediction
 {
 	static NumberFormatInfo ni = new NumberFormatInfo();
 
