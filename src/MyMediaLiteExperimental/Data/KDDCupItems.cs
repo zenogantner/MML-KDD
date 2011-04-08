@@ -21,7 +21,7 @@ using MyMediaLite.Taxonomy;
 namespace MyMediaLite.Data
 {
 	/// <summary>Represents KDD Cup 2011 items like album, track, artist, or genre</summary>
-	public class KDDCupItems
+	public sealed class KDDCupItems
 	{
 		IList<IList<int>> genres;
 		IList<int> artists;
