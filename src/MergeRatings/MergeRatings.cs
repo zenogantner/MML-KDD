@@ -32,8 +32,6 @@ class MergeRatings
 		
 		int chunk_size = 1000;
 		
-		// TODO check args.Length
-		
 		double weight_sum = 0;
 		
 		// parse command-line parameters
