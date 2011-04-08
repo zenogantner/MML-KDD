@@ -49,7 +49,9 @@ namespace MyMediaLite.RatingPrediction
 		public int NumSharedAlbumFactors { get; set; }
 		/// <summary>Number of shared factors for common genres</summary>
 		public int NumSharedGenreFactors { get; set; }
-
+		/// <summary>Regularization constant for shared factors - multiple of the normal regularization constants</summary>
+		public double SharedReg { get; set; }
+		
 		/// <inheritdoc/>
 		public KDDCupItems ItemInfo { get; set; }
 
@@ -59,6 +61,7 @@ namespace MyMediaLite.RatingPrediction
 			NumSharedArtistFactors = 2;
 			NumSharedAlbumFactors  = 2;
 			NumSharedGenreFactors  = 0;
+			SharedReg = 2;
 		}
 
 		/// <inheritdoc/>
@@ -134,29 +137,29 @@ namespace MyMediaLite.RatingPrediction
 				item_bias[i] += LearnRate * (gradient_common - BiasRegularization * item_bias[i]);
 
 				// adjust latent factors
-				AdjustFactors(u, i, NumFactors, user_factors, item_factors, gradient_common);
+				AdjustFactors(u, i, NumFactors, user_factors, item_factors, gradient_common, 1);
 
 				// adjust shared latent factors
 				if (ItemInfo.HasArtist(i))
-					AdjustFactors(u, artist_id, NumSharedArtistFactors, user_shared_artist_factors, item_shared_artist_factors, gradient_common);
+					AdjustFactors(u, artist_id, NumSharedArtistFactors, user_shared_artist_factors, item_shared_artist_factors, gradient_common, SharedReg);
 				if (ItemInfo.HasAlbum(i))
-					AdjustFactors(u, album_id, NumSharedAlbumFactors, user_shared_album_factors, item_shared_album_factors, gradient_common);
+					AdjustFactors(u, album_id, NumSharedAlbumFactors, user_shared_album_factors, item_shared_album_factors, gradient_common, SharedReg);
 				// TODO genres
 
 			}
 		}
 
-		void AdjustFactors(int u, int i, int num_factors, Matrix<double> u_factors, Matrix<double> i_factors, double gradient_common)
+		void AdjustFactors(int u, int i, int num_factors, Matrix<double> u_factors, Matrix<double> i_factors, double gradient_common, double reg_mod)
 		{
 			for (int f = 0; f < num_factors; f++)
 			{
 			 	double u_f = u_factors[u, f];
 				double i_f = i_factors[i, f];
 
-				double delta_u = gradient_common * i_f - RegUser * u_f;
+				double delta_u = gradient_common * i_f - RegUser * reg_mod * u_f;
 				MatrixUtils.Inc(u_factors, u, f, LearnRate * delta_u);
 
-				double delta_i = gradient_common * u_f - RegItem * i_f;
+				double delta_i = gradient_common * u_f - RegItem * reg_mod * i_f;
 				MatrixUtils.Inc(i_factors, i, f, LearnRate * delta_i);
 			}
 		}
@@ -247,8 +250,8 @@ namespace MyMediaLite.RatingPrediction
 			ni.NumberDecimalDigits = '.';
 
 			return string.Format(ni,
-								 "SharedFactorsMatrixFactorization num_factors={0} num_shared_artist_factors={1} num_shared_album_factors={2} num_shared_genre_factors={3} bias_regularization={4} reg_user={5} reg_item={6} learn_rate={7} num_iter={8} init_mean={9} init_stdev={10}",
-								 NumFactors, NumSharedArtistFactors, NumSharedAlbumFactors, NumSharedGenreFactors, BiasRegularization, RegUser, RegItem, LearnRate, NumIter, InitMean, InitStdev);
+								 "SharedFactorsMatrixFactorization num_factors={0} num_shared_artist_factors={1} num_shared_album_factors={2} num_shared_genre_factors={3} bias_regularization={4} reg_user={5} reg_item={6} shared_reg={7} learn_rate={8} num_iter={9} init_mean={10} init_stdev={11}",
+								 NumFactors, NumSharedArtistFactors, NumSharedAlbumFactors, NumSharedGenreFactors, BiasRegularization, RegUser, RegItem, SharedReg, NumIter, InitMean, InitStdev);
 		}
 	}
 }
