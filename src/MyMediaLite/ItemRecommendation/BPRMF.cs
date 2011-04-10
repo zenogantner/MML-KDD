@@ -26,19 +26,13 @@ using MyMediaLite.Eval;
 namespace MyMediaLite.ItemRecommendation
 {
 	/// <summary>
-	/// Matrix factorization model for item prediction optimized using BPR-Opt;
+	/// Matrix factorization model for item prediction optimized using BPR-Opt
 	/// </summary>
 	/// <remarks>
-	/// <inproceedings>
-	///   <author>Steffen Rendle</author>
-	///   <author>Christoph Freudenthaler</author>
-	///   <author>Zeno Gantner</author>
-	///   <author>Lars Schmidt-Thieme</author>
-	///   <title>BPR: Bayesian Personalized Ranking from Implicit Feedback</title>
-	///   <booktitle>Proceedings of the 25th Conference on Uncertainty in Artificial Intelligence (UAI 2009)</booktitle>
-	///   <location>Montreal, Canada</location>
-	///   <year>2009</year>
-	/// </inproceedings>
+	/// Steffen Rendle, Christoph Freudenthaler, Zeno Gantner, Lars Schmidt-Thieme:
+	/// BPR: Bayesian Personalized Ranking from Implicit Feedback.
+	/// Proceedings of the 25th Conference on Uncertainty in Artificial Intelligence (UAI 2009),
+	/// Montreal, Canada, 2009.
 	/// </remarks>
 	public class BPRMF : MF, IIterativeModel
 	{
