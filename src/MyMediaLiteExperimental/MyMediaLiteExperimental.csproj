@@ -79,6 +79,7 @@
     <Compile Include="ItemRecommender\AlbumCounter.cs" />
     <Compile Include="ItemRecommender\ArtistCounter.cs" />
     <Compile Include="ItemRecommender\BPR_SMF_KDD.cs" />
+    <Compile Include="Classification\LogisticRegression.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AttrToFactor\" />
@@ -92,6 +93,7 @@
     <Folder Include="Taxonomy\" />
     <Folder Include="Correlation\" />
     <Folder Include="RatingPrediction\" />
+    <Folder Include="Classification\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MyMediaLite\MyMediaLite.csproj">
