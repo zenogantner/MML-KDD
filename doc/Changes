@@ -10,6 +10,8 @@
             - get rid of unnecessary IterationLength parameter
             - only interate once over relevant data points in online learning
           - Random: remove unnecessary methods
+          - Zero: new item recommender that always predicts the score 0
+          - rename MyMediaLite.ensemble namespace to MyMediaLite.Ensemble
         - command-line tools
           - move DisplayDataStats() for item recommendation from the program
             to the library
