@@ -15,11 +15,13 @@
 //  You should have received a copy of the GNU General Public License
 //  along with MyMediaLite.  If not, see <http://www.gnu.org/licenses/>.
 
+using Mono.Options;
 using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.IO;
+using MyMediaLite.IO.KDDCup2011;
 
 class MergeTrack2
 {
@@ -53,8 +55,14 @@ class MergeTrack2
 			files.Add(tokens[0]);
 		}
 		output_filename = args.Last();
-		
+	
+		EvalFiles();
 		MergeFiles();
+	}
+	
+	static void EvalFiles()
+	{
+		//Track2Items.Read(validation_hits_file);
 	}
 	
 	static void MergeFiles()

@@ -37,6 +37,15 @@
   <ItemGroup>
     <Compile Include="MergeTrack2.cs" />
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="..\..\lib\Options.cs">
+      <Link>Options.cs</Link>
+    </Compile>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
+  <ItemGroup>
+    <ProjectReference Include="..\MyMediaLiteExperimental\MyMediaLiteExperimental.csproj">
+      <Project>{750EE318-9B7E-4825-8E42-5D9ABDD6E050}</Project>
+      <Name>MyMediaLiteExperimental</Name>
+    </ProjectReference>
+  </ItemGroup>
 </Project>
