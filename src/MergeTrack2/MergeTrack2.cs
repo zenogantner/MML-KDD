@@ -21,23 +21,26 @@ using System.Globalization;
 using System.Linq;
 using System.IO;
 
-class MegeTrack2
+class MergeTrack2
 {
+	const int NUM_CANDIDATES = 6;
+	
+	static double weight_sum = 0;
+    static List<double> weights = new List<double>();
+	static List<string> files   = new List<string>();
+	
+	static string output_filename;
+	
 	/// <summary>Parameters: num_files weight_1 .. weight_n file_1 .. file_n output_file</summary>
 	/// <param name="args">the command-line arguments</param>
 	public static void Main(string[] args)
 	{
-		int NUM_CANDIDATES = 6;
-
 		var ni = new NumberFormatInfo();
 		ni.NumberDecimalDigits = '.';
 
-		double weight_sum = 0;
-
 		// parse command-line parameters
-		var weights = new List<double>();
-		var files   = new List<string>();
-		for (int i = 0; i < args.Length - 1; i++)
+		bool find_best_number = args[0] == "find_best_number";
+		for (int i = find_best_number ? 1 : 0; i < args.Length - 1; i++)
 		{
 			string[] tokens = args[i].Split(':');
 						
@@ -49,8 +52,13 @@ class MegeTrack2
 			
 			files.Add(tokens[0]);
 		}
-		string output_filename = args.Last();
+		output_filename = args.Last();
 		
+		MergeFiles();
+	}
+	
+	static void MergeFiles()
+	{
 		// open files
 		var readers = new BinaryReader[files.Count];
 		for (int i = 0; i < files.Count; i++)
@@ -85,6 +93,6 @@ class MegeTrack2
 			catch (EndOfStreamException)
 			{
 				// do nothing
-			}
+			}		
 	}
 }
