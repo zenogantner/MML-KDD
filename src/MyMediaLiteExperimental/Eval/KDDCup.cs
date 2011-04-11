@@ -74,8 +74,6 @@ namespace MyMediaLite.Eval
 			{
 				IList<int> user_candidates = candidates[user_id];
 
-				// TODO  CHECK THIS !!!!!!
-				
 				var predictions = new double[user_candidates.Count];
 				for (int i = 0; i < user_candidates.Count; i++)
 					predictions[i] = recommender.Predict(user_id, user_candidates[i]);
@@ -94,6 +92,29 @@ namespace MyMediaLite.Eval
 			return 1 - (double) hit_count / num_pos;
 		}
 
+		/// <summary>Evaluate Track 2 on a validation set</summary>
+		/// <param name="predictions">the predictions for all candidates as one list</param>
+		/// <param name="candidates">the candidate items (per user)</param>
+		/// <param name="hits">the real items (per user)</param>
+		/// <returns>the error rate on this validation split</returns>
+		public static double EvaluateTrack2(IList<byte> predictions, Dictionary<int, IList<int>> candidates, Dictionary<int, IList<int>> hits)
+		{
+			int position  = 0;
+			int hit_count = 0;
+
+			foreach (int user_id in candidates.Keys)
+			{
+				var user_true_items = new HashSet<int>(hits[user_id]);
+				
+				foreach (int item_id in candidates[user_id])
+					if (predictions[position++] == 1 && user_true_items.Contains(item_id))
+						hit_count++;
+			}
+
+			int num_positive = candidates.Count * 3;
+			return 1 - (double) hit_count / num_positive;
+		}		
+		
 		/// <summary>Predict items for Track 1</summary>
 		/// <param name="recommender">the recommender to use</param>
 		/// <param name="ratings">the ratings to predict</param>
