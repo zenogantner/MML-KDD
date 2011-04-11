@@ -51,15 +51,15 @@ namespace MyMediaLite.ItemRecommendation
 		public override void Iterate()
 		{
 			// perform alternating parameter fitting
-			optimize(Feedback.UserMatrix, user_factors, item_factors);
-			optimize(Feedback.ItemMatrix, item_factors, user_factors); // TODO create different formulation to save 50% memory
+			Optimize(Feedback.UserMatrix, user_factors, item_factors);
+			Optimize(Feedback.ItemMatrix, item_factors, user_factors); // TODO create different formulation to save 50% memory
 		}
 
 		/// <summary>Optimizes the specified data</summary>
 		/// <param name="data">The data.</param>
 		/// <param name="W">The W.</param>
 		/// <param name="H">The H.</param>
-		void optimize(SparseBooleanMatrix data, Matrix<double> W, Matrix<double> H)
+		void Optimize(SparseBooleanMatrix data, Matrix<double> W, Matrix<double> H)
 		{
 			var HH   = new Matrix<double>(num_factors, num_factors);
 			var HCIH = new Matrix<double>(num_factors, num_factors);
