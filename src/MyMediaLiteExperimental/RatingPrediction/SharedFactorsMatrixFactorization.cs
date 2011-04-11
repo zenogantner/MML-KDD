@@ -251,7 +251,7 @@ namespace MyMediaLite.RatingPrediction
 
 			return string.Format(ni,
 								 "SharedFactorsMatrixFactorization num_factors={0} num_shared_artist_factors={1} num_shared_album_factors={2} num_shared_genre_factors={3} bias_regularization={4} reg_user={5} reg_item={6} shared_reg={7} learn_rate={8} num_iter={9} init_mean={10} init_stdev={11}",
-								 NumFactors, NumSharedArtistFactors, NumSharedAlbumFactors, NumSharedGenreFactors, BiasRegularization, RegUser, RegItem, SharedReg, NumIter, InitMean, InitStdev);
+								 NumFactors, NumSharedArtistFactors, NumSharedAlbumFactors, NumSharedGenreFactors, BiasRegularization, RegUser, RegItem, SharedReg, LearnRate, NumIter, InitMean, InitStdev);
 		}
 	}
 }
