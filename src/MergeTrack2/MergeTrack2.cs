@@ -23,12 +23,11 @@ using System.Linq;
 using System.IO;
 using MyMediaLite.Eval;
 using MyMediaLite.IO.KDDCup2011;
+using MyMediaLite.Util;
 
 class MergeTrack2
 {
 	const int NUM_CANDIDATES = 6;
-	
-	static string validation_hits_file;
 	
 	/// <summary>Parameters: num_files weight_1 .. weight_n file_1 .. file_n output_file</summary>
 	/// <param name="args">the command-line arguments</param>
@@ -38,12 +37,11 @@ class MergeTrack2
 		ni.NumberDecimalDigits = '.';
 
 		// parse command-line parameters
+		string data_dir    = null;
 		string output_file = null;
-		//static bool find_best;
 	   	var p = new OptionSet() {
-   			{ "validation-hits-file=", v => validation_hits_file = v },
-			{ "output-file=",          v => output_file = v },
-   		  	//{ "find-best",             v => find_best = v != null },
+   			{ "data-dir=",       v => data_dir = v },
+			{ "output-file=",    v => output_file = v },
    	  	};
    		IList<string> extra_args = p.Parse(args);
 
@@ -60,17 +58,31 @@ class MergeTrack2
 			
 			files.Add(tokens[0]);
 		}
-	
-		IList<byte> final_prediction      = MergeFiles(files, weights);
-		//IList<byte> validation_prediction = MergeFiles();
-		//EvalFiles();
+		
+		IList<byte> final_prediction = MergeFiles(files, weights);
+		if (data_dir != null)
+			Eval(files, weights, data_dir);
+		
 		WritePredictions(final_prediction, output_file);
 	}
 	
-	static void EvalFiles()
+	static void Eval(IList<string> files, IList<double> weights, string data_dir)
 	{
-		Track2Items.Read(validation_hits_file);
-		//KDDCup.EvaluateTrack2();
+		var candidates = Track2Items.Read(data_dir + "/mml-track2/validationCandidatesIdx2.txt");
+		var hits       = Track2Items.Read(data_dir + "/mml-track2/validationHitsIdx2.txt");
+		
+		IList<string> validation_files = new List<string>();
+		foreach (string filename in files)
+		{
+			string[] tokens = filename.Split(new string[] { "-it-" }, StringSplitOptions.None);
+			if (tokens.Length != 2)
+				throw new Exception(string.Format("Could not parse filename '{0}'", filename));
+			validation_files.Add(tokens[0] + "-validate-it-" + tokens[1]);
+		}
+		
+		IList<byte> validation_predictions = MergeFiles(validation_files, weights);
+				
+		Console.WriteLine(KDDCup.EvaluateTrack2(validation_predictions, candidates, hits));
 	}
 	
 	static IList<byte> MergeFiles(IList<string> files, IList<double> weights)
