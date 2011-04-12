@@ -60,7 +60,7 @@ namespace MyMediaLite.ItemRecommendation
 		/// <param name="data">data</param>
 		/// <param name="W">W</param>
 		/// <param name="H">H</param>
-		void Optimize(SparseBooleanMatrix data, Matrix<double> W, Matrix<double> H)
+		protected virtual void Optimize(SparseBooleanMatrix data, Matrix<double> W, Matrix<double> H)
 		{
 			var HH          = new Matrix<double>(num_factors, num_factors);
 			var HC_minus_IH = new Matrix<double>(num_factors, num_factors);
