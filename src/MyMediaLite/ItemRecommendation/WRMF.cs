@@ -37,7 +37,7 @@ namespace MyMediaLite.ItemRecommendation
 	///
 	/// This engine does not support online updates.
 	/// </remarks>
-	public sealed class WRMF : MF
+	public class WRMF : MF
 	{
 		/// <summary>C position: the weight/confidence that is put on positive observations</summary>
 		/// <remarks>The alpha value in Hu et al.</remarks>
