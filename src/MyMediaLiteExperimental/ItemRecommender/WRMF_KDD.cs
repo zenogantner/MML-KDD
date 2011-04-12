@@ -28,11 +28,20 @@ namespace MyMediaLite.ItemRecommendation
 	/// </remarks>
 	public sealed class WRMF_KDD : WRMF
 	{
+		/// <inheritdoc/>
+		public override void Iterate()
+		{
+			// perform alternating parameter fitting
+			Optimize(Feedback.UserMatrix, Feedback.ItemMatrix, user_factors, item_factors);
+			Optimize(Feedback.ItemMatrix, Feedback.UserMatrix, item_factors, user_factors);
+		}		
+		
 		/// <summary>Optimizes the specified data</summary>
 		/// <param name="data">data</param>
+		/// <param name="inverse_data">data</param>
 		/// <param name="W">W</param>
 		/// <param name="H">H</param>
-		void Optimize(SparseBooleanMatrix data, Matrix<double> W, Matrix<double> H)
+		void Optimize(SparseBooleanMatrix data, SparseBooleanMatrix inverse_data, Matrix<double> W, Matrix<double> H)
 		{
 			var HH          = new Matrix<double>(num_factors, num_factors);
 			var HC_minus_IH = new Matrix<double>(num_factors, num_factors);
@@ -41,6 +50,8 @@ namespace MyMediaLite.ItemRecommendation
 			var m = new MathNet.Numerics.LinearAlgebra.Matrix(num_factors, num_factors);
 			MathNet.Numerics.LinearAlgebra.Matrix m_inv;
 			// TODO speed up using more parts of that library
+			
+			// TODO using properties gives a 3-5% performance penalty
 
 			// source code comments are in terms of computing the user factors
 			// works the same with users and items exchanged
@@ -59,7 +70,16 @@ namespace MyMediaLite.ItemRecommendation
 			// HC_minus_IH is symmetric
 			for (int u = 0; u < W.dim1; u++)
 			{
-				HashSet<int> row = data[u];
+				HashSet<int> row = data[u];				
+				
+				// prepare KDD Cup specific weighting
+				int num_user_items = row.Count;
+				int user_positive_weight_sum = 0;
+				foreach (int i in row)
+					user_positive_weight_sum += inverse_data[i].Count;
+				double neg_weight_normalization = (double) (num_user_items * (1 + CPos)) / (Feedback.Count - user_positive_weight_sum);
+				// TODO precompute
+				
 				// create HC_minus_IH in O(f^2|S_u|)
 				for (int f_1 = 0; f_1 < num_factors; f_1++)
 					for (int f_2 = 0; f_2 < num_factors; f_2++)
@@ -74,9 +94,16 @@ namespace MyMediaLite.ItemRecommendation
 				for (int f = 0; f < num_factors; f++)
 				{
 					double d = 0;
+					for (int i = 0; i < inverse_data.NumberOfRows; i++)
+						if (row.Contains(i))
+							d += H[i, f] * (1 + CPos);
+						else
+							d += H[i, f] * inverse_data[i].Count * neg_weight_normalization;
+						/*
 					foreach (int i in row)
 						//d += H[i, f] * c_pos;
 						d += H[i, f] * (1 + CPos);
+						*/
 					HCp[f] = d;
 				}
 				// create m = HH + HC_minus_IH + reg*I
