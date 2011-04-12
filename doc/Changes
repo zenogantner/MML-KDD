@@ -15,6 +15,7 @@
         - command-line tools
           - move DisplayDataStats() for item recommendation from the program
             to the library
+          - improved usage information
         - evaluation
           - add relevant_users feature for item prediction
         - data types

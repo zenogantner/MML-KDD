@@ -84,7 +84,7 @@ class ItemPrediction
 		Console.WriteLine("   - save_model=FILE            save computed model to FILE");
 		Console.WriteLine("   - load_model=FILE            load model from FILE");
 		Console.WriteLine("   - no_eval=BOOL               do not evaluate");
-		Console.WriteLine("   - prediction_file=FILE       write predictions to FILE ('-' for STDOUT)");
+		Console.WriteLine("   - prediction_file=FILE       write ranked predictions to FILE ('-' for STDOUT), one user per line");
 		Console.WriteLine("   - predict_items_num=N        predict N items per user (needs predict_items_file)");
 		Console.WriteLine("   - predict_for_users=FILE     predict items for users specified in FILE (needs predict_items_file)");
 		Console.WriteLine("   - test_ratio=NUM             evaluate by splitting of a NUM part of the feedback");
