@@ -86,7 +86,7 @@ class ItemPrediction
 		Console.WriteLine("   - no_eval=BOOL               do not evaluate");
 		Console.WriteLine("   - prediction_file=FILE       write ranked predictions to FILE ('-' for STDOUT), one user per line");
 		Console.WriteLine("   - predict_items_num=N        predict N items per user (needs predict_items_file)");
-		Console.WriteLine("   - predict_for_users=FILE     predict items for users specified in FILE (needs predict_items_file)");
+		Console.WriteLine("   - predict_for_users=FILE     predict items for users specified in FILE (one user per line, needs predict_items_file)");
 		Console.WriteLine("   - test_ratio=NUM             evaluate by splitting of a NUM part of the feedback");
 		Console.WriteLine();
 		Console.WriteLine("  options for finding the right number of iterations (MF methods and BPR-Linear)");
