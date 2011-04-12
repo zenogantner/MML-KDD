@@ -28,7 +28,7 @@ using MyMediaLite.Util;
 class MergeTrack2
 {
 	const int NUM_CANDIDATES = 6;
-	
+
 	/// <summary>Parameters: num_files weight_1 .. weight_n file_1 .. file_n output_file</summary>
 	/// <param name="args">the command-line arguments</param>
 	public static void Main(string[] args)
@@ -52,15 +52,15 @@ class MergeTrack2
 		foreach (string arg in extra_args)
 		{
 			string[] tokens = arg.Split(':');
-						
+
 			if (tokens.Length == 2)
 				weights.Add(double.Parse(tokens[1]));
 			else
-				weights.Add(1);
-			
+				weights.Add(weights.Count == 0 ? 1.1 : 1);
+
 			files.Add(tokens[0]);
 		}
-		
+
 		if (greedy_forward)
 		{
 			GreedyForwardSearch(files, weights, data_dir);
@@ -68,30 +68,36 @@ class MergeTrack2
 		else
 		{
 			if (data_dir != null)
-				Eval(files, weights, data_dir);
-			
+			{
+				IList<byte> validation_predictions = MergeValidationFiles(files, weights);
+				Eval(validation_predictions, data_dir);
+				WritePredictions(validation_predictions, output_file + "-validation");
+			}
+
+			Console.WriteLine("{0} files", files.Count);
 			IList<byte> final_prediction = MergeFiles(files, weights);
 			WritePredictions(final_prediction, output_file);
 		}
 	}
-	
+
 	static void GreedyForwardSearch(IList<string> files, IList<double> weights, string data_dir)
 	{
 		var candidates = Track2Items.Read(data_dir + "/mml-track2/validationCandidatesIdx2.txt");
-		var hits       = Track2Items.Read(data_dir + "/mml-track2/validationHitsIdx2.txt");		
+		var hits       = Track2Items.Read(data_dir + "/mml-track2/validationHitsIdx2.txt");
 
 		var results = new List<double>();
 
 		var current_files   = new List<string>();
 		var current_weights = new List<double>();
-		
+
 		for (int i = 0; i < files.Count; i++)
 		{
 			current_files.Add(files[i]);
 			current_weights.Add(weights[i]);
-			
+
+			Console.Write(current_files.Count + " files ");
 			results.Add(Eval(current_files, current_weights, candidates, hits));
-			
+
 			if (results.Last() != results.Min())
 			{
 				// no improvement, remove from list
@@ -104,42 +110,61 @@ class MergeTrack2
 			}
 		}
 	}
-	
+
+	static double Eval(IList<byte> predictions, string data_dir)
+	{
+		var candidates = Track2Items.Read(data_dir + "/mml-track2/validationCandidatesIdx2.txt");
+		var hits       = Track2Items.Read(data_dir + "/mml-track2/validationHitsIdx2.txt");
+
+		return Eval(predictions, candidates, hits);
+	}
+
 	static double Eval(IList<string> files, IList<double> weights, string data_dir)
 	{
 		var candidates = Track2Items.Read(data_dir + "/mml-track2/validationCandidatesIdx2.txt");
 		var hits       = Track2Items.Read(data_dir + "/mml-track2/validationHitsIdx2.txt");
-		
+
 		return Eval(files, weights, candidates, hits);
 	}
-	
+
 	static double Eval(IList<string> files, IList<double> weights, Dictionary<int, IList<int>> candidates, Dictionary<int, IList<int>> hits)
+	{
+		IList<byte> validation_predictions = MergeValidationFiles(files, weights);
+
+		return Eval(validation_predictions, candidates, hits);
+	}
+
+	static double Eval(IList<byte> predictions, Dictionary<int, IList<int>> candidates, Dictionary<int, IList<int>> hits)
+	{
+		double result = KDDCup.EvaluateTrack2(predictions, candidates, hits);
+		Console.WriteLine("ERR {0} memory {1}", result, Memory.Usage);
+		return result;
+	}
+
+	static IList<byte> MergeValidationFiles(IList<string> files, IList<double> weights)
 	{
 		IList<string> validation_files = new List<string>();
 		foreach (string filename in files)
 		{
 			string[] tokens = filename.Split(new string[] { "-it-" }, StringSplitOptions.None);
-			if (tokens.Length != 2)
-				throw new Exception(string.Format("Could not parse filename '{0}'", filename));
-			validation_files.Add(tokens[0] + "-validate-it-" + tokens[1]);
+			if (tokens.Length == 2)
+				validation_files.Add(tokens[0] + "-validate-it-" + tokens[1]);
+			else if (tokens.Length == 1)
+				validation_files.Add(filename + "-validation");
 		}
-		
-		IList<byte> validation_predictions = MergeFiles(validation_files, weights);
-		
-		double result = KDDCup.EvaluateTrack2(validation_predictions, candidates, hits);
-		Console.WriteLine("{0} files ERR {1} memory {2}", files.Count, result, Memory.Usage);
-		return result;
+
+		return MergeFiles(validation_files, weights);
 	}
-	
+
 	static IList<byte> MergeFiles(IList<string> files, IList<double> weights)
 	{
 		// open files
 		var readers = new BinaryReader[files.Count];
 		for (int i = 0; i < files.Count; i++)
 			readers[i] = new BinaryReader(new FileStream(files[i], FileMode.Open, FileAccess.Read));
-		
+
 		var combined_predictions = new List<byte>();
-		
+
 		try
 		{
 			// read and merge
@@ -169,14 +194,14 @@ class MergeTrack2
 		{
 			// do nothing
 		}
-		
+
 		return combined_predictions;
 	}
-	
+
 	static void WritePredictions(IList<byte> predictions, string output_file)
 	{
 		using (var writer = new StreamWriter(output_file))
 			foreach (byte p in predictions)
 				writer.Write(p);
-	}	
+	}
 }
