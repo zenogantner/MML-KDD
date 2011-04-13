@@ -33,16 +33,40 @@ namespace MyMediaLite.Eval
 		/// <param name="filename">the file to write the predictions to</param>
 		public static void PredictTrack2(IRecommender recommender, Dictionary<int, IList<int>> candidates, string filename)
 		{
-       		using (FileStream file = File.Create(filename + ".gz"))
-            	using (var writer = new GZipStream(file, CompressionMode.Compress))
-					PredictTrack2(recommender, candidates, writer);
+       		using (FileStream file_stream = File.Create(filename + ".gz"))
+				using (var compressed_stream = new GZipStream(file_stream, CompressionMode.Compress))
+            		using (var writer = new StreamWriter(compressed_stream))
+						PredictTrack2(recommender, candidates, writer);
+		}
+
+		/// <summary>Predict item scores for Track 2</summary>
+		/// <param name="recommender">the recommender to use</param>
+		/// <param name="candidates">a mapping from user IDs to the candidate items</param>
+		/// <param name="filename">the file to write the predictions to</param>
+		public static void PredictScoresTrack2(IRecommender recommender, Dictionary<int, IList<int>> candidates, string filename)
+		{
+       		using (FileStream file_stream = File.Create(filename + "-scores.gz"))
+				using (var compressed_stream = new GZipStream(file_stream, CompressionMode.Compress))
+            		using (var writer = new BinaryWriter(compressed_stream))
+						PredictScoresTrack2(recommender, candidates, writer);
+		}
+
+		/// <summary>Predict item scores for Track 2</summary>
+		/// <param name="recommender">the recommender to use</param>
+		/// <param name="candidates">a mapping from user IDs to the candidate items</param>
+		/// <param name="writer">the writer to write the scores to</param>
+		public static void PredictScoresTrack2(IRecommender recommender, Dictionary<int, IList<int>> candidates, BinaryWriter writer)
+		{
+			foreach (int user_id in candidates.Keys)
+				foreach (int item_id in candidates[user_id])
+					writer.Write(recommender.Predict(user_id, item_id));
 		}
 
 		/// <summary>Predict items for Track 2</summary>
 		/// <param name="recommender">the recommender to use</param>
 		/// <param name="candidates">a mapping from user IDs to the candidate items</param>
-		/// <param name="stream">the stream to write the predictions to</param>
-		public static void PredictTrack2(IRecommender recommender, Dictionary<int, IList<int>> candidates, Stream stream)
+		/// <param name="writer">the writer object to write the predictions to</param>
+		public static void PredictTrack2(IRecommender recommender, Dictionary<int, IList<int>> candidates, TextWriter writer)
 		{
 			foreach (int user_id in candidates.Keys)
 			{
@@ -57,9 +81,9 @@ namespace MyMediaLite.Eval
 
 				for (int i = 0; i < user_candidates.Count; i++)
 					if (positions.IndexOf(i) < 3)
-						stream.WriteByte(0x31);
+						writer.Write("1");
 					else
-						stream.WriteByte(0x30);
+						writer.Write("0");
 			}
 		}
 
