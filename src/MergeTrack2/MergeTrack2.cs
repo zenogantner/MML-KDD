@@ -21,6 +21,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.Linq;
 using System.IO;
+using System.IO.Compression;
 using MyMediaLite.Eval;
 using MyMediaLite.IO.KDDCup2011;
 using MyMediaLite.Util;
@@ -28,6 +29,8 @@ using MyMediaLite.Util;
 class MergeTrack2
 {
 	const int NUM_CANDIDATES = 6;
+
+	static bool read_compressed = false;
 
 	/// <summary>Parameters: num_files weight_1 .. weight_n file_1 .. file_n output_file</summary>
 	/// <param name="args">the command-line arguments</param>
@@ -37,13 +40,14 @@ class MergeTrack2
 		ni.NumberDecimalDigits = '.';
 
 		// parse command-line parameters
-		string data_dir     = null;
-		string output_file  = null;
-		bool greedy_forward = false;
+		string data_dir      = null;
+		string output_file   = null;
+		bool greedy_forward  = false;
 	   	var p = new OptionSet() {
    			{ "data-dir=",       v => data_dir = v },
 			{ "output-file=",    v => output_file = v },
 			{ "greedy-forward",  v => greedy_forward = v != null },
+			{ "read-compressed", v => read_compressed = v != null },
    	  	};
    		IList<string> extra_args = p.Parse(args);
 
@@ -161,7 +165,10 @@ class MergeTrack2
 		// open files
 		var readers = new BinaryReader[files.Count];
 		for (int i = 0; i < files.Count; i++)
-			readers[i] = new BinaryReader(new FileStream(files[i], FileMode.Open, FileAccess.Read));
+			if (read_compressed)
+				readers[i] = new BinaryReader(new GZipStream(new FileStream(files[i] + ".gz", FileMode.Open, FileAccess.Read), CompressionMode.Decompress));
+			else
+				readers[i] = new BinaryReader(new FileStream(files[i], FileMode.Open, FileAccess.Read));
 
 		var combined_predictions = new List<byte>();
 
