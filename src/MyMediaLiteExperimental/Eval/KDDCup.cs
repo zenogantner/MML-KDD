@@ -19,6 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
+using System.IO.Compression;
 using MyMediaLite.Data;
 
 namespace MyMediaLite.Eval
@@ -32,15 +33,16 @@ namespace MyMediaLite.Eval
 		/// <param name="filename">the file to write the predictions to</param>
 		public static void PredictTrack2(IRecommender recommender, Dictionary<int, IList<int>> candidates, string filename)
 		{
-			using (var writer = new StreamWriter(filename))
-				PredictTrack2(recommender, candidates, writer);
+       		using (FileStream file = File.Create(filename + ".gz"))
+            	using (var writer = new GZipStream(file, CompressionMode.Compress))
+					PredictTrack2(recommender, candidates, writer);
 		}
 
 		/// <summary>Predict items for Track 2</summary>
 		/// <param name="recommender">the recommender to use</param>
 		/// <param name="candidates">a mapping from user IDs to the candidate items</param>
-		/// <param name="writer">the writer object to write the predictions to</param>
-		public static void PredictTrack2(IRecommender recommender, Dictionary<int, IList<int>> candidates, TextWriter writer)
+		/// <param name="stream">the stream to write the predictions to</param>
+		public static void PredictTrack2(IRecommender recommender, Dictionary<int, IList<int>> candidates, Stream stream)
 		{
 			foreach (int user_id in candidates.Keys)
 			{
@@ -55,9 +57,9 @@ namespace MyMediaLite.Eval
 
 				for (int i = 0; i < user_candidates.Count; i++)
 					if (positions.IndexOf(i) < 3)
-						writer.Write("1");
+						stream.WriteByte(0x31);
 					else
-						writer.Write("0");
+						stream.WriteByte(0x30);
 			}
 		}
 
@@ -105,7 +107,7 @@ namespace MyMediaLite.Eval
 			foreach (int user_id in candidates.Keys)
 			{
 				var user_true_items = new HashSet<int>(hits[user_id]);
-				
+
 				foreach (int item_id in candidates[user_id])
 					if (predictions[position++] == 1 && user_true_items.Contains(item_id))
 						hit_count++;
@@ -113,8 +115,8 @@ namespace MyMediaLite.Eval
 
 			int num_positive = candidates.Count * 3;
 			return 1 - (double) hit_count / num_positive;
-		}		
-		
+		}
+
 		/// <summary>Predict items for Track 1</summary>
 		/// <param name="recommender">the recommender to use</param>
 		/// <param name="ratings">the ratings to predict</param>
