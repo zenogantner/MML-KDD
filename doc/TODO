@@ -81,6 +81,7 @@ Architecture
    - use one repository per component, instead of having everything in one repository
  - IO and storage
    - save model files using reflection (binary and XML)
+   - GZip model files and prediction files (on demand)
 GUI demo
  - display a fixed number of movies on the screen, let the user browse
  - tabs
@@ -91,14 +92,11 @@ GUI demo
  - store/load user data
  - faster IO
 Misc features
- - support compressed data and model files
- - use --param for command-line parameters
-   - https://github.com/mono/mono/tree/master/mcs/class/Mono.Options/
-     or
-   - http://www.ndesk.org/Options
+ - use --param for command-line parameters: Mono.Options
  - rewrite MF techniques using vector/matrix abstractions
  - output a nice table format for evaluation w/ R etc.
 Documentation/website
+ - document all file formats
  - have documentation for different versions on the website
  - add flyer to homepage (main page)
  - document attribute-aware recommenders: using and implementing
