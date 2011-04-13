@@ -70,9 +70,9 @@ namespace MyMediaLite.ItemRecommendation
 		protected double reg_u = 0.0025;
 
 		/// <summary>support data structure for fast sampling</summary>
-		protected List<int[]> user_pos_items;
+		protected IList<IList<int>> user_pos_items;
 		/// <summary>support data structure for fast sampling</summary>
-		protected List<int[]> user_neg_items;
+		protected IList<IList<int>> user_neg_items;
 
 		/// <summary>Random number generator</summary>
 		protected System.Random random;
@@ -121,12 +121,12 @@ namespace MyMediaLite.ItemRecommendation
 			{
 				if (item_is_positive)
 				{
-					int rindex = random.Next(0, user_neg_items[u].Length);
+					int rindex = random.Next(0, user_neg_items[u].Count);
 					j = user_neg_items[u][rindex];
 				}
 				else
 				{
-					int rindex = random.Next(0, user_pos_items[u].Length);
+					int rindex = random.Next(0, user_pos_items[u].Count);
 					j = user_pos_items[u][rindex];
 				}
 			}
@@ -150,10 +150,10 @@ namespace MyMediaLite.ItemRecommendation
 			{
 				int rindex;
 
-				rindex = random.Next(0, user_pos_items[u].Length);
-				i = user_pos_items[u][rindex];
+				rindex = random.Next(0, user_pos_items[u].Count);
+				i = user_pos_items[u][rindex]; // TODO use this also with slow sampling?
 
-				rindex = random.Next(0, user_neg_items[u].Length);
+				rindex = random.Next(0, user_neg_items[u].Count);
 				j = user_neg_items[u][rindex];
 			}
 			else
@@ -431,8 +431,8 @@ namespace MyMediaLite.ItemRecommendation
 					{
 						fast_sampling = true;
 
-						this.user_pos_items = new List<int[]>(MaxUserID + 1);
-						this.user_neg_items = new List<int[]>(MaxUserID + 1);
+						this.user_pos_items = new List<IList<int>>(MaxUserID + 1);
+						this.user_neg_items = new List<IList<int>>(MaxUserID + 1);
 						for (int u = 0; u < MaxUserID + 1; u++)
 							CreateFastSamplingData(u);
 					}
