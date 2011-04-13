@@ -79,6 +79,7 @@ namespace MyMediaLite.ItemRecommendation
 					user_positive_weight_sum += inverse_data[i].Count;
 				double neg_weight_normalization = (double) (num_user_items * (1 + CPos)) / (Feedback.Count - user_positive_weight_sum);
 				// TODO precompute
+				// TODO check whether this is correct
 				
 				// create HC_minus_IH in O(f^2|S_u|)
 				for (int f_1 = 0; f_1 < num_factors; f_1++)
@@ -99,11 +100,6 @@ namespace MyMediaLite.ItemRecommendation
 							d += H[i, f] * (1 + CPos);
 						else
 							d += H[i, f] * inverse_data[i].Count * neg_weight_normalization;
-						/*
-					foreach (int i in row)
-						//d += H[i, f] * c_pos;
-						d += H[i, f] * (1 + CPos);
-						*/
 					HCp[f] = d;
 				}
 				// create m = HH + HC_minus_IH + reg*I
