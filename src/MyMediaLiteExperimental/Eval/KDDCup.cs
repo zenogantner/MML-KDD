@@ -45,7 +45,7 @@ namespace MyMediaLite.Eval
 		/// <param name="filename">the file to write the predictions to</param>
 		public static void PredictScoresTrack2(IRecommender recommender, Dictionary<int, IList<int>> candidates, string filename)
 		{
-       		using (FileStream file_stream = File.Create(filename + "-scores.gz"))
+       		using (FileStream file_stream = File.Create(filename + ".gz"))
 				using (var compressed_stream = new GZipStream(file_stream, CompressionMode.Compress))
             		using (var writer = new BinaryWriter(compressed_stream))
 						PredictScoresTrack2(recommender, candidates, writer);
