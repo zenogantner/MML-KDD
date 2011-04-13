@@ -25,14 +25,13 @@ namespace MyMediaLite.ItemRecommendation
 	/// <summary>BPRMF with frequency-adjusted sampling, prototype for KDD Cup 2011</summary>
 	public sealed class BPRMF_KDD : BPRMF
 	{
+		// TODO offer this data structure from Feedback
 		int[] users;
 		int[] items;
-		
+
 		/// <inheritdoc/>
 		protected override void InitModel()
 		{
-			FastSamplingMemoryLimit = 0;
-			
 			base.InitModel();
 			
 			users = new int[Feedback.Count];
@@ -50,11 +49,24 @@ namespace MyMediaLite.ItemRecommendation
 		}
 		
 		/// <inheritdoc/>
+		public override void Train()
+		{
+			// prepare helper data structures for training			
+			user_pos_items = new List<IList<int>>();
+			for (int u = 0; u < MaxUserID + 1; u++)
+				user_pos_items.Add(new List<int>(Feedback.UserMatrix[u]));
+		
+			// suppress using user_neg_items in BPRMF
+			FastSamplingMemoryLimit = 0;
+			
+			base.Train();
+		}
+		
+		/// <inheritdoc/>
 		protected override void SampleTriple(out int u, out int i, out int j)
 		{
-			int random_index = random.Next(0, users.Length - 1);
-			u = users[random_index];
-			i = items[random_index];
+			u = random.Next(0, MaxUserID + 1);
+			i = user_pos_items[u][random.Next(0, user_pos_items[u].Count - 1)];
 			
 			do
 				j = items[random.Next(0, items.Length - 1)];
