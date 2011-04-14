@@ -44,13 +44,15 @@ class MergeTrack2
 
 		// parse command-line parameters
 
-		string output_file   = null;
-		bool greedy_forward  = false;
+		string output_file    = null;
+		bool greedy_forward   = false;
+		int diversification_k = 1;
 	   	var p = new OptionSet() {
-   			{ "data-dir=",       v => data_dir = v },
-			{ "output-file=",    v => output_file = v },
-			{ "greedy-forward",  v => greedy_forward = v != null },
-			{ "read-compressed", v => read_compressed = v != null },
+   			{ "data-dir=",               v => data_dir = v },
+			{ "output-file=",            v => output_file = v },
+			{ "greedy-forward",          v => greedy_forward = v != null },
+			{ "k|pick-most-diverse-from=", (int v) => diversification_k = v },
+			{ "read-compressed",         v => read_compressed = v != null },
    	  	};
    		IList<string> extra_args = p.Parse(args);
 
@@ -70,7 +72,7 @@ class MergeTrack2
 
 		if (greedy_forward)
 		{
-			var greedy_files = GreedyForwardSearch(files); // ignore the weights for now
+			var greedy_files = GreedyForwardSearch(files, diversification_k); // ignore the weights for now
 
 			Console.WriteLine("{0} files", greedy_files.Count);
 			IList<byte> final_prediction = MergeFiles(greedy_files);
@@ -93,10 +95,8 @@ class MergeTrack2
 	}
 
 	// TODO more structure
-	static IList<string> GreedyForwardSearch(IList<string> candidate_files)
+	static IList<string> GreedyForwardSearch(IList<string> candidate_files, int k)
 	{
-		int k = 20;
-
 		var candidate_items = Track2Items.Read(data_dir + "/mml-track2/validationCandidatesIdx2.txt");
 		var item_hits       = Track2Items.Read(data_dir + "/mml-track2/validationHitsIdx2.txt");
 
@@ -121,34 +121,57 @@ class MergeTrack2
 			orderby candidate_error[file]
 			select file);
 
+		// add the top model as a start
+		var top_file = files_by_error.First();
+		files_by_error.Remove(top_file);
+		ensemble.Add(top_file);
+		ensemble_validation_predictions.Add(ReadFile(ValidationFilename(top_file)));
+
+		// init merged predictions
+		IList<byte> ensemble_merged_predictions = ensemble_validation_predictions.First();
+
+		// prediction cache (to save IO)
+		var prediction_cache = new Dictionary<string, IList<byte>>();
+
 		while (files_by_error.Count() > 0)
 		{
-			/*
 			// get the K best candidates
-			var top_k =
-				from file in candidate_error.Keys
-				orderby candidate_error[file]
-				select file.Take(k);
+			var top_k = files_by_error.Take(k);
 
-			// TODO load top_k predictions into memory to save IO
-
-			// compute difference
 			var difference = new Dictionary<string, double>();
-			foreach (string file in top_k)
-				difference[file] = ComputeDifference(validation_predictions, file);
-			*/
+			if (k > 1)
+			{
+				// compute difference
+				foreach (string file in top_k)
+				{
+					if (!prediction_cache.ContainsKey(file))
+						prediction_cache[file] = ReadFile(ValidationFilename(file));
+
+					difference[file] = ComputeDifference(prediction_cache[file], ensemble_merged_predictions);
+				}
+			}
+			else
+			{
+				difference[top_k.First()] = 0;
+			}
+
+			var files_by_difference =
+				from file in difference.Keys
+				orderby difference[file] descending
+				select file;
 
 			// remove from candidates, add to ensemble
-			var next_candidate = files_by_error.First();
+			var next_candidate = files_by_difference.First();
 			files_by_error.Remove(next_candidate);
 			ensemble.Add(next_candidate);
-			ensemble_validation_predictions.Add(ReadFile(ValidationFilename(next_candidate)));
-
+			ensemble_validation_predictions.Add(prediction_cache[next_candidate]);
 			Console.Write("candidate {0}: {1:F7} ... ", next_candidate, candidate_error[next_candidate]);
 
-			IList<byte> ensemble_predictions = MergePredictions(ensemble_validation_predictions);
-			//IList<byte> ensemble_predictions = MergeValidationFiles(ensemble);
-			double result = Eval(ensemble_predictions, candidate_items, item_hits);
+			// cache entry not needed any more
+			prediction_cache.Remove(next_candidate);
+
+			ensemble_merged_predictions = MergePredictions(ensemble_validation_predictions);
+			double result = Eval(ensemble_merged_predictions, candidate_items, item_hits);
 			Console.Write("ERR {0:F7} ... ", result);
 			if (result > best_result) // if no improvement
 			{
@@ -163,7 +186,7 @@ class MergeTrack2
 			}
 		}
 
-		Console.WriteLine("memory {0}", Memory.Usage);
+		Console.WriteLine("files {0} ERR {1} memory {2}", ensemble.Count, best_result, Memory.Usage);
 
 		return ensemble;
 	}
@@ -172,13 +195,13 @@ class MergeTrack2
 	{
 		if (predictions1.Count != predictions2.Count)
 			throw new ArgumentException("predictions must have equal lengths.");
-		
+
 		int diffs = 0;
-		
-		for (int i = 0; i < predictions1; i++)
+
+		for (int i = 0; i < predictions1.Count; i++)
 			if (predictions1[i] != predictions2[i])
 				diffs++;
-		
+
 		return diffs;
 	}
 
