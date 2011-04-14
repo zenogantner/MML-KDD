@@ -39,6 +39,8 @@ class MergeTrack2
 		var ni = new NumberFormatInfo();
 		ni.NumberDecimalDigits = '.';
 
+		AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(Handlers.UnhandledExceptionHandler);		
+		
 		// parse command-line parameters
 		string data_dir      = null;
 		string output_file   = null;
@@ -67,7 +69,7 @@ class MergeTrack2
 
 		if (greedy_forward)
 		{
-			GreedyForwardSearch(files, weights, data_dir);
+			GreedyForwardSearch(files, data_dir); // ignore the weights for now
 		}
 		else
 		{
@@ -77,44 +79,91 @@ class MergeTrack2
 				Eval(validation_predictions, data_dir);
 				WritePredictions(validation_predictions, output_file + "-validation");
 			}
-
-			Console.WriteLine("{0} files", files.Count);
-			IList<byte> final_prediction = MergeFiles(files, weights);
-			WritePredictions(final_prediction, output_file);
 		}
+		
+		Console.WriteLine("{0} files", files.Count);
+		IList<byte> final_prediction = MergeFiles(files, weights);
+		WritePredictions(final_prediction, output_file);
 	}
 
-	static void GreedyForwardSearch(IList<string> files, IList<double> weights, string data_dir)
+	// TODO more structure
+	static void GreedyForwardSearch(IList<string> candidate_files, string data_dir)
 	{
-		var candidates = Track2Items.Read(data_dir + "/mml-track2/validationCandidatesIdx2.txt");
-		var hits       = Track2Items.Read(data_dir + "/mml-track2/validationHitsIdx2.txt");
+		int k = 20;
+		
+		var candidate_items = Track2Items.Read(data_dir + "/mml-track2/validationCandidatesIdx2.txt");
+		var item_hits       = Track2Items.Read(data_dir + "/mml-track2/validationHitsIdx2.txt");
 
-		var results = new List<double>();
+		// get eval results for all predictions
+		var candidate_error = new Dictionary<string, double>();
+		foreach (string file in candidate_files)
+			candidate_error[file] = Eval(file, candidate_items, item_hits);
+		
+		// select top 3 for the starting ensemble
+		var top3 = (
+			from file in candidate_error.Keys
+			orderby candidate_error[file]
+			select file).Take(3);
+		
+		// the ensemble
+		var ensemble = new List<string>(top3); // add the top 3
+		foreach (string file in top3)
+			candidate_error.Remove(file); // remove from candidates
+		
+		IList<byte> validation_predictions = MergeValidationFiles(ensemble);
+		double best_result = Eval(validation_predictions, candidate_items, item_hits);
 
-		var current_files   = new List<string>();
-		var current_weights = new List<double>();
-
-		for (int i = 0; i < files.Count; i++)
+		var files_by_error = new List<string>(
+			from file in candidate_error.Keys
+			orderby candidate_error[file]
+			select file);
+		
+		while (files_by_error.Count() > 0)
 		{
-			current_files.Add(files[i]);
-			current_weights.Add(weights[i]);
+			/*
+			// get the K best candidates
+			var top_k =
+				from file in candidate_error.Keys
+				orderby candidate_error[file]
+				select file.Take(k);
 
-			Console.Write(current_files.Count + " files ");
-			results.Add(Eval(current_files, current_weights, candidates, hits));
-
-			if (results.Last() != results.Min())
+			// TODO load top_k predictions into memory to save IO
+			
+			// compute difference
+			var difference = new Dictionary<string, double>();
+			foreach (string file in top_k)
+				difference[file] = ComputeDifference(validation_predictions, file);
+			*/
+			
+			// remove from candidates, add to ensemble
+			var next_candidate = files_by_error.First();
+			files_by_error.Remove(next_candidate);
+			ensemble.Add(next_candidate);
+			
+			Console.WriteLine("candidate {0}: {1}", next_candidate, candidate_error[next_candidate]);
+			
+			double result = Eval(validation_predictions, candidate_items, item_hits);
+			if (result >= best_result) // if no improvement
 			{
-				// no improvement, remove from list
-				current_files.RemoveRange(current_files.Count - 1, 1);
-				current_weights.RemoveRange(current_weights.Count - 1, 1);
+				ensemble.RemoveAt(ensemble.Count - 1); // remove last
+				Console.WriteLine("Do not keep.");
 			}
 			else
 			{
-				Console.WriteLine("keep {0}", files[i]);
+				best_result = result;
+				Console.WriteLine("Keep.");
 			}
 		}
 	}
 
+	/*
+	static int ComputeDifference(IList<byte> predictions, string file)
+	{
+		
+	}
+	*/
+	
+	// TODO make data_dir global
 	static double Eval(IList<byte> predictions, string data_dir)
 	{
 		var candidates = Track2Items.Read(data_dir + "/mml-track2/validationCandidatesIdx2.txt");
@@ -123,6 +172,19 @@ class MergeTrack2
 		return Eval(predictions, candidates, hits);
 	}
 
+	static double Eval(string file, Dictionary<int, IList<int>> candidates, Dictionary<int, IList<int>> hits)
+	{
+		var files   = new List<string>();
+		var weights = new List<double>();
+				
+		files.Add(file);
+		weights.Add(1);
+		
+		weights[0] = 1.1; // tie-breaker
+				
+		return Eval(files, weights, candidates, hits);
+	}			
+			
 	static double Eval(IList<string> files, IList<double> weights, string data_dir)
 	{
 		var candidates = Track2Items.Read(data_dir + "/mml-track2/validationCandidatesIdx2.txt");
@@ -145,21 +207,66 @@ class MergeTrack2
 		return result;
 	}
 
+	static IList<byte> MergeValidationFiles(IList<string> files)
+	{
+		var weights = new double[files.Count];
+		for (int i = 0; i < weights.Length; i++)
+			weights[i] = 1;		
+		
+		return MergeValidationFiles(files, weights);
+	}
+	
 	static IList<byte> MergeValidationFiles(IList<string> files, IList<double> weights)
 	{
 		IList<string> validation_files = new List<string>();
 		foreach (string filename in files)
-		{
-			string[] tokens = filename.Split(new string[] { "-it-" }, StringSplitOptions.None);
-			if (tokens.Length == 2)
-				validation_files.Add(tokens[0] + "-validate-it-" + tokens[1]);
-			else if (tokens.Length == 1)
-				validation_files.Add(filename + "-validation");
-		}
+			validation_files.Add(ValidationFilename(filename));
 
 		return MergeFiles(validation_files, weights);
 	}
 
+	static string ValidationFilename(string filename)
+	{
+		string[] tokens = filename.Split(new string[] { "-it-" }, StringSplitOptions.None);
+		if (tokens.Length == 2)
+			return tokens[0] + "-validate-it-" + tokens[1];
+		else if (tokens.Length == 1)
+			return filename + "-validate";
+		else
+			throw new Exception();
+	}		
+	
+	static IList<byte> MergeFiles(IList<string> files)
+	{
+		var weights = new double[files.Count];
+		for (int i = 0; i < weights.Length; i++)
+			weights[i] = 1;
+		
+		weights[0] = 1.1; // tie-breaker
+		
+		return MergeFiles(files, weights);
+	}
+	
+	static IList<byte> ReadFile(string file)
+	{
+		var reader = read_compressed
+			? new BinaryReader(new GZipStream(new FileStream(file + ".gz", FileMode.Open, FileAccess.Read), CompressionMode.Decompress))
+			: new BinaryReader(               new FileStream(file,         FileMode.Open, FileAccess.Read));
+		
+		var predictions = new List<byte>();
+		char[] chunk;
+		while ( (chunk = reader.ReadChars(NUM_CANDIDATES)).Length > 0 )
+			foreach (char c in chunk)
+				if (c == '1')
+					predictions.Add(1);
+				else if (c == '0')
+					predictions.Add(0);
+				else
+					throw new IOException("Unknown value: " + c);
+		
+		return predictions;
+	}
+	
 	static IList<byte> MergeFiles(IList<string> files, IList<double> weights)
 	{
 		// open files
