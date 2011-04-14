@@ -101,11 +101,11 @@ class MergeTrack2
 		var item_hits       = Track2Items.Read(data_dir + "/mml-track2/validationHitsIdx2.txt");
 
 		// get eval results for all predictions
-		Console.Write("Calculating the quality of {0} candidates ... ", candidate_files.Count);
-		var candidate_error = new Dictionary<string, double>();
+		Console.Write("Calculating the errors of {0} candidates ... ", candidate_files.Count);
+		var error = new Dictionary<string, double>();
 		foreach (string file in candidate_files)
 		{
-			candidate_error[file] = Eval(file, candidate_items, item_hits);
+			error[file] = Eval(file, candidate_items, item_hits);
 			Console.Error.Write(".");
 		}
 		Console.WriteLine("done.");
@@ -117,8 +117,8 @@ class MergeTrack2
 		double best_result = 10;
 
 		var files_by_error = new List<string>(
-			from file in candidate_error.Keys
-			orderby candidate_error[file]
+			from file in error.Keys
+			orderby error[file]
 			select file);
 
 		// add the top model as a start
@@ -152,7 +152,11 @@ class MergeTrack2
 			}
 			else
 			{
-				difference[top_k.First()] = 0;
+				var file = top_k.First();
+				difference[file] = 0;
+				
+				if (!prediction_cache.ContainsKey(file))
+					prediction_cache[file] = ReadFile(ValidationFilename(file));				
 			}
 
 			var files_by_difference =
@@ -165,7 +169,7 @@ class MergeTrack2
 			files_by_error.Remove(next_candidate);
 			ensemble.Add(next_candidate);
 			ensemble_validation_predictions.Add(prediction_cache[next_candidate]);
-			Console.Write("candidate {0}: {1:F7} ... ", next_candidate, candidate_error[next_candidate]);
+			Console.Write("candidate {0}: {1:F7} ... ", next_candidate, error[next_candidate]);
 
 			// cache entry not needed any more
 			prediction_cache.Remove(next_candidate);
@@ -186,7 +190,7 @@ class MergeTrack2
 			}
 		}
 
-		Console.WriteLine("files {0} ERR {1} memory {2}", ensemble.Count, best_result, Memory.Usage);
+		Console.WriteLine("files {0} of {1} ERR {2:F7} memory {3}", ensemble.Count, error.Count, best_result, Memory.Usage);
 
 		return ensemble;
 	}
