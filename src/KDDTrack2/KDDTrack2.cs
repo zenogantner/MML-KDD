@@ -241,7 +241,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 
 			// evaluate and display results
 			double error = KDDCup.EvaluateTrack2(recommender_validate, validation_candidates, validation_hits);
-			Console.WriteLine(string.Format(ni, "ERR {0:0.####} {1}", error, iterative_recommender_validate.NumIter));
+			Console.WriteLine(string.Format(ni, "ERR {0:0.######} {1}", error, iterative_recommender_validate.NumIter));
 			
 			for (int i = iterative_recommender_validate.NumIter + 1; i <= max_iter; i++)
 			{
@@ -258,7 +258,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 						// evaluate
 						error = KDDCup.EvaluateTrack2(recommender_validate, validation_candidates, validation_hits);
 						err_eval_stats.Add(error);
-						Console.WriteLine(string.Format(ni, "ERR {0:0.####} {1}", error, i));
+						Console.WriteLine(string.Format(ni, "ERR {0:0.######} {1}", error, i));
 						
 						if (prediction_file != string.Empty)
 						{
@@ -285,7 +285,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 					
 					if (err_eval_stats.Last() > err_eval_stats.Min() + epsilon)
 					{
-						Console.Error.WriteLine(string.Format(ni, "Reached convergence (eps={0:0.####}) on training/validation data after {1} iterations.", epsilon, i));
+						Console.Error.WriteLine(string.Format(ni, "Reached convergence (eps={0:0.######}) on training/validation data after {1} iterations.", epsilon, i));
 						break;						
 					}
 				}
@@ -308,12 +308,12 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 			seconds = Utils.MeasureTime(delegate() {
 					// evaluate
 					double error = KDDCup.EvaluateTrack2(recommender_validate, validation_candidates, validation_hits);
-					Console.Write(string.Format(ni, "ERR {0:0.####}", error));
+					Console.Write(string.Format(ni, "ERR {0:0.######}", error));
 					
 					if (prediction_file != string.Empty)
 					{
 						// predict validation set
-						KDDCup.PredictTrack2(recommender_validate, validation_candidates, prediction_file + "validate-it-");					
+						KDDCup.PredictTrack2(recommender_validate, validation_candidates, prediction_file + "validate");					
 					
 						// predict test set
 						KDDCup.PredictTrack2(recommender_final, test_candidates, prediction_file);
