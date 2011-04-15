@@ -16,12 +16,13 @@
 //  along with MyMediaLite.  If not, see <http://www.gnu.org/licenses/>.
 
 using System;
+using MyMediaLite.Data;
 using MyMediaLite.RatingPrediction;
 
 namespace MyMediaLite.ItemRecommendation
 {
 	/// <summary>Two-stage recommender for KDD Cup</summary>
-	public abstract class Track2CompositeRecommender<RatedComponent, RatingComponent> : ItemRecommender
+	public abstract class Track2CompositeRecommender<RatedComponent, RatingComponent> : ItemRecommender, ITrack2CompositeRecommender
 		where RatedComponent  : ItemRecommender, new()
 		where RatingComponent : RatingPredictor, new()
 	{
@@ -29,6 +30,28 @@ namespace MyMediaLite.ItemRecommendation
 		protected RatedComponent   rated_component;
 		/// <summary>predicts how an item was rated</summary>
 		protected RatingComponent rating_component;
+		
+		/// <inheritdoc/>
+		public IRatings Ratings
+		{
+			get { return ratings; }
+			set {
+				ratings = value;
+				rated_component.Feedback = CreateFeedback(ratings);
+			}
+		}
+		private IRatings ratings;
+		
+		/// <inheritdoc/>
+		public override PosOnlyFeedback Feedback
+		{
+			get {
+				return rated_component.Feedback;
+			}
+			set {
+				throw new NotSupportedException();
+			}
+		}
 		
 		/// <summary>Default constructor</summary>
 		public Track2CompositeRecommender()
@@ -53,7 +76,20 @@ namespace MyMediaLite.ItemRecommendation
 		public override void SaveModel(string filename)
 		{
 			throw new NotImplementedException();
-		}				
+		}
+		
+		/// <summary>Create positive-only feedback from rating data</summary>
+		/// <param name="ratings">the rating data</param>
+		/// <returns>the positive-only feedback</returns>
+		static protected PosOnlyFeedback CreateFeedback(IRatings ratings)
+		{
+			var feedback = new PosOnlyFeedback();
+	
+			for (int i = 0; i < ratings.Count; i++)
+				feedback.Add(ratings.Users[i], ratings.Items[i]);
+	
+			return feedback;
+		}
 	}
 }
 

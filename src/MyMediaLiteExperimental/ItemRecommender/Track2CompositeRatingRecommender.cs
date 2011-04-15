@@ -25,10 +25,27 @@ namespace MyMediaLite.ItemRecommendation
 		where RatedComponent  : ItemRecommender, new()
 		where RatingComponent : RatingPredictor, new()		
 	{
+		/// <inheritdoc/>
+		public override double Predict(int user_id, int item_id)
+		{
+			//Console.WriteLine("{0}, {1}", rating_component.MinRating, rating_component.MaxRating);
+			
+			double rated_probability = rated_component.Predict(user_id, item_id);
+			//double rating_normalized = (rating_component.Predict(user_id, item_id) - rating_component.MinRating) / (rating_component.MaxRating - rating_component.MinRating);
+			double rating_normalized = rating_component.Predict(user_id, item_id);
+			
+			//Console.WriteLine("{0} * {1} = {2}", rated_probability, rating_normalized, rated_probability * rating_normalized);
+			
+			return rated_probability * rating_normalized;
+		}		
+		
 		/// <inheritdoc/>		
 		public override void Train()
 		{
 			// prepare data
+			rating_component.Ratings = Ratings;
+			rating_component.MinRating = 0;
+			rating_component.MaxRating = 100;
 			
 			// do training
 			rated_component.Train();

@@ -113,7 +113,7 @@ class MergeTrack2
 			error[file] = Eval(prediction_cache[file], candidate_items, item_hits);
 			Console.Error.Write(".");
 		}
-		Console.WriteLine("done. (memory {0}", Memory.Usage);
+		Console.WriteLine("done. (memory {0})", Memory.Usage);
 
 		// the ensemble
 		var ensemble = new List<string>();
@@ -175,7 +175,7 @@ class MergeTrack2
 			files_by_error.Remove(next_candidate);
 			ensemble.Add(next_candidate);
 			ensemble_validation_predictions.Add(prediction_cache[next_candidate]);
-			Console.Write("candidate {0}: {1:F7} ... ", next_candidate, error[next_candidate]);
+			Console.Write("{0}: {1:F7} ... ", next_candidate, error[next_candidate]);
 
 			// cache entry not needed any more
 			prediction_cache.Remove(next_candidate);
