@@ -81,6 +81,8 @@
     <Compile Include="ItemRecommender\BPR_SMF_KDD.cs" />
     <Compile Include="Classification\LogisticRegression.cs" />
     <Compile Include="ItemRecommender\WRMF_KDD.cs" />
+    <Compile Include="ItemRecommender\Track2CompositeRecommender.cs" />
+    <Compile Include="ItemRecommender\Track2CompositeRatingRecommender.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AttrToFactor\" />
