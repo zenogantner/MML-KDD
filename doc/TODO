@@ -92,6 +92,7 @@ GUI demo
  - store/load user data
  - faster IO
 Misc features
+ - command-line tools: standalone only for prediction based on model files
  - use --param for command-line parameters: Mono.Options
  - rewrite MF techniques using vector/matrix abstractions
  - output a nice table format for evaluation w/ R etc.
