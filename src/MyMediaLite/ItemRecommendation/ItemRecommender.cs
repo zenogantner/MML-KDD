@@ -38,7 +38,7 @@ namespace MyMediaLite.ItemRecommendation
 		public int MaxItemID { get; set; }
 
 		/// <summary>the feedback data to be used for training</summary>
-		public PosOnlyFeedback Feedback
+		public virtual PosOnlyFeedback Feedback
 		{
 			get { return this.feedback; }
 			set {
