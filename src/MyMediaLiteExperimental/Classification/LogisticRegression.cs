@@ -21,17 +21,24 @@ using MyMediaLite.DataType;
 
 namespace MyMediaLite.Classification
 {
+	/// <summary>Regularized logistic regression trained by stochastic gradient descent</summary>
 	public class LogisticRegression
 	{
+		/// <summary>the predictor (input) variables</summary>
 		public Matrix<byte> PredictorVariables { get; set; }
+		/// <summary>the target (output) variables</summary>
 		public IList<byte>  TargetVariables { get; set; }
+		/// <summary>number of training iterations</summary>
 		public uint NumIter { get; set; }
+		/// <summary>the learn rate, the step size for training updates</summary>
 		public double LearnRate { get; set; }
+		/// <summary>the regularization parameter, higher values lead to more shrinkage</summary>
 		public double Regularization { get; set; }
 		
 		double bias;
 		IList<double> parameters;
 		
+		/// <summary>Default constructor</summary>
 		public LogisticRegression()
 		{
 			NumIter= 10;
@@ -45,17 +52,21 @@ namespace MyMediaLite.Classification
 			parameters = new double[PredictorVariables.NumberOfColumns];
 		}
 		
-		public double Predict(IList<byte> features)
+		/// <summary>Predict probability for given features</summary>
+		/// <param name="input">the input</param>
+		/// <returns>the probability of the input belonging to class 1</returns>
+		public double PredictProbability(IList<byte> input)
 		{
 			// TODO assert features and parameters have same length
 			
 			double score = bias;
-			for (int i = 0; i < features.Count; i++)
-				score += features[i] * parameters[i];
+			for (int i = 0; i < input.Count; i++)
+				score += input[i] * parameters[i];
 			
 			return (double) 1 / (1 + Math.Exp(-score));
 		}
 		
+		/// <summary>Train using stochastic gradient descent</summary>
 		public void Train()
 		{
 			InitModel();
@@ -63,7 +74,7 @@ namespace MyMediaLite.Classification
 			for (int i = 0; i < NumIter; i++)
 				for (int j = 0; j < PredictorVariables.NumberOfRows; j++) // TODO shuffle to have really stochastic gradient ascent
 				{
-					double t_minus_p = TargetVariables[j] - Predict(PredictorVariables.GetRow(j));
+					double t_minus_p = TargetVariables[j] - PredictProbability(PredictorVariables.GetRow(j));
 				
 					// TODO do bias update
 				
