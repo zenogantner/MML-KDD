@@ -182,7 +182,7 @@ class MergeTrack2
 			{
 				ensemble.RemoveAt(ensemble.Count - 1); // remove last
 				ensemble_validation_predictions.RemoveAt(ensemble_validation_predictions.Count - 1); // remove last
-				Console.WriteLine("do not keep.");
+				Console.WriteLine(".");
 			}
 			else
 			{
