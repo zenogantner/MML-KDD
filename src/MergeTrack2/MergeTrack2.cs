@@ -101,15 +101,19 @@ class MergeTrack2
 		var candidate_items = Track2Items.Read(data_dir + "/mml-track2/validationCandidatesIdx2.txt");
 		var item_hits       = Track2Items.Read(data_dir + "/mml-track2/validationHitsIdx2.txt");
 
+		// prediction cache (to save IO)
+		var prediction_cache = new Dictionary<string, IList<byte>>();
+		
 		// get eval results for all predictions
 		Console.Write("Calculating the errors of {0} candidates ... ", candidate_files.Count);
 		var error = new Dictionary<string, double>();
 		foreach (string file in candidate_files)
 		{
-			error[file] = Eval(file, candidate_items, item_hits);
+			prediction_cache[file] = ReadFile(ValidationFilename(file));
+			error[file] = Eval(prediction_cache[file], candidate_items, item_hits);
 			Console.Error.Write(".");
 		}
-		Console.WriteLine("done.");
+		Console.WriteLine("done. (memory {0}", Memory.Usage);
 
 		// the ensemble
 		var ensemble = new List<string>();
@@ -131,9 +135,6 @@ class MergeTrack2
 		// init merged predictions
 		IList<byte> ensemble_merged_predictions = ensemble_validation_predictions.First();
 
-		// prediction cache (to save IO)
-		var prediction_cache = new Dictionary<string, IList<byte>>();
-
 		while (files_by_error.Count() > 0)
 		{
 			// get the K best candidates
@@ -145,8 +146,10 @@ class MergeTrack2
 				// compute difference
 				foreach (string file in top_k)
 				{
+					/*
 					if (!prediction_cache.ContainsKey(file))
 						prediction_cache[file] = ReadFile(ValidationFilename(file));
+					*/
 
 					difference[file] = ComputeDifference(prediction_cache[file], ensemble_merged_predictions);
 				}
@@ -156,8 +159,10 @@ class MergeTrack2
 				var file = top_k.First();
 				difference[file] = 0;
 
+				/*
 				if (!prediction_cache.ContainsKey(file))
 					prediction_cache[file] = ReadFile(ValidationFilename(file));
+					*/
 			}
 
 			var files_by_difference =
@@ -225,8 +230,6 @@ class MergeTrack2
 
 		files.Add(file);
 		weights.Add(1);
-
-		weights[0] = 1.1; // tie-breaker
 
 		return Eval(files, weights, candidates, hits);
 	}
