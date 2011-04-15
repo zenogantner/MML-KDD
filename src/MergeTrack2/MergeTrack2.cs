@@ -29,6 +29,7 @@ using MyMediaLite.Util;
 class MergeTrack2
 {
 	const int NUM_CANDIDATES = 6;
+	const int FILE_SIZE      = 607032;
 
 	static bool read_compressed = false;
 	static string data_dir      = null;
@@ -154,9 +155,9 @@ class MergeTrack2
 			{
 				var file = top_k.First();
 				difference[file] = 0;
-				
+
 				if (!prediction_cache.ContainsKey(file))
-					prediction_cache[file] = ReadFile(ValidationFilename(file));				
+					prediction_cache[file] = ReadFile(ValidationFilename(file));
 			}
 
 			var files_by_difference =
@@ -310,21 +311,19 @@ class MergeTrack2
 			? new BinaryReader(new GZipStream(new FileStream(file + ".gz", FileMode.Open, FileAccess.Read), CompressionMode.Decompress))
 			: new BinaryReader(               new FileStream(file,         FileMode.Open, FileAccess.Read));
 
-		var predictions = new List<byte>();
-		char[] chunk;
+		IList<char> content = null;
 
-		try
-		{
-			while ( (chunk = reader.ReadChars(NUM_CANDIDATES)).Length > 0 )
-				foreach (char c in chunk)
-					if (c == '1')
-						predictions.Add(1);
-					else if (c == '0')
-						predictions.Add(0);
-					else
-						throw new IOException("Unknown value: " + c);
-		}
+		try { content = reader.ReadChars(FILE_SIZE); }
 		catch (EndOfStreamException) { /* do nothing */ }
+
+		var predictions = new byte[content.Count];
+		for (int i = 0; i < predictions.Length; i++)
+			if (content[i] == '1')
+				predictions[i] = 1;
+			else if (content[i] == '0')
+				predictions[i] = 0;
+			else
+				throw new IOException("Unknown value: " + predictions[i]);
 
 		return predictions;
 	}
