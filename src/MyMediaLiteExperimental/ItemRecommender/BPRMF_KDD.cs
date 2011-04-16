@@ -29,6 +29,23 @@ namespace MyMediaLite.ItemRecommendation
 		int[] users;
 		int[] items;
 
+		// TODO move up in hierarchy
+		/// <summary>Modification factor for the learning rate of users to weight them higher or lower than items</summary>
+		public double UserLearnRateModifier { get; set; }
+		
+		/// <summary>If true, sample users uniformly</summary>
+		public bool UniformUserSampling { get; set; }
+		
+		/// <summary>Weight for test users</summary>
+		public double TestUserWeight { get; set; }
+		
+		/// <summary>Default constructor</summary>
+		public BPRMF_KDD()
+		{
+			UserLearnRateModifier = 1;
+			UniformUserSampling = false;
+		}
+		
 		/// <inheritdoc/>
 		protected override void InitModel()
 		{
@@ -65,14 +82,24 @@ namespace MyMediaLite.ItemRecommendation
 		/// <inheritdoc/>
 		protected override void SampleTriple(out int u, out int i, out int j)
 		{
-			// sample user
-			do
-				u = random.Next(0, MaxUserID + 1);
-			while (user_pos_items[u].Count == 0);
-			
-			// sample positive item
-			i = user_pos_items[u][random.Next(0, user_pos_items[u].Count - 1)];
-			
+			if (UniformUserSampling)
+			{
+				// sample user uniformly
+				do
+					u = random.Next(0, MaxUserID + 1);
+				while (user_pos_items[u].Count == 0);
+				
+				// sample positive item
+				i = user_pos_items[u][random.Next(0, user_pos_items[u].Count - 1)];
+			}
+			else
+			{
+				// sample user from positive user-item pairs
+				int index = random.Next(0, items.Length - 1);
+				u = users[index];
+				i = items[index];
+			}
+				
 			// sample negative item
 			do
 				j = items[random.Next(0, items.Length - 1)];

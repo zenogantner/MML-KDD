@@ -22,7 +22,12 @@ namespace MyMediaLite.ItemRecommendation
 {
 	/// <summary>Simple baseline model that combines MostPopular and ItemAverage</summary>
 	public class BaselineCompositeRatingRecommender : Track2CompositeRatingRecommender<MostPopular, ItemAverage>
-	{
+	{		
+		/// <inheritdoc/>
+		public override string ToString ()
+		{
+			return string.Format("BaselineCompositeRatingRecommender");
+		}	
 	}
 }
 

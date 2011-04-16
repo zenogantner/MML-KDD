@@ -77,7 +77,7 @@ namespace MyMediaLite.ItemRecommendation
 		{
 			throw new NotImplementedException();
 		}
-		
+				
 		/// <summary>Create positive-only feedback from rating data</summary>
 		/// <param name="ratings">the rating data</param>
 		/// <returns>the positive-only feedback</returns>

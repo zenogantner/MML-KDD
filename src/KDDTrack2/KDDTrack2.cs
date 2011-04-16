@@ -233,8 +233,8 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 			if ( !(recommender_validate is IIterativeModel) )
 				Usage("Only iterative recommenders support find_iter.");
 
-			IIterativeModel iterative_recommender_validate = (MF) recommender_validate;
-			IIterativeModel iterative_recommender_final    = (MF) recommender_final;
+			IIterativeModel iterative_recommender_validate = (IIterativeModel) recommender_validate;
+			IIterativeModel iterative_recommender_final    = (IIterativeModel) recommender_final;
 			Console.WriteLine();
 
 			if (load_model_file == string.Empty)
