@@ -1,17 +1,17 @@
 // Copyright (C) 2011 Zeno Gantner
-// 
+//
 // This file is part of MyMediaLite.
-// 
+//
 // MyMediaLite is free software: you can redistribute it and/or modify
 // it under the terms of the GNU General Public License as published by
 // the Free Software Foundation, either version 3 of the License, or
 // (at your option) any later version.
-// 
+//
 // MyMediaLite is distributed in the hope that it will be useful,
 // but WITHOUT ANY WARRANTY; without even the implied warranty of
 // MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
 // GNU General Public License for more details.
-// 
+//
 //  You should have received a copy of the GNU General Public License
 //  along with MyMediaLite.  If not, see <http://www.gnu.org/licenses/>.
 
@@ -35,9 +35,21 @@ namespace MyMediaLite.ItemRecommendation
 		Matrix<double> user_track_factors;
 
 		Matrix<double> item_typed_factors;
-		
+
 		/// <summary>Number of typed factors</summary>
 		public int NumTypedFactors { get; set; }
+
+		/// <summary>Regularization parameter for artist factors</summary>
+		public double ArtistReg { get; set; }
+
+		/// <summary>Regularization parameter for album factors</summary>
+		public double AlbumReg { get; set; }
+
+		/// <summary>Regularization parameter for track factors</summary>
+		public double TrackReg { get; set; }
+
+		/// <summary>Regularization parameter for genre factors</summary>
+		public double GenreReg { get; set; }
 
 		/// <inheritdoc/>
 		public KDDCupItems ItemInfo { get; set; }
@@ -46,19 +58,17 @@ namespace MyMediaLite.ItemRecommendation
 		public TypedBPRMF()
 		{
 			NumTypedFactors = NumFactors;
-		}		
-				
-		// TODO more specific regularization
-		
+		}
+
 		/// <inheritdoc/>
 		protected override void InitModel()
 		{
 			base.InitModel();
-			
+
 			user_artist_factors = new Matrix<double>(MaxUserID + 1, NumTypedFactors);
 			user_album_factors  = new Matrix<double>(MaxUserID + 1, NumTypedFactors);
 			user_genre_factors  = new Matrix<double>(MaxUserID + 1, NumTypedFactors);
-			user_track_factors  = new Matrix<double>(MaxUserID + 1, NumTypedFactors);			
+			user_track_factors  = new Matrix<double>(MaxUserID + 1, NumTypedFactors);
 
 			item_typed_factors = new Matrix<double>(MaxItemID + 1, NumTypedFactors);
 
@@ -68,7 +78,7 @@ namespace MyMediaLite.ItemRecommendation
 			MatrixUtils.InitNormal(user_track_factors, InitMean, InitStdev);
 			MatrixUtils.InitNormal(item_typed_factors, InitMean, InitStdev);
 		}
-		
+
 		/// <inheritdoc/>
 		public override double Predict(int user_id, int item_id)
 		{
@@ -85,11 +95,11 @@ namespace MyMediaLite.ItemRecommendation
 
 			double score = item_bias[item_id] + MatrixUtils.RowScalarProduct(user_factors, user_id, item_factors, item_id);
 			score += MatrixUtils.RowScalarProduct(GetUserTypedFactors(item_id), user_id, item_typed_factors, item_id);
-			
-					
+
+
 			return score;
-		}		
-		
+		}
+
 		Matrix<double> GetUserTypedFactors(int item_id)
 		{
 			switch (ItemInfo.GetType(item_id))
@@ -101,18 +111,18 @@ namespace MyMediaLite.ItemRecommendation
 				case KDDCupItemType.Track :
 					return user_track_factors;
 				case KDDCupItemType.Genre :
-					return user_genre_factors;				
+					return user_genre_factors;
 				default :
 					throw new Exception("Unknown type for item " + item_id);
-			}			
+			}
 		}
-		
+
 		// TODO take update_x into account
 		/// <inheritdoc/>
 		protected override void UpdateFactors(int u, int i, int j, bool update_u, bool update_i, bool update_j)
 		{
 			double x_uij = Predict(u, i) - Predict(u, j);
-		
+
 			for (int f = 0; f < num_factors; f++)
 			{
 				double w_uf = user_factors[u, f];
@@ -129,7 +139,7 @@ namespace MyMediaLite.ItemRecommendation
 
 				// update factors of negative item
 				double jf_update = -w_uf / (1 + Math.Exp(x_uij)) - reg_j * h_jf;
-				item_factors[j, f] = h_jf + learn_rate * jf_update;				
+				item_factors[j, f] = h_jf + learn_rate * jf_update;
 			}
 
 			// adjust typed factors for i
@@ -148,7 +158,7 @@ namespace MyMediaLite.ItemRecommendation
 				item_typed_factors[i, f] = h_if + learn_rate * if_update;
 			}
 
-			// adjust typed factors for j			
+			// adjust typed factors for j
 			Matrix<double> uj_factors = GetUserTypedFactors(j);
 			for (int f = 0; f < NumTypedFactors; f++)
 			{
@@ -161,10 +171,10 @@ namespace MyMediaLite.ItemRecommendation
 
 				// update factors of negative item
 				double jf_update = -w_uf / (1 + Math.Exp(x_uij)) - reg_j * h_jf;
-				item_typed_factors[j, f] = h_jf + learn_rate * jf_update;				
+				item_typed_factors[j, f] = h_jf + learn_rate * jf_update;
 			}
-		}		
-		
+		}
+
 		/// <inheritdoc/>
 		public override string ToString()
 		{
@@ -173,7 +183,7 @@ namespace MyMediaLite.ItemRecommendation
 
 			return string.Format(ni, "BPR_SMF_KDD num_factors={0} num_typed_factors={1} bias_reg={2} reg_u={3} reg_i={4} reg_j={5} num_iter={6} learn_rate={7} init_mean={8} init_stdev={9}",
 								 num_factors, NumTypedFactors, BiasReg, reg_u, reg_i, reg_j, NumIter, learn_rate, InitMean, InitStdev);
-		}		
+		}
 	}
 }
 
