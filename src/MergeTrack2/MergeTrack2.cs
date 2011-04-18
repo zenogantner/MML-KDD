@@ -75,10 +75,6 @@ class MergeTrack2
 		{
 			var greedy_files = GreedyForwardSearch(files, diversification_k); // ignore the weights for now
 
-			Console.WriteLine("{0} files", greedy_files.Count);
-			foreach (var file in greedy_files)
-				Console.WriteLine(file);
-
 			IList<byte> final_prediction = MergeFiles(greedy_files);
 			WritePredictions(final_prediction, output_file);
 		}
@@ -197,6 +193,12 @@ class MergeTrack2
 				best_result = result;
 				Console.WriteLine("keep ({0}).", ensemble.Count);
 			}
+
+			// show results
+			Console.WriteLine("{0} files", greedy_files.Count);
+			foreach (var file in greedy_files)
+				Console.WriteLine("{0} ({1}", file, error[file]);
+			
 		}
 
 		Console.WriteLine("files {0} of {1} ERR {2:F7} memory {3}", ensemble.Count, error.Count, best_result, Memory.Usage);
