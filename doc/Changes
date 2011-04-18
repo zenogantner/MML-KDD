@@ -12,6 +12,8 @@
           - Random: remove unnecessary methods
           - Zero: new item recommender that always predicts the score 0
           - rename MyMediaLite.ensemble namespace to MyMediaLite.Ensemble
+          - make matrix factorization recommender faster by using
+            MatrixUtils.RowScalarProduct
         - command-line tools
           - move DisplayDataStats() for item recommendation from the program
             to the library

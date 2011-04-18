@@ -60,8 +60,8 @@ namespace MyMediaLite.ItemRecommendation
 
 			MatrixUtils.InitNormal(user_factors, init_mean, init_stdev);
 			MatrixUtils.InitNormal(item_factors, init_mean, init_stdev);
-		}			
-		
+		}
+
 		/// <inheritdoc/>
 		public override void Train()
 		{
@@ -99,10 +99,7 @@ namespace MyMediaLite.ItemRecommendation
 				return 0;
 			}
 
-			double result = 0;
-			for (int f = 0; f < num_factors; f++)
-				result += user_factors[user_id, f] * item_factors[item_id, f];
-			return result;
+			return MatrixUtils.RowScalarProduct(user_factors, user_id, item_factors, item_id);
 		}
 
 		/// <inheritdoc/>

@@ -54,7 +54,7 @@ namespace MyMediaLite.RatingPrediction
 
 		/// <summary>Standard deviation of the normal distribution used to initialize the factors</summary>
 		public double InitStdev { get; set; }
-		
+
 		/// <summary>Number of latent factors</summary>
 		public int NumFactors { get; set;}
 
@@ -77,7 +77,7 @@ namespace MyMediaLite.RatingPrediction
 			InitStdev = 0.1;
 			NumFactors = 10;
 		}
-		
+
 		/// <summary>Initialize the model data structure</summary>
 		protected virtual void InitModel()
 		{
@@ -168,11 +168,7 @@ namespace MyMediaLite.RatingPrediction
 		/// <inheritdoc/>
 		protected double Predict(int user_id, int item_id, bool bound)
 		{
-			double result = global_bias;
-
-			// U*V
-			for (int f = 0; f < NumFactors; f++)
-				result += user_factors[user_id, f] * item_factors[item_id, f];
+			double result = global_bias + MatrixUtils.RowScalarProduct(user_factors, user_id, item_factors, item_id);
 
 			if (bound)
 			{
