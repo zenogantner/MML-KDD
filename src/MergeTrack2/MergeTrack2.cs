@@ -76,6 +76,9 @@ class MergeTrack2
 			var greedy_files = GreedyForwardSearch(files, diversification_k); // ignore the weights for now
 
 			Console.WriteLine("{0} files", greedy_files.Count);
+			foreach (var file in greedy_files)
+				Console.WriteLine(file);
+
 			IList<byte> final_prediction = MergeFiles(greedy_files);
 			WritePredictions(final_prediction, output_file);
 		}
@@ -103,7 +106,7 @@ class MergeTrack2
 
 		// prediction cache (to save IO)
 		var prediction_cache = new Dictionary<string, IList<byte>>();
-		
+
 		// get eval results for all predictions
 		Console.Write("Calculating the errors of {0} candidates ... ", candidate_files.Count);
 		var error = new Dictionary<string, double>();

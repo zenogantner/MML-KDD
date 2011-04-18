@@ -164,7 +164,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		if (recommender_validate == null)
 			Usage(string.Format("Unknown method: '{0}'", method));
 
-		Recommender.Configure(recommender_validate, parameters, Usage);
+ 		Recommender.Configure(recommender_validate, parameters, Usage);
 		recommender_final = recommender_validate.Clone() as ItemRecommender;	
 		
 		if (parameters.CheckForLeftovers())

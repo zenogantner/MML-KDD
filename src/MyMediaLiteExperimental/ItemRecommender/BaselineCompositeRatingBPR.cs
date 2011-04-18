@@ -28,9 +28,9 @@ namespace MyMediaLite.ItemRecommendation
 		public int NumIter    { get { return rated_component.NumIter;    } set { rated_component.NumIter    = value; } }
 		/// <summary>Number of factors of the BPR component</summary>
 		public int NumFactors { get { return rated_component.NumFactors; } set { rated_component.NumFactors = value; } }
-		/// <summary>Use the first item latent factor as a bias term if set to true</summary>
-		public bool ItemBias { get { return rated_component.ItemBias; } set { rated_component.ItemBias = value; }	}
 
+		// TODO bias reg
+		
 		/// <summary>Learning rate alpha</summary>
 		public double LearnRate { get {	return rated_component.LearnRate; } set { rated_component.LearnRate = value; } }
 
@@ -58,8 +58,8 @@ namespace MyMediaLite.ItemRecommendation
 			var ni = new NumberFormatInfo();
 			ni.NumberDecimalDigits = '.';
 
-			return string.Format(ni, "BaselineCompositeRatingBPR num_factors={0} item_bias={1} reg_u={2} reg_i={3} reg_j={4} num_iter={5} learn_rate={6}",
-								 NumFactors, ItemBias, RegU, RegI, RegJ, NumIter, LearnRate);
+			return string.Format(ni, "BaselineCompositeRatingBPR num_factors={0} reg_u={1} reg_i={2} reg_j={3} num_iter={4} learn_rate={5}",
+								 NumFactors, RegU, RegI, RegJ, NumIter, LearnRate);
 
 		}
 	}

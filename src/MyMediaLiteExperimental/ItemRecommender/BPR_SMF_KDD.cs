@@ -154,24 +154,9 @@ namespace MyMediaLite.ItemRecommendation
 		{
 			double x_uij = Predict(u, i) - Predict(u, j);
 
-			int start_factor = 0;
-
-			if (item_bias)
-			{
-				start_factor = 1; // leave out the first (index 0) factor later
-
-				double w_uf = user_factors[u, 0];
-				double h_if = item_factors[i, 0];
-				double h_jf = item_factors[j, 0];
-
-				double if_update = w_uf / (1 + Math.Exp(x_uij)) - reg_i * h_if;
-				item_factors[i, 0] = h_if + learn_rate * if_update;
-
-				double jf_update = -w_uf / (1 + Math.Exp(x_uij)) - reg_j * h_jf;
-				item_factors[j, 0] = h_jf + learn_rate * jf_update;
-			}
-
-			for (int f = start_factor; f < num_factors; f++)
+			// TODO update factors
+			
+			for (int f = 0; f < num_factors; f++)
 			{
 				double w_uf = user_factors[u, f];
 				double h_if = item_factors[i, f];

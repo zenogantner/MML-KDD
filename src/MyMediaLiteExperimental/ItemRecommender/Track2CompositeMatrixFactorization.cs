@@ -28,10 +28,11 @@ namespace MyMediaLite.ItemRecommendation
 		public int NumIter    { get { return rated_component.NumIter;    } set { rated_component.NumIter    = value; } }
 		/// <summary>Number of factors of the BPR component</summary>
 		public int BPR_NumFactors { get { return rated_component.NumFactors; } set { rated_component.NumFactors = value; } }
-		/// <summary>Use the first item latent factor as a bias term if set to true (BPR component)</summary>
-		public bool BPR_ItemBias { get { return rated_component.ItemBias; } set { rated_component.ItemBias = value; }	}
 
-		/// <summary>Learning rate alpha</summary>
+		/// <summary>Bias regularization parameter for the BPR component</summary>
+		public double BPR_BiasReg { get { return rated_component.BiasReg; } set {rated_component.BiasReg = value; } }
+		
+		/// <summary>Learning rate alpha for the BPR component</summary>
 		public double BPR_LearnRate { get {	return rated_component.LearnRate; } set { rated_component.LearnRate = value; } }
 
 		/// <summary>Regularization parameter for positive item factors (BPR component)</summary>
@@ -58,8 +59,8 @@ namespace MyMediaLite.ItemRecommendation
 			var ni = new NumberFormatInfo();
 			ni.NumberDecimalDigits = '.';
 
-			return string.Format(ni, "Track2CompositeMatrixFactorization bpr_num_factors={0} bpr_item_bias={1} bpr_reg_u={2} bpr_reg_i={3} bpr_reg_j={4} num_iter={5} bpr_learn_rate={6}",
-								 BPR_NumFactors, BPR_ItemBias, BPR_RegU, BPR_RegI, BPR_RegJ, NumIter, BPR_LearnRate);
+			return string.Format(ni, "Track2CompositeMatrixFactorization bpr_num_factors={0} bpr_bias_reg={1} bpr_reg_u={2} bpr_reg_i={3} bpr_reg_j={4} num_iter={5} bpr_learn_rate={6}",
+								 BPR_NumFactors, BPR_BiasReg, BPR_RegU, BPR_RegI, BPR_RegJ, NumIter, BPR_LearnRate);
 
 		}
 	}

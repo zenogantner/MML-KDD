@@ -87,6 +87,8 @@
     <Compile Include="ItemRecommender\BaselineCompositeRatingRecommender.cs" />
     <Compile Include="ItemRecommender\BaselineCompositeRatingBPR.cs" />
     <Compile Include="ItemRecommender\Track2CompositeMatrixFactorization.cs" />
+    <Compile Include="ItemRecommender\TypedBPRMF.cs" />
+    <Compile Include="ItemRecommender\SemiSupervisedBPRMF.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AttrToFactor\" />
