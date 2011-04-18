@@ -39,16 +39,17 @@ namespace MyMediaLite.ItemRecommendation
 		/// <summary>Fast, but memory-intensive sampling</summary>
 		protected bool fast_sampling = false;
 
+		/// <summary>Item bias terms</summary>
+		protected IList<double> item_bias;
+		
 		/// <summary>Fast sampling memory limit, in MiB</summary>
 		public int FastSamplingMemoryLimit { get { return fast_sampling_memory_limit; }	set { fast_sampling_memory_limit = value; } }
 		/// <summary>Fast sampling memory limit, in MiB</summary>
 		protected int fast_sampling_memory_limit = 1024;
 
-		/// <summary>Use the first item latent factor as a bias term if set to true</summary>
-		public bool ItemBias { get { return item_bias; } set { item_bias = value; }	}
-		/// <summary>Use the first item latent factor as a bias term if set to true</summary>
-		protected bool item_bias = false;
-
+		/// <summary>Regularization parameter for the bias term</summary>
+		public double BiasReg { get; set; }
+		
 		/// <summary>Learning rate alpha</summary>
 		public double LearnRate { get {	return learn_rate; } set { learn_rate = value; } }
 		/// <summary>Learning rate alpha</summary>
@@ -82,12 +83,10 @@ namespace MyMediaLite.ItemRecommendation
 		{
 			base.InitModel();
 
-			random = Util.Random.GetInstance();
-			CheckSampling(); // TODO rename
-
-			// if necessary, set the bias counterparts to 1
-			if (item_bias)
-				user_factors.SetColumnToOneValue(0, 1.0);
+			item_bias = new double[MaxItemID + 1];
+			
+			random = Util.Random.GetInstance(); // TODO move to training
+			CheckSampling();                    // TODO rename
 		}
 
 		/// <summary>Perform one iteration of stochastic gradient ascent over the training data</summary>
@@ -201,30 +200,21 @@ namespace MyMediaLite.ItemRecommendation
 		{
 			double x_uij = Predict(u, i) - Predict(u, j);
 
-			int start_factor = 0;
-
-			if (item_bias)
+			// adjust bias terms
+			if (update_i)
 			{
-				start_factor = 1; // leave out the first (index 0) factor later
-
-				double w_uf = user_factors[u, 0];
-				double h_if = item_factors[i, 0];
-				double h_jf = item_factors[j, 0];
-
-				if (update_i)
-				{
-					double if_update = w_uf / (1 + Math.Exp(x_uij)) - reg_i * h_if;
-					item_factors[i, 0] = h_if + learn_rate * if_update;
-				}
-
-				if (update_j)
-				{
-					double jf_update = -w_uf / (1 + Math.Exp(x_uij)) - reg_j * h_jf;
-					item_factors[j, 0] = h_jf + learn_rate * jf_update;
-				}
+				double bias_update = 1.0 / (1 + Math.Exp(x_uij)) - BiasReg * item_bias[i];
+				item_bias[i] += learn_rate * bias_update;
 			}
 
-			for (int f = start_factor; f < num_factors; f++)
+			if (update_j)
+			{
+				double bias_update = 1.0 / (1 + Math.Exp(x_uij)) - BiasReg * item_bias[j];
+				item_bias[j] -= learn_rate * bias_update;
+			}
+			
+			// adjust factors
+			for (int f = 0; f < num_factors; f++)
 			{
 				double w_uf = user_factors[u, f];
 				double h_if = item_factors[i, f];
@@ -446,6 +436,12 @@ namespace MyMediaLite.ItemRecommendation
 		}
 
 		/// <inheritdoc/>
+		public override double Predict(int user_id, int item_id)
+		{
+			return item_bias[item_id] + MatrixUtils.RowScalarProduct(user_factors, user_id, item_factors, item_id);
+		}
+		
+		/// <inheritdoc/>
 		public override void LoadModel(string filename)
 		{
 			base.LoadModel(filename);
@@ -458,8 +454,8 @@ namespace MyMediaLite.ItemRecommendation
 			var ni = new NumberFormatInfo();
 			ni.NumberDecimalDigits = '.';
 
-			return string.Format(ni, "BPRMF num_factors={0} item_bias={1} reg_u={2} reg_i={3} reg_j={4} num_iter={5} learn_rate={6} fast_sampling_memory_limit={7} init_mean={8} init_stdev={9}",
-								 num_factors, item_bias, reg_u, reg_i, reg_j, NumIter, learn_rate, fast_sampling_memory_limit, InitMean, InitStdev);
+			return string.Format(ni, "BPRMF num_factors={0} bias_reg={1} reg_u={2} reg_i={3} reg_j={4} num_iter={5} learn_rate={6} fast_sampling_memory_limit={7} init_mean={8} init_stdev={9}",
+								 num_factors, BiasReg, reg_u, reg_i, reg_j, NumIter, learn_rate, fast_sampling_memory_limit, InitMean, InitStdev);
 		}
 	}
 }
