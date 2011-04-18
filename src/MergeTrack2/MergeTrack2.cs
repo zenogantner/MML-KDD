@@ -195,8 +195,8 @@ class MergeTrack2
 			}
 
 			// show results
-			Console.WriteLine("{0} files", greedy_files.Count);
-			foreach (var file in greedy_files)
+			Console.WriteLine("{0} files", ensemble.Count);
+			foreach (var file in ensemble)
 				Console.WriteLine("{0} ({1}", file, error[file]);
 			
 		}
