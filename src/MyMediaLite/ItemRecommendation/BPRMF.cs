@@ -211,8 +211,8 @@ namespace MyMediaLite.ItemRecommendation
 
 			if (update_j)
 			{
-				double bias_update = one_over_one_plus_ex - BiasReg * item_bias[j];
-				item_bias[j] -= learn_rate * bias_update;
+				double bias_update = -one_over_one_plus_ex - BiasReg * item_bias[j];
+				item_bias[j] += learn_rate * bias_update;
 			}
 
 			// adjust factors
