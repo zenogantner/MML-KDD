@@ -19,7 +19,7 @@ using System;
 using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
-using System.IO.Compression;
+//using System.IO.Compression;
 using MyMediaLite.Data;
 
 namespace MyMediaLite.Eval
@@ -34,8 +34,9 @@ namespace MyMediaLite.Eval
 		public static void PredictTrack2(IRecommender recommender, Dictionary<int, IList<int>> candidates, string filename)
 		{
        		using (FileStream file_stream = File.Create(filename + ".gz"))
-				using (var compressed_stream = new GZipStream(file_stream, CompressionMode.Compress))
-            		using (var writer = new StreamWriter(compressed_stream))
+				//using (var compressed_stream = new GZipStream(file_stream, CompressionMode.Compress))
+            	//	using (var writer = new StreamWriter(compressed_stream))
+					using (var writer = new StreamWriter(file_stream))
 						PredictTrack2(recommender, candidates, writer);
 		}
 
@@ -46,8 +47,9 @@ namespace MyMediaLite.Eval
 		public static void PredictScoresTrack2(IRecommender recommender, Dictionary<int, IList<int>> candidates, string filename)
 		{
        		using (FileStream file_stream = File.Create(filename + ".gz"))
-				using (var compressed_stream = new GZipStream(file_stream, CompressionMode.Compress))
-            		using (var writer = new BinaryWriter(compressed_stream))
+				//using (var compressed_stream = new GZipStream(file_stream, CompressionMode.Compress))
+            	//	using (var writer = new BinaryWriter(compressed_stream))
+					using (var writer = new BinaryWriter(file_stream))
 						PredictScoresTrack2(recommender, candidates, writer);
 		}
 
