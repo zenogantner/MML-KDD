@@ -115,12 +115,15 @@ class MergeTrack2
 
 			// only keep if error is below threshold
 			if (err < err_threshold)
+			{
 			    error[file] = err;
+				Console.Error.Write(".");
+			}
 			else
+			{
 				prediction_cache.Remove(file);
-
-			// display progress
-			Console.Error.Write(".");
+				Console.Error.Write("_");
+			}
 		}
 		Console.WriteLine("done: candidates {0} memory {1}", error.Count, Memory.Usage);
 
