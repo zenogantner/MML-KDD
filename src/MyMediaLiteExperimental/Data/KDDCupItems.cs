@@ -29,7 +29,7 @@ namespace MyMediaLite.Data
 		IList<KDDCupItemType> types;
 
 		static int[] empty_list = new int[0];
-		
+
 		/// <summary>Create item information object</summary>
 		/// <param name="size">the number of items</param>
 		public KDDCupItems(int size)
@@ -38,7 +38,7 @@ namespace MyMediaLite.Data
 			artists = new int[size];
 			albums  = new int[size];
 			types   = new KDDCupItemType[size];
-			
+
 			for (int i = 0; i < size; i++)
 			{
 				artists[i] = -1;
@@ -118,7 +118,7 @@ namespace MyMediaLite.Data
 				return false;
 			return genres[item_id].Count > 0;
 		}
-		
+
 		/// <summary>Gives a textual summary of the item data</summary>
 		public override string ToString()
 		{
@@ -131,7 +131,7 @@ namespace MyMediaLite.Data
 					case KDDCupItemType.Artist: num_artists++; break;
 					case KDDCupItemType.Genre:  num_genres++;  break;
 				}
-			
+
 			return string.Format("{0} tracks, {1} albums, {2} artists, {3} genres", num_tracks, num_albums, num_artists, num_genres);
 		}
 	}

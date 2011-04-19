@@ -165,8 +165,8 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 			Usage(string.Format("Unknown method: '{0}'", method));
 
  		Recommender.Configure(recommender_validate, parameters, Usage);
-		recommender_final = recommender_validate.Clone() as ItemRecommender;	
-		
+		recommender_final = recommender_validate.Clone() as ItemRecommender;
+
 		if (parameters.CheckForLeftovers())
 			Usage(-1);
 
@@ -189,7 +189,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 			recommender_validate.Feedback = CreateFeedback(training_ratings);
 			recommender_final.Feedback    = CreateFeedback(complete_ratings);
 		}
-			
+
 		Console.Error.WriteLine("memory before deleting ratings: {0}", Memory.Usage);
 		training_ratings = null;
 		validation_ratings = null;

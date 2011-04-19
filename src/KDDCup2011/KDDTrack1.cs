@@ -164,7 +164,7 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 		recommender = Recommender.CreateRatingPredictor(method);
 		if (recommender == null)
 			Usage(string.Format("Unknown method: '{0}'", method));
-		
+
 		Recommender.Configure(recommender, parameters, Usage);
 
 		if (parameters.CheckForLeftovers())
@@ -294,7 +294,7 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 			TimeSpan seconds;
 
 			if (!no_eval)
-			{			
+			{
 				if (load_model_file == string.Empty)
 				{
 					Console.Write(recommender.ToString());
@@ -314,9 +314,9 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 						Recommender.SaveModel(recommender, save_model_file);
 					}
 				}
-	
+
 				Console.Write(recommender.ToString() + " ");
-			
+
 				seconds = Utils.MeasureTime(
 			    	delegate() { RatingEval.DisplayResults(RatingEval.Evaluate(rating_predictor_validate, validation_ratings)); }
 				);
