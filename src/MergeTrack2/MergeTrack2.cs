@@ -198,7 +198,7 @@ class MergeTrack2
 
 		// show results
 		foreach (var file in ensemble)
-			Console.WriteLine("{0} ({1}", file, error[file]);		
+			Console.WriteLine("{0} ({1})", file, error[file]);		
 		Console.WriteLine("files {0} of {1} ERR {2:F7} memory {3}", ensemble.Count, error.Count, best_result, Memory.Usage);
 
 		return ensemble;
