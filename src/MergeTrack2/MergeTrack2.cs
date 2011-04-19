@@ -157,24 +157,12 @@ class MergeTrack2
 			{
 				// compute difference
 				foreach (string file in top_k)
-				{
-					/*
-					if (!prediction_cache.ContainsKey(file))
-						prediction_cache[file] = ReadFile(ValidationFilename(file));
-					*/
-
 					difference[file] = ComputeDifference(prediction_cache[file], ensemble_merged_predictions);
-				}
 			}
 			else
 			{
 				var file = top_k.First();
 				difference[file] = 0;
-
-				/*
-				if (!prediction_cache.ContainsKey(file))
-					prediction_cache[file] = ReadFile(ValidationFilename(file));
-					*/
 			}
 
 			var files_by_difference =
@@ -206,14 +194,11 @@ class MergeTrack2
 				best_result = result;
 				Console.WriteLine("keep ({0}).", ensemble.Count);
 			}
-
-			// show results
-			Console.WriteLine("{0} files", ensemble.Count);
-			foreach (var file in ensemble)
-				Console.WriteLine("{0} ({1}", file, error[file]);
-
 		}
 
+		// show results
+		foreach (var file in ensemble)
+			Console.WriteLine("{0} ({1}", file, error[file]);		
 		Console.WriteLine("files {0} of {1} ERR {2:F7} memory {3}", ensemble.Count, error.Count, best_result, Memory.Usage);
 
 		return ensemble;
