@@ -121,13 +121,13 @@ namespace MyMediaLite.ItemRecommendation
 			switch (ItemInfo.GetType(item_id))
 			{
 				case KDDCupItemType.Artist :
-					return ArtistReg;
+					return ArtistRegModifier;
 				case KDDCupItemType.Album :
-					return AlbumReg;
+					return AlbumRegModifier;
 				case KDDCupItemType.Track :
-					return TrackReg;
+					return TrackRegModifier;
 				case KDDCupItemType.Genre :
-					return GenreReg;
+					return GenreRegModifier;
 				default :
 					throw new Exception("Unknown type for item " + item_id);
 			}
