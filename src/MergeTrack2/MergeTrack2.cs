@@ -48,12 +48,14 @@ class MergeTrack2
 		string output_file    = null;
 		bool greedy_forward   = false;
 		int diversification_k = 1;
+		double err_threshold  = 1;
 	   	var p = new OptionSet() {
-   			{ "data-dir=",               v => data_dir = v },
-			{ "output-file=",            v => output_file = v },
-			{ "greedy-forward",          v => greedy_forward = v != null },
+   			{ "data-dir=",                 v => data_dir = v },
+			{ "output-file=",              v => output_file = v },
+			{ "greedy-forward",            v => greedy_forward = v != null },
+			{ "error-threshold=",          (double v) => err_threshold = v },
 			{ "k|pick-most-diverse-from=", (int v) => diversification_k = v },
-			{ "read-compressed",         v => read_compressed = v != null },
+			{ "read-compressed",           v => read_compressed = v != null },
    	  	};
    		IList<string> extra_args = p.Parse(args);
 
@@ -73,7 +75,7 @@ class MergeTrack2
 
 		if (greedy_forward)
 		{
-			var greedy_files = GreedyForwardSearch(files, diversification_k); // ignore the weights for now
+			var greedy_files = GreedyForwardSearch(files, diversification_k, err_threshold); // ignore the weights for now
 
 			IList<byte> final_prediction = MergeFiles(greedy_files);
 			WritePredictions(final_prediction, output_file);
@@ -95,7 +97,7 @@ class MergeTrack2
 	}
 
 	// TODO more structure
-	static IList<string> GreedyForwardSearch(IList<string> candidate_files, int k)
+	static IList<string> GreedyForwardSearch(IList<string> candidate_files, int k, double err_threshold)
 	{
 		var candidate_items = Track2Items.Read(data_dir + "/mml-track2/validationCandidatesIdx2.txt");
 		var item_hits       = Track2Items.Read(data_dir + "/mml-track2/validationHitsIdx2.txt");
@@ -109,10 +111,18 @@ class MergeTrack2
 		foreach (string file in candidate_files)
 		{
 			prediction_cache[file] = ReadFile(ValidationFilename(file));
-			error[file] = Eval(prediction_cache[file], candidate_items, item_hits);
+			double err = Eval(prediction_cache[file], candidate_items, item_hits);
+
+			// only keep if error is below threshold
+			if (err < err_threshold)
+			    error[file] = err;
+			else
+				prediction_cache.Remove(file);
+
+			// display progress
 			Console.Error.Write(".");
 		}
-		Console.WriteLine("done. (memory {0})", Memory.Usage);
+		Console.WriteLine("done: candidates {0} memory {1}", error.Count, Memory.Usage);
 
 		// the ensemble
 		var ensemble = new List<string>();
@@ -198,7 +208,7 @@ class MergeTrack2
 			Console.WriteLine("{0} files", ensemble.Count);
 			foreach (var file in ensemble)
 				Console.WriteLine("{0} ({1}", file, error[file]);
-			
+
 		}
 
 		Console.WriteLine("files {0} of {1} ERR {2:F7} memory {3}", ensemble.Count, error.Count, best_result, Memory.Usage);
