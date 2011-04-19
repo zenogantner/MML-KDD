@@ -59,7 +59,6 @@
     <Compile Include="AttrToFactor\MF_Mapping.cs" />
     <Compile Include="AttrToFactor\MF_ItemMapping.cs" />
     <Compile Include="AttrToFactor\MF_Item_Mapping_Optimal.cs" />
-    <Compile Include="ItemRecommender\ItemAttributeSVM.cs" />
     <Compile Include="Diversification\SequentialDiversification.cs" />
     <Compile Include="AttrToFactor\BPRMF_ItemMappingKNN.cs" />
     <Compile Include="AttrToFactor\BPRMF_ItemMappingSVR.cs" />
@@ -73,26 +72,27 @@
     <Compile Include="IKDDCupRecommender.cs" />
     <Compile Include="RatingPrediction\SharedFactorsMatrixFactorization.cs" />
     <Compile Include="IO\KDDCup2011\Track2Items.cs" />
-    <Compile Include="ItemRecommender\BPRMF_KDD.cs" />
-    <Compile Include="ItemRecommender\AttributeCounter.cs" />
-    <Compile Include="ItemRecommender\GenreCounter.cs" />
-    <Compile Include="ItemRecommender\AlbumCounter.cs" />
-    <Compile Include="ItemRecommender\ArtistCounter.cs" />
-    <Compile Include="ItemRecommender\BPR_SMF_KDD.cs" />
     <Compile Include="Classification\LogisticRegression.cs" />
-    <Compile Include="ItemRecommender\WRMF_KDD.cs" />
-    <Compile Include="ItemRecommender\Track2CompositeRecommender.cs" />
-    <Compile Include="ItemRecommender\Track2CompositeRatingRecommender.cs" />
-    <Compile Include="ItemRecommender\ITrack2CompositeRecommender.cs" />
-    <Compile Include="ItemRecommender\BaselineCompositeRatingRecommender.cs" />
-    <Compile Include="ItemRecommender\BaselineCompositeRatingBPR.cs" />
-    <Compile Include="ItemRecommender\Track2CompositeMatrixFactorization.cs" />
-    <Compile Include="ItemRecommender\TypedBPRMF.cs" />
-    <Compile Include="ItemRecommender\SemiSupervisedBPRMF.cs" />
+    <Compile Include="ItemRecommendation\ItemAttributeSVM.cs" />
+    <Compile Include="ItemRecommendation\BPRMF_KDD.cs" />
+    <Compile Include="ItemRecommendation\AttributeCounter.cs" />
+    <Compile Include="ItemRecommendation\GenreCounter.cs" />
+    <Compile Include="ItemRecommendation\AlbumCounter.cs" />
+    <Compile Include="ItemRecommendation\ArtistCounter.cs" />
+    <Compile Include="ItemRecommendation\BPR_SMF_KDD.cs" />
+    <Compile Include="ItemRecommendation\WRMF_KDD.cs" />
+    <Compile Include="ItemRecommendation\Track2CompositeRecommender.cs" />
+    <Compile Include="ItemRecommendation\Track2CompositeRatingRecommender.cs" />
+    <Compile Include="ItemRecommendation\ITrack2CompositeRecommender.cs" />
+    <Compile Include="ItemRecommendation\BaselineCompositeRatingRecommender.cs" />
+    <Compile Include="ItemRecommendation\BaselineCompositeRatingBPR.cs" />
+    <Compile Include="ItemRecommendation\Track2CompositeMatrixFactorization.cs" />
+    <Compile Include="ItemRecommendation\TypedBPRMF.cs" />
+    <Compile Include="ItemRecommendation\SemiSupervisedBPRMF.cs" />
+    <Compile Include="ItemRecommendation\ISemiSupervisedRecommender.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AttrToFactor\" />
-    <Folder Include="ItemRecommender\" />
     <Folder Include="Util\" />
     <Folder Include="Diversification\" />
     <Folder Include="IO\" />
@@ -103,6 +103,7 @@
     <Folder Include="Correlation\" />
     <Folder Include="RatingPrediction\" />
     <Folder Include="Classification\" />
+    <Folder Include="ItemRecommendation\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MyMediaLite\MyMediaLite.csproj">
