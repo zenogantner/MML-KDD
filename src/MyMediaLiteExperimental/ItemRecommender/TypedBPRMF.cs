@@ -96,7 +96,6 @@ namespace MyMediaLite.ItemRecommendation
 			double score = item_bias[item_id] + MatrixUtils.RowScalarProduct(user_factors, user_id, item_factors, item_id);
 			score += MatrixUtils.RowScalarProduct(GetUserTypedFactors(item_id), user_id, item_typed_factors, item_id);
 
-
 			return score;
 		}
 
@@ -112,6 +111,23 @@ namespace MyMediaLite.ItemRecommendation
 					return user_track_factors;
 				case KDDCupItemType.Genre :
 					return user_genre_factors;
+				default :
+					throw new Exception("Unknown type for item " + item_id);
+			}
+		}
+
+		double GetUserTypedFactorsRegularization(int item_id)
+		{
+			switch (ItemInfo.GetType(item_id))
+			{
+				case KDDCupItemType.Artist :
+					return ArtistReg;
+				case KDDCupItemType.Album :
+					return AlbumReg;
+				case KDDCupItemType.Track :
+					return TrackReg;
+				case KDDCupItemType.Genre :
+					return GenreReg;
 				default :
 					throw new Exception("Unknown type for item " + item_id);
 			}
@@ -144,13 +160,14 @@ namespace MyMediaLite.ItemRecommendation
 
 			// adjust typed factors for i
 			Matrix<double> ui_factors = GetUserTypedFactors(i);
+			double user_typed_reg_i = GetUserTypedFactorsRegularization(i);
 			for (int f = 0; f < NumTypedFactors; f++)
 			{
 				double w_uf = ui_factors[u, f];
 				double h_if = item_typed_factors[i, f];
 
 				// update user factors
-				double uf_update = h_if / (1 + Math.Exp(x_uij)) - reg_u * w_uf;
+				double uf_update = h_if / (1 + Math.Exp(x_uij)) - user_typed_reg_i * w_uf;
 				ui_factors[u, f] = w_uf + learn_rate * uf_update;
 
 				// update factors of positive item
@@ -160,13 +177,14 @@ namespace MyMediaLite.ItemRecommendation
 
 			// adjust typed factors for j
 			Matrix<double> uj_factors = GetUserTypedFactors(j);
+			double user_typed_reg_j = GetUserTypedFactorsRegularization(j);
 			for (int f = 0; f < NumTypedFactors; f++)
 			{
 				double w_uf = uj_factors[u, f];
 				double h_jf = item_typed_factors[j, f];
 
 				// update user factors
-				double uf_update = -h_jf / (1 + Math.Exp(x_uij)) - reg_u * w_uf;
+				double uf_update = -h_jf / (1 + Math.Exp(x_uij)) - user_typed_reg_j * w_uf;
 				uj_factors[u, f] = w_uf + learn_rate * uf_update;
 
 				// update factors of negative item
