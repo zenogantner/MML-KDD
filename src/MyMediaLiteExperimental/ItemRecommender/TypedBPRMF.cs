@@ -139,6 +139,22 @@ namespace MyMediaLite.ItemRecommendation
 		{
 			double x_uij = Predict(u, i) - Predict(u, j);
 
+			double one_over_one_plus_ex = 1 / (1 + Math.Exp(x_uij));
+
+			// adjust bias terms
+			if (update_i)
+			{
+				double bias_update = one_over_one_plus_ex - BiasReg * item_bias[i];
+				item_bias[i] += learn_rate * bias_update;
+			}
+
+			if (update_j)
+			{
+				double bias_update = -one_over_one_plus_ex - BiasReg * item_bias[j];
+				item_bias[j] += learn_rate * bias_update;
+			}
+
+			// adjust normal factors
 			for (int f = 0; f < num_factors; f++)
 			{
 				double w_uf = user_factors[u, f];
@@ -146,15 +162,15 @@ namespace MyMediaLite.ItemRecommendation
 				double h_jf = item_factors[j, f];
 
 				// update user factors
-				double uf_update = (h_if - h_jf) / (1 + Math.Exp(x_uij)) - reg_u * w_uf;
+				double uf_update = (h_if - h_jf) * one_over_one_plus_ex - reg_u * w_uf;
 				user_factors[u, f] = w_uf + learn_rate * uf_update;
 
 				// update factors of positive item
-				double if_update = w_uf / (1 + Math.Exp(x_uij)) - reg_i * h_if;
+				double if_update = w_uf * one_over_one_plus_ex - reg_i * h_if;
 				item_factors[i, f] = h_if + learn_rate * if_update;
 
 				// update factors of negative item
-				double jf_update = -w_uf / (1 + Math.Exp(x_uij)) - reg_j * h_jf;
+				double jf_update = -w_uf * one_over_one_plus_ex - reg_j * h_jf;
 				item_factors[j, f] = h_jf + learn_rate * jf_update;
 			}
 
@@ -167,11 +183,11 @@ namespace MyMediaLite.ItemRecommendation
 				double h_if = item_typed_factors[i, f];
 
 				// update user factors
-				double uf_update = h_if / (1 + Math.Exp(x_uij)) - typed_reg_mod_i * reg_u * w_uf;
+				double uf_update = h_if * one_over_one_plus_ex - typed_reg_mod_i * reg_u * w_uf;
 				ui_factors[u, f] = w_uf + learn_rate * uf_update;
 
 				// update factors of positive item
-				double if_update = w_uf / (1 + Math.Exp(x_uij)) - typed_reg_mod_i * reg_i * h_if;
+				double if_update = w_uf * one_over_one_plus_ex - typed_reg_mod_i * reg_i * h_if;
 				item_typed_factors[i, f] = h_if + learn_rate * if_update;
 			}
 
@@ -184,11 +200,11 @@ namespace MyMediaLite.ItemRecommendation
 				double h_jf = item_typed_factors[j, f];
 
 				// update user factors
-				double uf_update = -h_jf / (1 + Math.Exp(x_uij)) - typed_reg_mod_j * reg_u * w_uf;
+				double uf_update = -h_jf * one_over_one_plus_ex - typed_reg_mod_j * reg_u * w_uf;
 				uj_factors[u, f] = w_uf + learn_rate * uf_update;
 
 				// update factors of negative item
-				double jf_update = -w_uf / (1 + Math.Exp(x_uij)) - typed_reg_mod_j * reg_j * h_jf;
+				double jf_update = -w_uf * one_over_one_plus_ex - typed_reg_mod_j * reg_j * h_jf;
 				item_typed_factors[j, f] = h_jf + learn_rate * jf_update;
 			}
 		}

@@ -38,6 +38,8 @@ namespace MyMediaLite.ItemRecommendation
 		{
 			double x_uij = Predict(u, i) - Predict(u, j);
 
+			double one_over_one_plus_ex = 1 / (1 + Math.Exp(x_uij));
+
 			double learn_rate_u = learn_rate;
 			double learn_rate_i = learn_rate;
 			double learn_rate_j = learn_rate;
@@ -54,14 +56,14 @@ namespace MyMediaLite.ItemRecommendation
 			// adjust bias terms
 			if (update_i)
 			{
-				double bias_update = 1.0 / (1 + Math.Exp(x_uij)) - BiasReg * item_bias[i];
+				double bias_update = one_over_one_plus_ex - BiasReg * item_bias[i];
 				item_bias[i] += learn_rate * bias_update;
 			}
 
 			if (update_j)
 			{
-				double bias_update = 1.0 / (1 + Math.Exp(x_uij)) - BiasReg * item_bias[j];
-				item_bias[j] -= learn_rate * bias_update;
+				double bias_update = -one_over_one_plus_ex - BiasReg * item_bias[j];
+				item_bias[j] += learn_rate * bias_update;
 			}
 
 			// adjust factors
@@ -73,24 +75,23 @@ namespace MyMediaLite.ItemRecommendation
 
 				if (update_u)
 				{
-					double uf_update = (h_if - h_jf) / (1 + Math.Exp(x_uij)) - reg_u * w_uf;
+					double uf_update = (h_if - h_jf) * one_over_one_plus_ex - reg_u * w_uf;
 					user_factors[u, f] = w_uf + learn_rate_u * uf_update;
 				}
 
 				if (update_i)
 				{
-					double if_update = w_uf / (1 + Math.Exp(x_uij)) - reg_i * h_if;
+					double if_update = w_uf * one_over_one_plus_ex - reg_i * h_if;
 					item_factors[i, f] = h_if + learn_rate_i * if_update;
 				}
 
 				if (update_j)
 				{
-					double jf_update = -w_uf / (1 + Math.Exp(x_uij)) - reg_j * h_jf;
+					double jf_update = -w_uf * one_over_one_plus_ex - reg_j * h_jf;
 					item_factors[j, f] = h_jf + learn_rate_j * jf_update;
 				}
 			}
 		}
-
 	}
 }
 
