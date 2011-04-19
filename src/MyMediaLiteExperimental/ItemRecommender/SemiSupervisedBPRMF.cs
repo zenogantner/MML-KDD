@@ -20,14 +20,20 @@ using System.Collections.Generic;
 
 namespace MyMediaLite.ItemRecommendation
 {
+	/// <summary>BPR variant that takes into account some test data</summary>
 	public class SemiSupervisedBPRMF : BPRMF
 	{
+		/// <summary>Set containing all test users</summary>
 		public HashSet<int> TestUsers { get; set; }
 
+		/// <summary>Set containing all test items</summary>
 		public HashSet<int> TestItems { get; set; }
 
+		/// <summary>Learn rate modifier for users/items not contained in the test set</summary>
+		/// <remarks>Should be less than 1.</remarks>
 		public double NonTestModifier { get; set; }
 
+		/// <inheritdoc/>
 		protected override void UpdateFactors(int u, int i, int j, bool update_u, bool update_i, bool update_j)
 		{
 			double x_uij = Predict(u, i) - Predict(u, j);
