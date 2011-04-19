@@ -39,17 +39,17 @@ namespace MyMediaLite.ItemRecommendation
 		/// <summary>Number of typed factors</summary>
 		public int NumTypedFactors { get; set; }
 
-		/// <summary>Regularization parameter for artist factors</summary>
-		public double ArtistReg { get; set; }
+		/// <summary>Regularization modifier for artist factors</summary>
+		public double ArtistRegModifier { get; set; }
 
-		/// <summary>Regularization parameter for album factors</summary>
-		public double AlbumReg { get; set; }
+		/// <summary>Regularization modifier for album factors</summary>
+		public double AlbumRegModifier { get; set; }
 
-		/// <summary>Regularization parameter for track factors</summary>
-		public double TrackReg { get; set; }
+		/// <summary>Regularization modifier for track factors</summary>
+		public double TrackRegModifier { get; set; }
 
-		/// <summary>Regularization parameter for genre factors</summary>
-		public double GenreReg { get; set; }
+		/// <summary>Regularization modifier for genre factors</summary>
+		public double GenreRegModifier { get; set; }
 
 		/// <inheritdoc/>
 		public KDDCupItems ItemInfo { get; set; }
@@ -116,7 +116,7 @@ namespace MyMediaLite.ItemRecommendation
 			}
 		}
 
-		double GetUserTypedFactorsRegularization(int item_id)
+		double GetTypedFactorsRegModifier(int item_id)
 		{
 			switch (ItemInfo.GetType(item_id))
 			{
@@ -160,35 +160,35 @@ namespace MyMediaLite.ItemRecommendation
 
 			// adjust typed factors for i
 			Matrix<double> ui_factors = GetUserTypedFactors(i);
-			double user_typed_reg_i = GetUserTypedFactorsRegularization(i);
+			double typed_reg_mod_i = GetTypedFactorsRegModifier(i);
 			for (int f = 0; f < NumTypedFactors; f++)
 			{
 				double w_uf = ui_factors[u, f];
 				double h_if = item_typed_factors[i, f];
 
 				// update user factors
-				double uf_update = h_if / (1 + Math.Exp(x_uij)) - user_typed_reg_i * w_uf;
+				double uf_update = h_if / (1 + Math.Exp(x_uij)) - typed_reg_mod_i * reg_u * w_uf;
 				ui_factors[u, f] = w_uf + learn_rate * uf_update;
 
 				// update factors of positive item
-				double if_update = w_uf / (1 + Math.Exp(x_uij)) - reg_i * h_if;
+				double if_update = w_uf / (1 + Math.Exp(x_uij)) - typed_reg_mod_i * reg_i * h_if;
 				item_typed_factors[i, f] = h_if + learn_rate * if_update;
 			}
 
 			// adjust typed factors for j
 			Matrix<double> uj_factors = GetUserTypedFactors(j);
-			double user_typed_reg_j = GetUserTypedFactorsRegularization(j);
+			double typed_reg_mod_j = GetTypedFactorsRegModifier(j);
 			for (int f = 0; f < NumTypedFactors; f++)
 			{
 				double w_uf = uj_factors[u, f];
 				double h_jf = item_typed_factors[j, f];
 
 				// update user factors
-				double uf_update = -h_jf / (1 + Math.Exp(x_uij)) - user_typed_reg_j * w_uf;
+				double uf_update = -h_jf / (1 + Math.Exp(x_uij)) - typed_reg_mod_j * reg_u * w_uf;
 				uj_factors[u, f] = w_uf + learn_rate * uf_update;
 
 				// update factors of negative item
-				double jf_update = -w_uf / (1 + Math.Exp(x_uij)) - reg_j * h_jf;
+				double jf_update = -w_uf / (1 + Math.Exp(x_uij)) - typed_reg_mod_j * reg_j * h_jf;
 				item_typed_factors[j, f] = h_jf + learn_rate * jf_update;
 			}
 		}
@@ -199,8 +199,8 @@ namespace MyMediaLite.ItemRecommendation
 			var ni = new NumberFormatInfo();
 			ni.NumberDecimalDigits = '.';
 
-			return string.Format(ni, "BPR_SMF_KDD num_factors={0} num_typed_factors={1} bias_reg={2} reg_u={3} reg_i={4} reg_j={5} num_iter={6} learn_rate={7} init_mean={8} init_stdev={9}",
-								 num_factors, NumTypedFactors, BiasReg, reg_u, reg_i, reg_j, NumIter, learn_rate, InitMean, InitStdev);
+			return string.Format(ni, "BPR_SMF_KDD num_factors={0} num_typed_factors={1} bias_reg={2} reg_u={3} reg_i={4} reg_j={5} album_reg_modifier={6} artist_reg_modifier={7} genre_reg_modifier={8} track_reg_modifier={9} num_iter={6} learn_rate={10} init_mean={11} init_stdev={12}",
+								 num_factors, NumTypedFactors, BiasReg, reg_u, reg_i, reg_j, AlbumRegModifier, ArtistRegModifier, GenreRegModifier, TrackRegModifier, NumIter, learn_rate, InitMean, InitStdev);
 		}
 	}
 }
