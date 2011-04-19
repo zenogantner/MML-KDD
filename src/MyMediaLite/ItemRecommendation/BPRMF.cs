@@ -41,7 +41,7 @@ namespace MyMediaLite.ItemRecommendation
 
 		/// <summary>Item bias terms</summary>
 		protected IList<double> item_bias;
-		
+
 		/// <summary>Fast sampling memory limit, in MiB</summary>
 		public int FastSamplingMemoryLimit { get { return fast_sampling_memory_limit; }	set { fast_sampling_memory_limit = value; } }
 		/// <summary>Fast sampling memory limit, in MiB</summary>
@@ -49,7 +49,7 @@ namespace MyMediaLite.ItemRecommendation
 
 		/// <summary>Regularization parameter for the bias term</summary>
 		public double BiasReg { get; set; }
-		
+
 		/// <summary>Learning rate alpha</summary>
 		public double LearnRate { get {	return learn_rate; } set { learn_rate = value; } }
 		/// <summary>Learning rate alpha</summary>
@@ -84,7 +84,7 @@ namespace MyMediaLite.ItemRecommendation
 			base.InitModel();
 
 			item_bias = new double[MaxItemID + 1];
-			
+
 			random = Util.Random.GetInstance(); // TODO move to training
 			CheckSampling();                    // TODO rename
 		}
@@ -212,7 +212,7 @@ namespace MyMediaLite.ItemRecommendation
 				double bias_update = 1.0 / (1 + Math.Exp(x_uij)) - BiasReg * item_bias[j];
 				item_bias[j] -= learn_rate * bias_update;
 			}
-			
+
 			// adjust factors
 			for (int f = 0; f < num_factors; f++)
 			{
@@ -440,7 +440,7 @@ namespace MyMediaLite.ItemRecommendation
 		{
 			return item_bias[item_id] + MatrixUtils.RowScalarProduct(user_factors, user_id, item_factors, item_id);
 		}
-		
+
 		/// <inheritdoc/>
 		public override void LoadModel(string filename)
 		{
