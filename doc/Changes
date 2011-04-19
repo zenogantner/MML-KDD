@@ -10,6 +10,7 @@
             - get rid of unnecessary IterationLength parameter
             - only interate once over relevant data points in online learning
             - explicitly model item bias
+            - significant speed up of learning
           - Random: remove unnecessary methods
           - Zero: new item recommender that always predicts the score 0
           - rename MyMediaLite.ensemble namespace to MyMediaLite.Ensemble
