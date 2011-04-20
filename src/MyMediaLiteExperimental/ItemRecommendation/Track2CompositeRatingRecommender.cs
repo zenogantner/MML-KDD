@@ -21,9 +21,9 @@ using MyMediaLite.RatingPrediction;
 namespace MyMediaLite.ItemRecommendation
 {
 	/// <summary>wrapper class for item recommenders in KDD Cup track 2</summary>
-	public class Track2CompositeRatingRecommender<RatedComponent, RatingComponent> : Track2CompositeRecommender<RatedComponent, RatingComponent>
-		where RatedComponent  : ItemRecommender, new()
-		where RatingComponent : RatingPredictor, new()
+	public class Track2CompositeRatingRecommender<RatedComponentType, RatingComponentType> : Track2CompositeRecommender<RatedComponentType, RatingComponentType>
+		where RatedComponentType  : ItemRecommender, new()
+		where RatingComponentType : RatingPredictor, new()
 	{
 		/// <inheritdoc/>
 		public override double Predict(int user_id, int item_id)

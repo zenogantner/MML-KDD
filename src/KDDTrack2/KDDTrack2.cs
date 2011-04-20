@@ -47,6 +47,9 @@ class KDDTrack2
 	static Dictionary<int, IList<int>> validation_candidates;
 	static Dictionary<int, IList<int>> validation_hits;
 
+	// composite evaluation
+	static Dictionary<int, IList<int>> validation_rated_hits = new Dictionary<int, IList<int>>();
+
 	//  test
 	static Dictionary<int, IList<int>> test_candidates;
 
@@ -176,48 +179,6 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		});
 		Console.WriteLine("loading_time {0:0.##}", loading_time.TotalSeconds.ToString(ni));
 
-		// connect data and recommenders
-		if (recommender_validate is ITrack2CompositeRecommender)
-		{
-			// two-stage recommenders
-			((ITrack2CompositeRecommender) recommender_validate).Ratings = training_ratings;
-			((ITrack2CompositeRecommender) recommender_final).Ratings    = complete_ratings;
-		}
-		else
-		{
-			// normal item recommenders
-			recommender_validate.Feedback = CreateFeedback(training_ratings);
-			recommender_final.Feedback    = CreateFeedback(complete_ratings);
-		}
-		if (recommender_validate is ISemiSupervisedRecommender)
-		{
-			// add additional data to semi-supervised models
-			//   for the validation recommender
-			((ISemiSupervisedRecommender) recommender_validate).TestUsers = new HashSet<int>(validation_candidates.Keys);
-			var validation_items = new HashSet<int>();
-			foreach (var l in validation_candidates.Values)
-				foreach (var i in l)
-					validation_items.Add(i);
-			((ISemiSupervisedRecommender) recommender_validate).TestItems = validation_items;
-						
-			//   for the test/final recommender
-			((ISemiSupervisedRecommender) recommender_final).TestUsers = new HashSet<int>(test_candidates.Keys);
-			var test_items = new HashSet<int>();
-			foreach (var l in test_candidates.Values)
-				foreach (var i in l)
-					test_items.Add(i);
-			((ISemiSupervisedRecommender) recommender_final).TestItems = test_items;
-			
-		}
-
-		Console.Error.WriteLine("memory before deleting ratings: {0}", Memory.Usage);
-		training_ratings = null;
-		validation_ratings = null;
-		complete_ratings = null;
-		Console.Error.WriteLine("memory after deleting ratings:  {0}", Memory.Usage);
-
-		Utils.DisplayDataStats(recommender_final.Feedback, null, recommender_final);
-
 		if (load_model_file != string.Empty)
 		{
 			Recommender.LoadModel(recommender_validate, load_model_file + "-validate");
@@ -283,12 +244,16 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 						// evaluate components, if possible
 						if (recommender_validate is ITrack2CompositeRecommender)
 						{
+							var component_recommender = recommender_validate as ITrack2CompositeRecommender;
+
 							// rated component
-							Console.Write();
+							double rated_error = KDDCup.EvaluateTrack2(component_recommender.RatedComponent, validation_candidates, validation_rated_hits);
+							double rating_error = (RatingEval.Evaluate(component_recommender.RatingComponent, validation_ratings))["RMSE"];
+							Console.Write(string.Format(ni, "rated_error {0:F6} rating_error {1:F6} ", rated_error, rating_error));
 							// rating component
 						}
-						
-						
+
+
 						// evaluate
 						error = KDDCup.EvaluateTrack2(recommender_validate, validation_candidates, validation_hits);
 						err_eval_stats.Add(error);
@@ -401,6 +366,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		int num_validation_users = validation_hits.Count;
 		int num_validation_ratings = 3 * num_validation_users;
 		validation_ratings = MyMediaLite.IO.KDDCup2011.Ratings.Read(validation_ratings_file, num_validation_ratings);
+
 		complete_ratings = new CombinedRatings(training_ratings, validation_ratings);
 
 		// read test data
@@ -412,6 +378,56 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 			var kddcup_recommender = recommender_validate as IKDDCupRecommender;
 			kddcup_recommender.ItemInfo = Items.Read(track_file, album_file, artist_file, genre_file, 2);
 		}
+
+
+		// connect data and recommenders
+		if (recommender_validate is ITrack2CompositeRecommender)
+		{
+			// two-stage recommenders
+			((ITrack2CompositeRecommender) recommender_validate).Ratings = training_ratings;
+			((ITrack2CompositeRecommender) recommender_final).Ratings    = complete_ratings;
+
+			// create rated_hits
+			foreach (int u in validation_candidates.Keys)
+				validation_rated_hits[u] = new List<int>();
+			for (int index = 0; index < validation_ratings.Count; index++)
+				validation_rated_hits[validation_ratings.Users[index]].Add(validation_ratings.Items[index]);
+		}
+		else
+		{
+			// normal item recommenders
+			recommender_validate.Feedback = CreateFeedback(training_ratings);
+			recommender_final.Feedback    = CreateFeedback(complete_ratings);
+		}
+		if (recommender_validate is ISemiSupervisedRecommender)
+		{
+			// add additional data to semi-supervised models
+			//   for the validation recommender
+			((ISemiSupervisedRecommender) recommender_validate).TestUsers = new HashSet<int>(validation_candidates.Keys);
+			var validation_items = new HashSet<int>();
+			foreach (var l in validation_candidates.Values)
+				foreach (var i in l)
+					validation_items.Add(i);
+			((ISemiSupervisedRecommender) recommender_validate).TestItems = validation_items;
+
+			//   for the test/final recommender
+			((ISemiSupervisedRecommender) recommender_final).TestUsers = new HashSet<int>(test_candidates.Keys);
+			var test_items = new HashSet<int>();
+			foreach (var l in test_candidates.Values)
+				foreach (var i in l)
+					test_items.Add(i);
+			((ISemiSupervisedRecommender) recommender_final).TestItems = test_items;
+
+		}
+
+		Console.Error.WriteLine("memory before deleting ratings: {0}", Memory.Usage);
+		training_ratings = null;
+		complete_ratings = null;
+		if (! (recommender_validate is ITrack2CompositeRecommender)) // we need this for the composite recommenders
+			validation_ratings = null;
+		Console.Error.WriteLine("memory after deleting ratings:  {0}", Memory.Usage);
+
+		Utils.DisplayDataStats(recommender_final.Feedback, null, recommender_final);
 	}
 
 	static void AbortHandler(object sender, ConsoleCancelEventArgs args)

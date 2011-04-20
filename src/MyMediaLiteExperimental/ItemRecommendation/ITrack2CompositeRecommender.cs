@@ -21,18 +21,16 @@ using MyMediaLite.RatingPrediction;
 namespace MyMediaLite.ItemRecommendation
 {
 	/// <summary>Composite recommender interface</summary>
-	public interface ITrack2CompositeRecommender<RatedComponentType, RatingComponentType>
-		where RatedComponentType  : ItemRecommender, new()
-		where RatingComponentType : RatingPredictor, new()
+	public interface ITrack2CompositeRecommender
 	{
 		/// <summary>The ratings dataset</summary>
 		IRatings Ratings { get; set; }
 
 		/// <summary>predicts whether an item was rated</summary>
-		RatedComponentType RatedComponent { get; set; }
+		ItemRecommender RatedComponent { get; set; }
 
 		/// <summary>predicts how an item was rated</summary>
-		RatingComponentType RatingComponent { get; set; }
+		RatingPredictor RatingComponent { get; set; }
 
 	}
 }

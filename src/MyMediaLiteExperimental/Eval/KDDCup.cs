@@ -20,6 +20,7 @@ using System.Collections.Generic;
 using System.Globalization;
 using System.IO;
 //using System.IO.Compression;
+using System.Linq;
 using MyMediaLite.Data;
 
 namespace MyMediaLite.Eval
@@ -113,12 +114,12 @@ namespace MyMediaLite.Eval
 
 				var user_true_items = new HashSet<int>(hits[user_id]);
 
-				for (int i = 0; i < 3; i++)
+				for (int i = 0; i < user_true_items.Count; i++)
 					if (user_true_items.Contains(user_candidates[positions[i]]))
 						hit_count++;
 			}
 
-			int num_pos = candidates.Count * 3;
+			int num_pos = hits.Keys.Sum(u => hits[u].Count);
 			return 1 - (double) hit_count / num_pos;
 		}
 

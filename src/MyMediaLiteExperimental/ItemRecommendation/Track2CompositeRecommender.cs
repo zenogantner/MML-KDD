@@ -22,14 +22,19 @@ using MyMediaLite.RatingPrediction;
 namespace MyMediaLite.ItemRecommendation
 {
 	/// <summary>Two-stage recommender for KDD Cup</summary>
-	public abstract class Track2CompositeRecommender<RatedComponentType, RatingComponentType> : ItemRecommender, ITrack2CompositeRecommender<RatedComponentType, RatingComponentType>
+	public abstract class Track2CompositeRecommender<RatedComponentType, RatingComponentType> : ItemRecommender, ITrack2CompositeRecommender
 		where RatedComponentType  : ItemRecommender, new()
 		where RatingComponentType : RatingPredictor, new()
 	{
 		/// <summary>predicts whether an item was rated</summary>
-		public RatedComponentType RatedComponent { get; set; }
+		public ItemRecommender RatedComponent { get { return rated_component; } set { rated_component = (RatedComponentType) value; } }
+		/// <summary>predicts whether an item was rated</summary>
+		protected RatedComponentType rated_component;
+
 		/// <summary>predicts how an item was rated</summary>
-		public RatingComponentType RatingComponent { get; set; }
+		public RatingPredictor RatingComponent { get { return rating_component; } set { rating_component = (RatingComponentType) value; } }
+		/// <summary>predicts how an item was rated</summary>
+		protected RatingComponentType rating_component;
 
 		/// <inheritdoc/>
 		public IRatings Ratings
@@ -56,7 +61,8 @@ namespace MyMediaLite.ItemRecommendation
 		/// <summary>Default constructor</summary>
 		public Track2CompositeRecommender()
 		{
-			RatedComponent = new RatedComponentType();
+			//Console.Error.WriteLine("create Track2CompositeRecommender() object");
+			RatedComponent  = new RatedComponentType();
 			RatingComponent = new RatingComponentType();
 		}
 

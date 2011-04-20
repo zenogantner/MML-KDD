@@ -133,8 +133,8 @@ namespace MyMediaLite.RatingPrediction
 				double gradient_common = err * sig_dot * (1 - sig_dot) * rating_range_size;
 
 				// adjust biases
-				user_bias[u] += LearnRate * (gradient_common - BiasRegularization * user_bias[u]);
-				item_bias[i] += LearnRate * (gradient_common - BiasRegularization * item_bias[i]);
+				user_bias[u] += LearnRate * (gradient_common - BiasReg * user_bias[u]);
+				item_bias[i] += LearnRate * (gradient_common - BiasReg * item_bias[i]);
 
 				// adjust latent factors
 				AdjustFactors(u, i, NumFactors, user_factors, item_factors, gradient_common, 1);
@@ -156,10 +156,10 @@ namespace MyMediaLite.RatingPrediction
 			 	double u_f = u_factors[u, f];
 				double i_f = i_factors[i, f];
 
-				double delta_u = gradient_common * i_f - RegUser * reg_mod * u_f;
+				double delta_u = gradient_common * i_f - RegU * reg_mod * u_f;
 				MatrixUtils.Inc(u_factors, u, f, LearnRate * delta_u);
 
-				double delta_i = gradient_common * u_f - RegItem * reg_mod * i_f;
+				double delta_i = gradient_common * u_f - RegI * reg_mod * i_f;
 				MatrixUtils.Inc(i_factors, i, f, LearnRate * delta_i);
 			}
 		}
@@ -251,7 +251,7 @@ namespace MyMediaLite.RatingPrediction
 
 			return string.Format(ni,
 								 "SharedFactorsMatrixFactorization num_factors={0} num_shared_artist_factors={1} num_shared_album_factors={2} num_shared_genre_factors={3} bias_regularization={4} reg_user={5} reg_item={6} shared_reg={7} learn_rate={8} num_iter={9} init_mean={10} init_stdev={11}",
-								 NumFactors, NumSharedArtistFactors, NumSharedAlbumFactors, NumSharedGenreFactors, BiasRegularization, RegUser, RegItem, SharedReg, LearnRate, NumIter, InitMean, InitStdev);
+								 NumFactors, NumSharedArtistFactors, NumSharedAlbumFactors, NumSharedGenreFactors, BiasReg, RegU, RegI, SharedReg, LearnRate, NumIter, InitMean, InitStdev);
 		}
 	}
 }

@@ -25,32 +25,50 @@ namespace MyMediaLite.ItemRecommendation
 	public class Track2CompositeMatrixFactorization : Track2CompositeRatingRecommender<BPRMF_KDD, BiasedMatrixFactorization>, IIterativeModel
 	{
 		/// <summary>Number of iterations</summary>
-		public int NumIter    { get { return RatedComponent.NumIter;    } set { RatedComponent.NumIter    = value; } }
+		public int NumIter    { get { return rated_component.NumIter;    } set { rated_component.NumIter    = value; } }
+
 		/// <summary>Number of factors of the BPR component</summary>
-		public int BPR_NumFactors { get { return RatedComponent.NumFactors; } set { RatedComponent.NumFactors = value; } }
+		public int BPR_NumFactors { get { return rated_component.NumFactors; } set { rated_component.NumFactors = value; } }
 
 		/// <summary>Bias regularization parameter for the BPR component</summary>
-		public double BPR_BiasReg { get { return RatedComponent.BiasReg; } set {RatedComponent.BiasReg = value; } }
+		public double BPR_BiasReg { get { return rated_component.BiasReg; } set {rated_component.BiasReg = value; } }
 
 		/// <summary>Learning rate alpha for the BPR component</summary>
-		public double BPR_LearnRate { get {	return RatedComponent.LearnRate; } set { RatedComponent.LearnRate = value; } }
+		public double BPR_LearnRate { get {	return rated_component.LearnRate; } set { rated_component.LearnRate = value; } }
 
 		/// <summary>Regularization parameter for positive item factors (BPR component)</summary>
-		public double BPR_RegI { get { return RatedComponent.RegI; } set { RatedComponent.RegI = value;	} }
+		public double BPR_RegI { get { return rated_component.RegI; } set { rated_component.RegI = value;	} }
 
 		/// <summary>Regularization parameter for negative item factors (BPR component)</summary>
-		public double BPR_RegJ { get { return RatedComponent.RegJ; } set { RatedComponent.RegJ = value; } }
+		public double BPR_RegJ { get { return rated_component.RegJ; } set { rated_component.RegJ = value; } }
 
 		/// <summary>Regularization parameter for user factors (BPR component)</summary>
-		public double BPR_RegU { get { return RatedComponent.RegU; } set { RatedComponent.RegU = value; } }
+		public double BPR_RegU { get { return rated_component.RegU; } set { rated_component.RegU = value; } }
+
+		/// <summary>Number of factors of the BMF component</summary>
+		public int BMF_NumFactors { get { return rating_component.NumFactors; } set { rating_component.NumFactors = value; } }
+
+		/// <summary>Learning rate alpha for the BMF component</summary>
+		public double BMF_LearnRate { get { return rating_component.LearnRate; } set { rating_component.LearnRate = value; } }
+
+		/// <summary>Bias regularization parameter for the BMF component</summary>
+		public double BMF_BiasReg { get { return rating_component.BiasReg; } set {rating_component.BiasReg = value; } }
+
+		/// <summary>Regularization parameter for item factors (BMF component)</summary>
+		public double BMF_RegI { get { return rating_component.RegI; } set { rating_component.RegI = value;	} }
+
+		/// <summary>Regularization parameter for user factors (BMF component)</summary>
+		public double BMF_RegU { get { return rating_component.RegU; } set { rating_component.RegU = value; } }
 
 		/// <inheritdoc/>
-		public double ComputeFit() { return RatedComponent.ComputeFit(); }
+		public double ComputeFit() { return rated_component.ComputeFit(); }
 
 		/// <inheritdoc/>
 		public void Iterate()
 		{
-			RatedComponent.Iterate();
+			rated_component.Iterate();
+
+			rating_component.Iterate();
 		}
 
 		/// <inheritdoc/>
@@ -59,8 +77,8 @@ namespace MyMediaLite.ItemRecommendation
 			var ni = new NumberFormatInfo();
 			ni.NumberDecimalDigits = '.';
 
-			return string.Format(ni, "Track2CompositeMatrixFactorization bpr_num_factors={0} bpr_bias_reg={1} bpr_reg_u={2} bpr_reg_i={3} bpr_reg_j={4} num_iter={5} bpr_learn_rate={6}",
-								 BPR_NumFactors, BPR_BiasReg, BPR_RegU, BPR_RegI, BPR_RegJ, NumIter, BPR_LearnRate);
+			return string.Format(ni, "Track2CompositeMatrixFactorization  num_iter={0} bpr_num_factors={1} bpr_bias_reg={2} bpr_reg_u={3} bpr_reg_i={4} bpr_reg_j={5} bpr_learn_rate={6} bmf_num_factors={7} bmf_bias_reg={8} bmf_reg_u={9} bmf_reg_i={10} bmf_learn_rate={11}",
+								 NumIter, BPR_NumFactors, BPR_BiasReg, BPR_RegU, BPR_RegI, BPR_RegJ, BPR_LearnRate, BMF_NumFactors, BMF_BiasReg, BMF_RegU, BMF_RegI, BMF_LearnRate);
 
 		}
 	}
