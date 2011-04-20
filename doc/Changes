@@ -24,6 +24,7 @@
           - improved usage information
         - evaluation
           - add relevant_users feature for item prediction
+          - rating evaluation: check arguments for null
         - data types
           - fix incorrect error message in Matrix class (reported by
             Chris Newell)
