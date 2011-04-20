@@ -156,6 +156,8 @@ namespace MyMediaLite.ItemRecommendation
 
 			// TODO update factors
 			
+			// TODO faster updates
+			
 			for (int f = 0; f < num_factors; f++)
 			{
 				double w_uf = user_factors[u, f];

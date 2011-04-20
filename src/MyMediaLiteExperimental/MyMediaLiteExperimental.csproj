@@ -90,6 +90,7 @@
     <Compile Include="ItemRecommendation\TypedBPRMF.cs" />
     <Compile Include="ItemRecommendation\SemiSupervisedBPRMF.cs" />
     <Compile Include="ItemRecommendation\ISemiSupervisedRecommender.cs" />
+    <Compile Include="ItemRecommendation\SemiSupervisedBPRMF_KDD.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AttrToFactor\" />
