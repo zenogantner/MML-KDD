@@ -98,7 +98,7 @@ namespace MyMediaLite.ItemRecommendation
 			ni.NumberDecimalDigits = '.';
 
 			return string.Format(ni, "SemiSupervisedBPRMF_KDD num_factors={0} bias_reg={1} reg_u={2} reg_i={3} reg_j={4} non_test_modifier={5} num_iter={6} learn_rate={7} init_mean={8} init_stdev={9}",
-								 num_factors, BiasReg, reg_u, reg_i, reg_j, NumIter, NonTestModifier, learn_rate, InitMean, InitStdev);
+								 num_factors, BiasReg, reg_u, reg_i, reg_j, NonTestModifier, NumIter, learn_rate, InitMean, InitStdev);
 		}
 	}
 }
