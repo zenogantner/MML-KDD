@@ -36,7 +36,7 @@ namespace MyMediaLite.ItemRecommendation
 		public double UserLearnRateModifier { get; set; }
 
 		/// <summary>If true, sample users uniformly</summary>
-		public bool UniformUserSampling { get; set; }
+		//public bool UniformUserSampling { get; set; }
 
 		/// <summary>Weight for test users</summary>
 		public double TestUserWeight { get; set; }
@@ -45,7 +45,7 @@ namespace MyMediaLite.ItemRecommendation
 		public BPRMF_KDD()
 		{
 			UserLearnRateModifier = 1;
-			UniformUserSampling = false;
+			//UniformUserSampling = false;
 		}
 
 		/// <inheritdoc/>
@@ -84,6 +84,7 @@ namespace MyMediaLite.ItemRecommendation
 		/// <inheritdoc/>
 		protected override void SampleTriple(out int u, out int i, out int j)
 		{
+			/*
 			if (UniformUserSampling)
 			{
 				// sample user uniformly
@@ -95,6 +96,7 @@ namespace MyMediaLite.ItemRecommendation
 				i = user_pos_items[u][random.Next(0, user_pos_items[u].Count - 1)];
 			}
 			else
+			*/			
 			{
 				// sample user from positive user-item pairs
 				int index = random.Next(0, items.Length - 1);
