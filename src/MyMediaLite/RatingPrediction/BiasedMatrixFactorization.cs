@@ -31,7 +31,7 @@ namespace MyMediaLite.RatingPrediction
 	public class BiasedMatrixFactorization : MatrixFactorization
 	{
 		/// <summary>regularization constant for the bias terms</summary>
-		public double BiasRegularization { get; set; }
+		public double BiasReg { get; set; }
 
 		/// <summary>regularization constant for the user factors</summary>
 		public double RegUser { get; set; }
@@ -57,7 +57,7 @@ namespace MyMediaLite.RatingPrediction
 		/// <inheritdoc/>
 		public BiasedMatrixFactorization()
 		{
-			BiasRegularization = 0.0001;
+			BiasReg = 0.0001;
 		}
 
 		/// <inheritdoc/>
@@ -107,9 +107,9 @@ namespace MyMediaLite.RatingPrediction
 
 				// adjust biases
 				if (update_user)
-					user_bias[u] += LearnRate * (gradient_common - BiasRegularization * user_bias[u]);
+					user_bias[u] += LearnRate * (gradient_common - BiasReg * user_bias[u]);
 				if (update_item)
-					item_bias[i] += LearnRate * (gradient_common - BiasRegularization * item_bias[i]);
+					item_bias[i] += LearnRate * (gradient_common - BiasReg * item_bias[i]);
 
 				// adjust latent factors
 				for (int f = 0; f < NumFactors; f++)
@@ -277,8 +277,8 @@ namespace MyMediaLite.RatingPrediction
 			ni.NumberDecimalDigits = '.';
 
 			return string.Format(ni,
-								 "BiasedMatrixFactorization num_factors={0} bias_regularization={1} reg_user={2} reg_item={3} learn_rate={4} num_iter={5} init_mean={6} init_stdev={7}",
-								 NumFactors, BiasRegularization, RegUser, RegItem, LearnRate, NumIter, InitMean, InitStdev);
+								 "BiasedMatrixFactorization num_factors={0} bias_reg={1} reg_user={2} reg_item={3} learn_rate={4} num_iter={5} init_mean={6} init_stdev={7}",
+								 NumFactors, BiasReg, RegUser, RegItem, LearnRate, NumIter, InitMean, InitStdev);
 		}
 	}
 }
