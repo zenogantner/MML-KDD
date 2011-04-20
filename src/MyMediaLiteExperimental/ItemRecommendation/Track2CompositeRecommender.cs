@@ -22,14 +22,14 @@ using MyMediaLite.RatingPrediction;
 namespace MyMediaLite.ItemRecommendation
 {
 	/// <summary>Two-stage recommender for KDD Cup</summary>
-	public abstract class Track2CompositeRecommender<RatedComponent, RatingComponent> : ItemRecommender, ITrack2CompositeRecommender
-		where RatedComponent  : ItemRecommender, new()
-		where RatingComponent : RatingPredictor, new()
+	public abstract class Track2CompositeRecommender<RatedComponentType, RatingComponentType> : ItemRecommender, ITrack2CompositeRecommender<RatedComponentType, RatingComponentType>
+		where RatedComponentType  : ItemRecommender, new()
+		where RatingComponentType : RatingPredictor, new()
 	{
 		/// <summary>predicts whether an item was rated</summary>
-		protected RatedComponent   rated_component;
+		public RatedComponentType RatedComponent { get; set; }
 		/// <summary>predicts how an item was rated</summary>
-		protected RatingComponent rating_component;
+		public RatingComponentType RatingComponent { get; set; }
 
 		/// <inheritdoc/>
 		public IRatings Ratings
@@ -37,7 +37,7 @@ namespace MyMediaLite.ItemRecommendation
 			get { return ratings; }
 			set {
 				ratings = value;
-				rated_component.Feedback = CreateFeedback(ratings);
+				RatedComponent.Feedback = CreateFeedback(ratings);
 			}
 		}
 		private IRatings ratings;
@@ -46,7 +46,7 @@ namespace MyMediaLite.ItemRecommendation
 		public override PosOnlyFeedback Feedback
 		{
 			get {
-				return rated_component.Feedback;
+				return RatedComponent.Feedback;
 			}
 			set {
 				throw new NotSupportedException();
@@ -56,14 +56,14 @@ namespace MyMediaLite.ItemRecommendation
 		/// <summary>Default constructor</summary>
 		public Track2CompositeRecommender()
 		{
-			rated_component = new RatedComponent();
-			rating_component = new RatingComponent();
+			RatedComponent = new RatedComponentType();
+			RatingComponent = new RatingComponentType();
 		}
 
 		/// <inheritdoc/>
 		public override double Predict(int user_id, int item_id)
 		{
-			return rated_component.Predict(user_id, item_id) * rating_component.Predict(user_id, item_id);
+			return RatedComponent.Predict(user_id, item_id) * RatingComponent.Predict(user_id, item_id);
 		}
 
 		/// <inheritdoc/>

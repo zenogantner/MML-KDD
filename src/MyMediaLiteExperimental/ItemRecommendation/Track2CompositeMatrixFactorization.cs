@@ -25,32 +25,32 @@ namespace MyMediaLite.ItemRecommendation
 	public class Track2CompositeMatrixFactorization : Track2CompositeRatingRecommender<BPRMF_KDD, BiasedMatrixFactorization>, IIterativeModel
 	{
 		/// <summary>Number of iterations</summary>
-		public int NumIter    { get { return rated_component.NumIter;    } set { rated_component.NumIter    = value; } }
+		public int NumIter    { get { return RatedComponent.NumIter;    } set { RatedComponent.NumIter    = value; } }
 		/// <summary>Number of factors of the BPR component</summary>
-		public int BPR_NumFactors { get { return rated_component.NumFactors; } set { rated_component.NumFactors = value; } }
+		public int BPR_NumFactors { get { return RatedComponent.NumFactors; } set { RatedComponent.NumFactors = value; } }
 
 		/// <summary>Bias regularization parameter for the BPR component</summary>
-		public double BPR_BiasReg { get { return rated_component.BiasReg; } set {rated_component.BiasReg = value; } }
-		
+		public double BPR_BiasReg { get { return RatedComponent.BiasReg; } set {RatedComponent.BiasReg = value; } }
+
 		/// <summary>Learning rate alpha for the BPR component</summary>
-		public double BPR_LearnRate { get {	return rated_component.LearnRate; } set { rated_component.LearnRate = value; } }
+		public double BPR_LearnRate { get {	return RatedComponent.LearnRate; } set { RatedComponent.LearnRate = value; } }
 
 		/// <summary>Regularization parameter for positive item factors (BPR component)</summary>
-		public double BPR_RegI { get { return rated_component.RegI; } set { rated_component.RegI = value;	} }
+		public double BPR_RegI { get { return RatedComponent.RegI; } set { RatedComponent.RegI = value;	} }
 
 		/// <summary>Regularization parameter for negative item factors (BPR component)</summary>
-		public double BPR_RegJ { get { return rated_component.RegJ; } set { rated_component.RegJ = value; } }
+		public double BPR_RegJ { get { return RatedComponent.RegJ; } set { RatedComponent.RegJ = value; } }
 
 		/// <summary>Regularization parameter for user factors (BPR component)</summary>
-		public double BPR_RegU { get { return rated_component.RegU; } set { rated_component.RegU = value; } }
+		public double BPR_RegU { get { return RatedComponent.RegU; } set { RatedComponent.RegU = value; } }
 
 		/// <inheritdoc/>
-		public double ComputeFit() { return rated_component.ComputeFit(); }
+		public double ComputeFit() { return RatedComponent.ComputeFit(); }
 
 		/// <inheritdoc/>
 		public void Iterate()
 		{
-			rated_component.Iterate();
+			RatedComponent.Iterate();
 		}
 
 		/// <inheritdoc/>

@@ -280,6 +280,15 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 				if (i % find_iter == 0)
 				{
 					time = Utils.MeasureTime(delegate() { // TODO parallelize
+						// evaluate components, if possible
+						if (recommender_validate is ITrack2CompositeRecommender)
+						{
+							// rated component
+							Console.Write();
+							// rating component
+						}
+						
+						
 						// evaluate
 						error = KDDCup.EvaluateTrack2(recommender_validate, validation_candidates, validation_hits);
 						err_eval_stats.Add(error);

@@ -25,31 +25,31 @@ namespace MyMediaLite.ItemRecommendation
 	public class BaselineCompositeRatingBPR : Track2CompositeRatingRecommender<BPRMF_KDD, ItemAverage>, IIterativeModel
 	{
 		/// <summary>Number of iterations for training the BPR component</summary>
-		public int NumIter    { get { return rated_component.NumIter;    } set { rated_component.NumIter    = value; } }
+		public int NumIter    { get { return RatedComponent.NumIter;    } set { RatedComponent.NumIter    = value; } }
 		/// <summary>Number of factors of the BPR component</summary>
-		public int NumFactors { get { return rated_component.NumFactors; } set { rated_component.NumFactors = value; } }
+		public int NumFactors { get { return RatedComponent.NumFactors; } set { RatedComponent.NumFactors = value; } }
 
 		// TODO bias reg
 		
 		/// <summary>Learning rate alpha</summary>
-		public double LearnRate { get {	return rated_component.LearnRate; } set { rated_component.LearnRate = value; } }
+		public double LearnRate { get {	return RatedComponent.LearnRate; } set { RatedComponent.LearnRate = value; } }
 
 		/// <summary>Regularization parameter for positive item factors</summary>
-		public double RegI { get { return rated_component.RegI; } set { rated_component.RegI = value;	} }
+		public double RegI { get { return RatedComponent.RegI; } set { RatedComponent.RegI = value;	} }
 
 		/// <summary>Regularization parameter for negative item factors</summary>
-		public double RegJ { get { return rated_component.RegJ; } set { rated_component.RegJ = value; } }
+		public double RegJ { get { return RatedComponent.RegJ; } set { RatedComponent.RegJ = value; } }
 
 		/// <summary>Regularization parameter for user factors</summary>
-		public double RegU { get { return rated_component.RegU; } set { rated_component.RegU = value; } }
+		public double RegU { get { return RatedComponent.RegU; } set { RatedComponent.RegU = value; } }
 
 		/// <inheritdoc/>
-		public double ComputeFit() { return rated_component.ComputeFit(); }
+		public double ComputeFit() { return RatedComponent.ComputeFit(); }
 
 		/// <inheritdoc/>
 		public void Iterate()
 		{
-			rated_component.Iterate();
+			RatedComponent.Iterate();
 		}
 
 		/// <inheritdoc/>
