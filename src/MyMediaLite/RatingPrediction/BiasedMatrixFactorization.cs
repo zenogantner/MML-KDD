@@ -34,18 +34,18 @@ namespace MyMediaLite.RatingPrediction
 		public double BiasReg { get; set; }
 
 		/// <summary>regularization constant for the user factors</summary>
-		public double RegUser { get; set; }
+		public double RegU { get; set; }
 
 		/// <summary>regularization constant for the user factors</summary>
-		public double RegItem { get; set; }
+		public double RegI { get; set; }
 
 		/// <inheritdoc/>
 		public override double Regularization
 		{
 			set {
 				base.Regularization = value;
-				RegUser = value;
-				RegItem = value;
+				RegU = value;
+				RegI = value;
 			}
 		}
 
@@ -119,14 +119,14 @@ namespace MyMediaLite.RatingPrediction
 
 					if (update_user)
 					{
-						double delta_u = gradient_common * i_f - RegUser * u_f;
+						double delta_u = gradient_common * i_f - RegU * u_f;
 						MatrixUtils.Inc(user_factors, u, f, LearnRate * delta_u);
 						// this is faster (190 vs. 260 seconds per iteration on Netflix w/ k=30) than
 						//    user_factors[u, f] += learn_rate * delta_u;
 					}
 					if (update_item)
 					{
-						double delta_i = gradient_common * u_f - RegItem * i_f;
+						double delta_i = gradient_common * u_f - RegI * i_f;
 						MatrixUtils.Inc(item_factors, i, f, LearnRate * delta_i);
 						// item_factors[i, f] += learn_rate * delta_i;
 					}
@@ -277,8 +277,8 @@ namespace MyMediaLite.RatingPrediction
 			ni.NumberDecimalDigits = '.';
 
 			return string.Format(ni,
-								 "BiasedMatrixFactorization num_factors={0} bias_reg={1} reg_user={2} reg_item={3} learn_rate={4} num_iter={5} init_mean={6} init_stdev={7}",
-								 NumFactors, BiasReg, RegUser, RegItem, LearnRate, NumIter, InitMean, InitStdev);
+								 "BiasedMatrixFactorization num_factors={0} bias_reg={1} reg_u={2} reg_i={3} learn_rate={4} num_iter={5} init_mean={6} init_stdev={7}",
+								 NumFactors, BiasReg, RegU, RegI, LearnRate, NumIter, InitMean, InitStdev);
 		}
 	}
 }
