@@ -110,8 +110,17 @@ namespace MyMediaLite.Util
 		/// <summary>Delegate definition necessary to define ConfigureEngine</summary>
 		public delegate void takes_string(string s);
 
-		// TODO Configure from string
-
+		/// <summary>Configure a recommender engine</summary>
+		/// <param name="engine">the recommender engine to configure</param>
+		/// <param name="parameters">a string containing the parameters as key-value pairs</param>
+		/// <param name="report_error">void function that takes a string for error reporting</param>
+		/// <returns>the configured recommender engine</returns>
+		public static T Configure<T>(T engine, string parameters, takes_string report_error)
+		{
+			var parameters_dictionary = new CommandLineParameters(parameters);
+			return Configure(engine, parameters_dictionary, report_error);
+		}
+		
 		/// <summary>Configure a recommender engine</summary>
 		/// <param name="engine">the recommender engine to configure</param>
 		/// <param name="parameters">a dictionary containing the parameters as key-value pairs</param>
