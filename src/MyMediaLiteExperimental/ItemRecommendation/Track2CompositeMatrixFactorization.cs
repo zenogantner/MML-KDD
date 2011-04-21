@@ -25,7 +25,7 @@ namespace MyMediaLite.ItemRecommendation
 	public class Track2CompositeMatrixFactorization : Track2CompositeRatingRecommender<BPRMF_KDD, BiasedMatrixFactorization>, IIterativeModel
 	{
 		/// <summary>Number of iterations</summary>
-		public int NumIter    { get { return rated_component.NumIter;    } set { rated_component.NumIter    = value; } }
+		public int NumIter { get { return rated_component.NumIter; } set { rated_component.NumIter = value; rating_component.NumIter = value; } }
 
 		/// <summary>Number of factors of the BPR component</summary>
 		public int BPR_NumFactors { get { return rated_component.NumFactors; } set { rated_component.NumFactors = value; } }
