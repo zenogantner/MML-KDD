@@ -354,29 +354,23 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 		string album_file      = Path.Combine(data_dir, "albumData1.txt");
 		string artist_file     = Path.Combine(data_dir, "artistData1.txt");
 		string genre_file      = Path.Combine(data_dir, "genreData1.txt");
-		int num_ratings            = 262810175;
-		int num_validation_ratings = 4003960;
-		int num_test_ratings       = 6005940;
 
 		if (sample_data)
 		{
-			num_ratings            = 11696; // these are not true values, just upper bounds
-			num_validation_ratings = 220;   // these are not true values, just upper bounds
-			num_test_ratings       = 308;
 			training_file   = Path.Combine(data_dir, "trainIdx1.firstLines.txt");
 			test_file       = Path.Combine(data_dir, "testIdx1.firstLines.txt");
 			validation_file = Path.Combine(data_dir, "validationIdx1.firstLines.txt");
 		}
 
 		// read training data
-		training_ratings = MyMediaLite.IO.KDDCup2011.Ratings.Read(training_file, num_ratings);
+		training_ratings = MyMediaLite.IO.KDDCup2011.Ratings.Read(training_file);
 
 		// read validation data (track 1)
-		validation_ratings = MyMediaLite.IO.KDDCup2011.Ratings.Read(validation_file, num_validation_ratings);
+		validation_ratings = MyMediaLite.IO.KDDCup2011.Ratings.Read(validation_file);
 		complete_ratings = new CombinedRatings(training_ratings, validation_ratings);
 
 		// read test data
-		track1_test_data = MyMediaLite.IO.KDDCup2011.Ratings.ReadTest(test_file, num_test_ratings);
+		track1_test_data = MyMediaLite.IO.KDDCup2011.Ratings.ReadTest(test_file);
 
 		// read item data
 		if (recommender is IKDDCupRecommender)

@@ -342,11 +342,9 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		string album_file                 = Path.Combine(data_dir, "albumData2.txt");
 		string artist_file                = Path.Combine(data_dir, "artistData2.txt");
 		string genre_file                 = Path.Combine(data_dir, "genreData2.txt");
-		int num_ratings                   = 61943733;
 
 		if (sample_data)
 		{
-			num_ratings                = 8824; // these are not true values, just upper bounds
 			training_file              = Path.Combine(data_dir, "trainIdx2.firstLines.txt");
 			test_file                  = Path.Combine(data_dir, "testIdx2.firstLines.txt");
 			validation_candidates_file = Path.Combine(data_dir, "validationCandidatesIdx2.firstLines.txt");
@@ -355,7 +353,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		}
 
 		// read training data
-		training_ratings = MyMediaLite.IO.KDDCup2011.Ratings.Read(training_file, num_ratings);
+		training_ratings = MyMediaLite.IO.KDDCup2011.Ratings.Read(training_file);
 
 		// read validation data
 		validation_candidates = Track2Items.Read(validation_candidates_file);
@@ -363,9 +361,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 
 		if (validation_hits.Count != validation_candidates.Count)
 			throw new Exception("inconsistent number of users in hits and candidates");
-		int num_validation_users = validation_hits.Count;
-		int num_validation_ratings = 3 * num_validation_users;
-		validation_ratings = MyMediaLite.IO.KDDCup2011.Ratings.Read(validation_ratings_file, num_validation_ratings);
+		validation_ratings = MyMediaLite.IO.KDDCup2011.Ratings.Read(validation_ratings_file);
 
 		complete_ratings = new CombinedRatings(training_ratings, validation_ratings);
 
