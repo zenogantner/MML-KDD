@@ -146,22 +146,22 @@ namespace MyMediaLite.Eval
 			return 1 - (double) hit_count / num_positive;
 		}
 
-		/// <summary>Predict items for Track 1</summary>
+		/// <summary>Predict ratings for Track 1</summary>
 		/// <param name="recommender">the recommender to use</param>
 		/// <param name="ratings">the ratings to predict</param>
 		/// <param name="filename">the file to write the predictions to</param>
-		public static void PredictTrack1(IRecommender recommender, IRatings ratings, string filename)
+		public static void PredictRatings(IRecommender recommender, IRatings ratings, string filename)
 		{
 			using (var stream = new FileStream(filename, FileMode.Create))
 				using (var writer = new BinaryWriter(stream))
-					PredictTrack1(recommender, ratings, writer);
+					PredictRatings(recommender, ratings, writer);
 		}
 
-		/// <summary>Predict items for Track 1</summary>
+		/// <summary>Predict ratings for Track 1</summary>
 		/// <param name="recommender">the recommender to use</param>
 		/// <param name="ratings">the ratings to predict</param>
 		/// <param name="writer">the writer object to write the predictions to</param>
-		public static void PredictTrack1(IRecommender recommender, IRatings ratings, BinaryWriter writer)
+		public static void PredictRatings(IRecommender recommender, IRatings ratings, BinaryWriter writer)
 		{
 			var ni = new NumberFormatInfo();
 			ni.NumberDecimalDigits = '.';
@@ -172,6 +172,30 @@ namespace MyMediaLite.Eval
 				byte encoded_prediction = (byte) (2.55 * prediction + 0.5);
 				writer.Write(encoded_prediction);
 			}
+		}
+
+		/// <summary>Predict ratings (double precision)</summary>
+		/// <param name="recommender">the recommender to use</param>
+		/// <param name="ratings">the ratings to predict</param>
+		/// <param name="filename">the file to write the predictions to</param>
+		public static void PredictRatingsDouble(IRecommender recommender, IRatings ratings, string filename)
+		{
+			using (var stream = new FileStream(filename, FileMode.Create))
+				using (var writer = new BinaryWriter(stream))
+					PredictRatingsDouble(recommender, ratings, writer);
+		}
+
+		/// <summary>Predict ratings (double precision)</summary>
+		/// <param name="recommender">the recommender to use</param>
+		/// <param name="ratings">the ratings to predict</param>
+		/// <param name="writer">the writer object to write the predictions to</param>
+		public static void PredictRatingsDouble(IRecommender recommender, IRatings ratings, BinaryWriter writer)
+		{
+			var ni = new NumberFormatInfo();
+			ni.NumberDecimalDigits = '.';
+
+			for (int i = 0; i < ratings.Count; i++)
+				writer.Write(recommender.Predict(ratings.Users[i], ratings.Items[i]));
 		}
 	}
 }

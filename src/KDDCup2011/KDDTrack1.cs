@@ -40,7 +40,7 @@ class KDDTrack1
 	static IRatings training_ratings;
 	static IRatings validation_ratings;
 	static IRatings complete_ratings;
-	static IRatings track1_test_data;
+	static IRatings test_data;
 
 	// recommenders
 	static RatingPredictor recommender = null;
@@ -65,6 +65,7 @@ class KDDTrack1
 	static string prediction_file;
 	static bool sample_data;
 	static bool track2;
+	static bool good_rating_prob;
 
 	static void Usage(string message)
 	{
@@ -101,6 +102,7 @@ MyMediaLite KDD Cup 2011 Track 1 tool
                                  (ignores the test data)
    - sample_data=BOOL           assume the sample data set instead of the real one
    - track2=BOOL                perform rating prediction on track 2 data
+   - good_rating_prob=BOOL      try to predict the probability of a good rating (>= 80)
 
   options for finding the right number of iterations (MF methods)
    - find_iter=N                give out statistics every N iterations
@@ -160,6 +162,10 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 		no_eval          = parameters.GetRemoveBool(   "no_eval",          false);
 		prediction_file  = parameters.GetRemoveString( "prediction_file");
 		cross_validation = parameters.GetRemoveInt32(  "cross_validation", 0);
+		good_rating_prob = parameters.GetRemoveBool(   "good_rating_prob", false);
+
+		if (good_rating_prob)
+			max_rating = 1;
 
 		if (random_seed != -1)
 			MyMediaLite.Util.Random.InitInstance(random_seed);
@@ -202,7 +208,7 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 		Console.WriteLine("Validation split:");
 		Utils.DisplayDataStats(training_ratings, validation_ratings, rating_predictor_validate);
 		Console.WriteLine("Test split:");
-		Utils.DisplayDataStats(complete_ratings, track1_test_data, rating_predictor_final);
+		Utils.DisplayDataStats(complete_ratings, test_data, rating_predictor_final);
 
 		if (find_iter != 0)
 		{
@@ -269,10 +275,16 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 						Recommender.SaveModel(rating_predictor_final, save_model_file, i);
 					}
 					if (prediction_file != string.Empty)
-					{					// TODO measure time needed for this
-						KDDCup.PredictTrack1(rating_predictor_validate, validation_ratings, prediction_file + "-validate-it-" + i);
-						KDDCup.PredictTrack1(rating_predictor_final,    track1_test_data, prediction_file + "-it-" + i);
-					}
+						if (track2)
+						{
+							KDDCup.PredictRatingsDouble(rating_predictor_validate, validation_ratings, prediction_file + "-validate-it-" + i);
+							KDDCup.PredictRatingsDouble(rating_predictor_final,    test_data, prediction_file + "-it-" + i);
+						}
+						else
+						{
+							KDDCup.PredictRatings(rating_predictor_validate, validation_ratings, prediction_file + "-validate-it-" + i);
+							KDDCup.PredictRatings(rating_predictor_final,    test_data, prediction_file + "-it-" + i);
+						}
 
 					// check whether we should abort
 					if (epsilon > 0 && results["RMSE"] > rmse_eval_stats.Min() + epsilon)
@@ -341,7 +353,7 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 
 				Console.WriteLine();
 				seconds = Utils.MeasureTime( delegate() {
-						KDDCup.PredictTrack1(rating_predictor_final, track1_test_data, prediction_file);
+						KDDCup.PredictRatings(rating_predictor_final, test_data, prediction_file);
 				});
 				Console.Error.WriteLine("predicting_time " + seconds);
 			}
@@ -365,15 +377,29 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 			validation_file = Path.Combine(data_dir, track2 ? "validationIdx2.firstLines.txt" : "validationIdx1.firstLines.txt");
 		}
 
-		// read training data
-		training_ratings = MyMediaLite.IO.KDDCup2011.Ratings.Read(training_file);
+		if (good_rating_prob)
+		{
+			// read training data
+			training_ratings = MyMediaLite.IO.KDDCup2011.Ratings.Read80Plus(training_file);
 
-		// read validation data (track 1)
-		validation_ratings = MyMediaLite.IO.KDDCup2011.Ratings.Read(validation_file);
+			// read validation data
+			validation_ratings = MyMediaLite.IO.KDDCup2011.Ratings.Read80Plus(validation_file);
+		}
+		else
+		{
+			// read training data
+			training_ratings = MyMediaLite.IO.KDDCup2011.Ratings.Read(training_file);
+
+			// read validation data
+			validation_ratings = MyMediaLite.IO.KDDCup2011.Ratings.Read(validation_file);
+		}
+
+		// combine training and validation ratings
 		complete_ratings = new CombinedRatings(training_ratings, validation_ratings);
 
 		// read test data
-		track1_test_data = MyMediaLite.IO.KDDCup2011.Ratings.ReadTest(test_file);
+		Console.Error.WriteLine("Reading {0}", test_file);
+		test_data = MyMediaLite.IO.KDDCup2011.Ratings.ReadTest(test_file);
 
 		// read item data
 		if (recommender is IKDDCupRecommender)
