@@ -24,17 +24,6 @@ using MyMediaLite.Util;
 
 namespace MyMediaLite.IO
 {
-	/// <summary>Represent different numerical types that are used to store the ratings</summary>
-	public enum RatingType
-	{
-		/// <summary>byte (1 byte per rating)</summary>
-		BYTE,
-		/// <summary>float (4 bytes per rating)</summary>
-		FLOAT,
-		/// <summary>double (8 bytes per rating)</summary>
-		DOUBLE
-	}
-
 	/// <summary>Class that offers methods for reading in static rating data</summary>
 	public class RatingPredictionStatic
 	{

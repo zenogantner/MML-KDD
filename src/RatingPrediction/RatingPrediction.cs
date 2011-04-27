@@ -70,7 +70,7 @@ MyMediaLite rating prediction
 
   use '-' for either TRAINING_FILE or TEST_FILE to read the data from STDIN
 
-  methods (plus arguments and their defaults):");
+  methods (plus options and their defaults):");
 
 			Console.Write("   - ");
 			Console.WriteLine(string.Join("\n   - ", Recommender.List("MyMediaLite.RatingPrediction")));
@@ -78,33 +78,34 @@ MyMediaLite rating prediction
 			Console.WriteLine(@"method ARGUMENTS have the form name=value
 
   general OPTIONS have the form --name=value
-   --option-file=FILE           read options from FILE (line format KEY: VALUE)
-   --random-seed=N              set random seed to N
-   --data-dir=DIR               load all files from DIR
-   --user-attributes=FILE       file containing user attribute information
-   --item-attributes=FILE       file containing item attribute information
-   --user-relations=FILE         file containing user relation information
-   --item-relations=FILE         file containing item relation information
-   --save-model=FILE            save computed model to FILE
-   --load-model=FILE            load model from FILE
-   --min-rating=NUM             the smallest valid rating value
-   --max-rating=NUM             the greatest valid rating value
-   --no-eval=BOOL               do not evaluate
-   --prediction-file=FILE       write the rating predictions to  FILE ('-' for STDOUT)
-   --cross-validation=K         perform k-fold crossvalidation on the training data
-                                 (ignores the test data)
-   --ml1m-format=BOOL           read rating data in MovieLens 1M (and 10M) format
-   --kddcup-format=BOOL         read rating data in KDDCup-2011 format
-   --use-float=BOOL             store ratings as floats instead of doubles
-   --use-byte=BOOL              store ratings as bytes instead of doubles
+   --recommender-options=OPTIONS  use OPTIONS as recommender options
+   --option-file=FILE             read options from FILE (line format KEY: VALUE)
+   --random-seed=N                set random seed to N
+   --data-dir=DIR                 load all files from DIR
+   --user-attributes=FILE         file containing user attribute information
+   --item-attributes=FILE         file containing item attribute information
+   --user-relations=FILE          file containing user relation information
+   --item-relations=FILE          file containing item relation information
+   --save-model=FILE              save computed model to FILE
+   --load-model=FILE              load model from FILE
+   --min-rating=NUM               the smallest valid rating value
+   --max-rating=NUM               the greatest valid rating value
+   --no-eval=BOOL                 do not evaluate
+   --prediction-file=FILE         write the rating predictions to  FILE ('-' for STDOUT)
+   --cross-validation=K           perform k-fold crossvalidation on the training data
+                                  (ignores the test data)
+   --ml1m-format=BOOL             read rating data in MovieLens 1M (and 10M) format
+   --kddcup-format=BOOL           read rating data in KDDCup-2011 format
+   --use-float=BOOL               store ratings as floats instead of doubles
+   --use-byte=BOOL                store ratings as bytes instead of doubles
 
   options for finding the right number of iterations (MF methods)
-   --find-iter=N                give out statistics every N iterations
-   --max-iter=N                 perform at most N iterations
-   --epsilon=NUM                abort iterations if RMSE is more than best result plus NUM
-   --rmse-cutoff=NUM            abort if RMSE is above NUM
-   --mae-cutoff=NUM             abort if MAE is above NUM
-   --compute-fit=BOOL           display fit on training data every find_iter iterations");
+   --find-iter=N                  give out statistics every N iterations
+   --max-iter=N                   perform at most N iterations
+   --epsilon=NUM                  abort iterations if RMSE is more than best result plus NUM
+   --rmse-cutoff=NUM              abort if RMSE is above NUM
+   --mae-cutoff=NUM               abort if MAE is above NUM
+   --compute-fit=BOOL             display fit on training data every find_iter iterations");
 
 		Environment.Exit(exit_code);
 	}
@@ -120,7 +121,7 @@ MyMediaLite rating prediction
 
 		// recommender arguments
 		string recommender_options = string.Empty;
-		
+
 		// arguments for iteration search
 		int find_iter      = 0;
 		int max_iter       = 500;
@@ -170,7 +171,7 @@ MyMediaLite rating prediction
 			{ "rmse-cutoff=",         (double v)     => rmse_cutoff          = v },
 			{ "mae-cutoff=",          (double v)     => mae_cutoff           = v },
 			// enum options
-			{ "rating-type=",         (RatingType v) => rating_type          = v },			
+			{ "rating-type=",         (RatingType v) => rating_type          = v },
 			// boolean options
 			{ "compute-fit",          v              => compute_fit      = v != null },
 			{ "no-eval",              v              => no_eval          = v != null },
@@ -183,7 +184,7 @@ MyMediaLite rating prediction
 			Usage("Not enough arguments.");
 
 		// read command line parameters
-		string training_file = extra_args[0];
+		string training_file = extra_args[0]; // TODO handley via Mono.Options, too
 		string testfile      = extra_args[1];
 		string method        = extra_args[2];
 

@@ -147,6 +147,8 @@
     <Compile Include="Data\CombinedRatings.cs" />
     <Compile Include="DataType\CombinedList.cs" />
     <Compile Include="ItemRecommendation\Zero.cs" />
+    <Compile Include="Data\RatingType.cs" />
+    <Compile Include="IO\FileFormat.cs" />
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
   <!-- To modify your build process, add your task inside one of the targets below and uncomment it. 
