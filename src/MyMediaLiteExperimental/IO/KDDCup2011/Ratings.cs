@@ -71,10 +71,7 @@ namespace MyMediaLite.IO.KDDCup2011
 		static public IRatings ReadTest(string filename)
 		{
 			using ( var reader = new StreamReader(filename) )
-			{
-				Console.Error.WriteLine("reading {0}", filename);
 				return ReadTest(reader);
-			}
 		}
 
 		/// <summary>Read in rating test data (Track 1) from a TextReader</summary>
@@ -82,9 +79,7 @@ namespace MyMediaLite.IO.KDDCup2011
 		/// <returns>the rating data</returns>
 		static public IRatings ReadTest(StreamReader reader)
 		{
-			int num_ratings = GetNumberOfRatings(reader);
-			Console.Error.WriteLine("{0} ratings", num_ratings);
-			IRatings ratings = new StaticByteRatings(num_ratings);
+			IRatings ratings = new StaticByteRatings(GetNumberOfRatings(reader));
 
 			string line;
 
