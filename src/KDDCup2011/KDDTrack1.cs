@@ -64,6 +64,7 @@ class KDDTrack1
 	static bool no_eval;
 	static string prediction_file;
 	static bool sample_data;
+	static bool track2;
 
 	static void Usage(string message)
 	{
@@ -99,6 +100,7 @@ MyMediaLite KDD Cup 2011 Track 1 tool
    - cross_validation=K         perform k-fold crossvalidation on the training data
                                  (ignores the test data)
    - sample_data=BOOL           assume the sample data set instead of the real one
+   - track2=BOOL                perform rating prediction on track 2 data
 
   options for finding the right number of iterations (MF methods)
    - find_iter=N                give out statistics every N iterations
@@ -144,17 +146,18 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 
 		// data arguments
 		string data_dir  = parameters.GetRemoveString( "data_dir");
+		track2           = parameters.GetRemoveBool(   "track2", false);
 		if (data_dir != string.Empty)
-			data_dir = data_dir + "/track1";
+			data_dir = data_dir + (track2 ? "/track2-validation" : "/track1");
 		else
-			data_dir = "track1";
+			data_dir = track2 ? "/track2-validation" : "track1";
 		sample_data      = parameters.GetRemoveBool(   "sample_data", false);
 
 		// other arguments
 		save_model_file  = parameters.GetRemoveString( "save_model");
 		load_model_file  = parameters.GetRemoveString( "load_model");
-		int random_seed  = parameters.GetRemoveInt32(  "random_seed",  -1);
-		no_eval          = parameters.GetRemoveBool(   "no_eval",      false);
+		int random_seed  = parameters.GetRemoveInt32(  "random_seed",      -1);
+		no_eval          = parameters.GetRemoveBool(   "no_eval",          false);
 		prediction_file  = parameters.GetRemoveString( "prediction_file");
 		cross_validation = parameters.GetRemoveInt32(  "cross_validation", 0);
 
@@ -347,19 +350,19 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 
     static void LoadData(string data_dir)
 	{
-		string training_file   = Path.Combine(data_dir, "trainIdx1.txt");
-		string test_file       = Path.Combine(data_dir, "testIdx1.txt");
-		string validation_file = Path.Combine(data_dir, "validationIdx1.txt");
-		string track_file      = Path.Combine(data_dir, "trackData1.txt");
-		string album_file      = Path.Combine(data_dir, "albumData1.txt");
-		string artist_file     = Path.Combine(data_dir, "artistData1.txt");
-		string genre_file      = Path.Combine(data_dir, "genreData1.txt");
+		string training_file   = Path.Combine(data_dir, track2 ? "trainIdx2.txt"      : "trainIdx1.txt");
+		string test_file       = Path.Combine(data_dir, track2 ? "testIdx2.txt"       : "testIdx1.txt");
+		string validation_file = Path.Combine(data_dir, track2 ? "validationIdx2.txt" : "validationIdx1.txt");
+		string track_file      = Path.Combine(data_dir, track2 ? "trackData2.txt"     : "trackData1.txt");
+		string album_file      = Path.Combine(data_dir, track2 ? "albumData2.txt"     : "albumData1.txt");
+		string artist_file     = Path.Combine(data_dir, track2 ? "artistData2.txt"    : "artistData1.txt");
+		string genre_file      = Path.Combine(data_dir, track2 ? "genreData2.txt"     : "genreData1.txt");
 
 		if (sample_data)
 		{
-			training_file   = Path.Combine(data_dir, "trainIdx1.firstLines.txt");
-			test_file       = Path.Combine(data_dir, "testIdx1.firstLines.txt");
-			validation_file = Path.Combine(data_dir, "validationIdx1.firstLines.txt");
+			training_file   = Path.Combine(data_dir, track2 ? "trainIdx2.firstLines.txt"      : "trainIdx1.firstLines.txt");
+			test_file       = Path.Combine(data_dir, track2 ? "testIdx2.firstLines.txt"       : "testIdx1.firstLines.txt");
+			validation_file = Path.Combine(data_dir, track2 ? "validationIdx2.firstLines.txt" : "validationIdx1.firstLines.txt");
 		}
 
 		// read training data
