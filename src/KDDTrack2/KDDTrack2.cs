@@ -47,9 +47,6 @@ class KDDTrack2
 	static Dictionary<int, IList<int>> validation_candidates;
 	static Dictionary<int, IList<int>> validation_hits;
 
-	// composite evaluation
-	static Dictionary<int, IList<int>> validation_rated_hits = new Dictionary<int, IList<int>>();
-
 	//  test
 	static Dictionary<int, IList<int>> test_candidates;
 
@@ -70,7 +67,9 @@ class KDDTrack2
 	static double epsilon;
 	static double err_cutoff;
 	static string prediction_file;
+	static bool predict_score;
 	static bool sample_data;
+	static bool predict_rated;
 
 	static void Usage(string message)
 	{
@@ -105,6 +104,9 @@ MyMediaLite KDD Cup 2011 Track 2 tool
    - load_model=FILE            load model from FILE
    - prediction_file=FILE       write the predictions to  FILE ('-' for STDOUT)
    - sample_data=BOOL           assume the sample data set instead of the real one
+   - predict_score=BOOL         predict scores (double precision) instead of 0/1 decisions
+   - predict_rated=BOOL         instead of predicting what received a good rating, try to predict what received a rating at all
+                                (implies predict_score)
 
   options for finding the right number of iterations (MF methods)
    - find_iter=N                give out statistics every N iterations
@@ -119,11 +121,6 @@ MyMediaLite KDD Cup 2011 Track 2 tool
     {
 		Assembly assembly = Assembly.GetExecutingAssembly();
 		Assembly.LoadFile(Path.GetDirectoryName(assembly.Location) + Path.DirectorySeparatorChar + "MyMediaLiteExperimental.dll");
-
-		/*
-		double min_rating = 0;
-		double max_rating = 100;
-		*/
 
 		AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(Handlers.UnhandledExceptionHandler);
 		Console.CancelKeyPress += new ConsoleCancelEventHandler(AbortHandler);
@@ -152,7 +149,9 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 			data_dir = data_dir + "/mml-track2";
 		else
 			data_dir = "mml-track2";
-		sample_data      = parameters.GetRemoveBool(   "sample_data", false);
+		sample_data      = parameters.GetRemoveBool(   "sample_data",   false);
+		predict_rated    = parameters.GetRemoveBool(   "predict_rated", false); 
+		predict_score    = parameters.GetRemoveBool(   "predict_score", false); 
 
 		// other arguments
 		save_model_file  = parameters.GetRemoveString( "save_model");
@@ -160,6 +159,9 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		int random_seed  = parameters.GetRemoveInt32(  "random_seed",  -1);
 		prediction_file  = parameters.GetRemoveString( "prediction_file");
 
+		if (predict_rated)
+			predict_score = true;
+		
 		if (random_seed != -1)
 			MyMediaLite.Util.Random.InitInstance(random_seed);
 
@@ -241,19 +243,6 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 				if (i % find_iter == 0)
 				{
 					time = Utils.MeasureTime(delegate() { // TODO parallelize
-						// evaluate components, if possible
-						if (recommender_validate is ITrack2CompositeRecommender)
-						{
-							var component_recommender = recommender_validate as ITrack2CompositeRecommender;
-
-							// rated component
-							double rated_error = KDDCup.EvaluateTrack2(component_recommender.RatedComponent, validation_candidates, validation_rated_hits);
-							double rating_error = (RatingEval.Evaluate(component_recommender.RatingComponent, validation_ratings))["RMSE"];
-							Console.Write(string.Format(ni, "rated_error {0:F6} rating_error {1:F6} ", rated_error, rating_error));
-							// rating component
-						}
-
-
 						// evaluate
 						error = KDDCup.EvaluateTrack2(recommender_validate, validation_candidates, validation_hits);
 						err_eval_stats.Add(error);
@@ -311,11 +300,16 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 
 					if (prediction_file != string.Empty)
 					{
-						// predict validation set
-						KDDCup.PredictTrack2(recommender_validate, validation_candidates, prediction_file + "validate");
-
-						// predict test set
-						KDDCup.PredictTrack2(recommender_final, test_candidates, prediction_file);
+						if (predict_score)
+						{
+							KDDCup.PredictScoresTrack2(recommender_validate, validation_candidates, prediction_file + "validate");
+							KDDCup.PredictScoresTrack2(recommender_final, test_candidates, prediction_file);
+						}						
+						else
+						{
+							KDDCup.PredictTrack2(recommender_validate, validation_candidates, prediction_file + "validate");
+							KDDCup.PredictTrack2(recommender_final, test_candidates, prediction_file);
+						}
 					}
 			});
 			Console.Write(" evaluation_time " + seconds + " ");
@@ -375,19 +369,19 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 			kddcup_recommender.ItemInfo = Items.Read(track_file, album_file, artist_file, genre_file, 2);
 		}
 
-
 		// connect data and recommenders
-		if (recommender_validate is ITrack2CompositeRecommender)
+		if (predict_rated)
 		{
-			// two-stage recommenders
-			((ITrack2CompositeRecommender) recommender_validate).Ratings = training_ratings;
-			((ITrack2CompositeRecommender) recommender_final).Ratings    = complete_ratings;
-
 			// create rated_hits
+			var validation_rated_hits = new Dictionary<int, IList<int>>();
 			foreach (int u in validation_candidates.Keys)
 				validation_rated_hits[u] = new List<int>();
 			for (int index = 0; index < validation_ratings.Count; index++)
 				validation_rated_hits[validation_ratings.Users[index]].Add(validation_ratings.Items[index]);
+			validation_hits = validation_rated_hits;
+			
+			recommender_validate.Feedback = CreatePosOnlyFeedback(training_ratings);
+			recommender_final.Feedback    = CreatePosOnlyFeedback(complete_ratings);
 		}
 		else
 		{
@@ -413,19 +407,29 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 				foreach (var i in l)
 					test_items.Add(i);
 			((ISemiSupervisedRecommender) recommender_final).TestItems = test_items;
-
 		}
 
 		Console.Error.WriteLine("memory before deleting ratings: {0}", Memory.Usage);
 		training_ratings = null;
 		complete_ratings = null;
-		if (! (recommender_validate is ITrack2CompositeRecommender)) // we need this for the composite recommenders
-			validation_ratings = null;
 		Console.Error.WriteLine("memory after deleting ratings:  {0}", Memory.Usage);
 
 		Utils.DisplayDataStats(recommender_final.Feedback, null, recommender_final);
 	}
 
+	/// <summary>Create positive-only feedback from rating data</summary>
+	/// <param name="ratings">the rating data</param>
+	/// <returns>the positive-only feedback</returns>
+	static protected PosOnlyFeedback CreatePosOnlyFeedback(IRatings ratings)
+	{
+		var feedback = new PosOnlyFeedback();
+
+		for (int i = 0; i < ratings.Count; i++)
+			feedback.Add(ratings.Users[i], ratings.Items[i]);
+
+		return feedback;
+	}	
+	
 	static void AbortHandler(object sender, ConsoleCancelEventArgs args)
 	{
 		DisplayIterationStats();
