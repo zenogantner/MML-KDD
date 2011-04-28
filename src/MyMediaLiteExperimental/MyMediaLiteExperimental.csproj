@@ -81,12 +81,6 @@
     <Compile Include="ItemRecommendation\ArtistCounter.cs" />
     <Compile Include="ItemRecommendation\BPR_SMF_KDD.cs" />
     <Compile Include="ItemRecommendation\WRMF_KDD.cs" />
-    <Compile Include="ItemRecommendation\Track2CompositeRecommender.cs" />
-    <Compile Include="ItemRecommendation\Track2CompositeRatingRecommender.cs" />
-    <Compile Include="ItemRecommendation\ITrack2CompositeRecommender.cs" />
-    <Compile Include="ItemRecommendation\BaselineCompositeRatingRecommender.cs" />
-    <Compile Include="ItemRecommendation\BaselineCompositeRatingBPR.cs" />
-    <Compile Include="ItemRecommendation\Track2CompositeMatrixFactorization.cs" />
     <Compile Include="ItemRecommendation\TypedBPRMF.cs" />
     <Compile Include="ItemRecommendation\SemiSupervisedBPRMF.cs" />
     <Compile Include="ItemRecommendation\ISemiSupervisedRecommender.cs" />
