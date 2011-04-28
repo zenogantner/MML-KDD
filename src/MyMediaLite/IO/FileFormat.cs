@@ -20,8 +20,11 @@ namespace MyMediaLite.IO
 	/// <summary>Represents different rating file formats</summary>
 	public enum RatingFileFormat
 	{
+		/// <summary>The default tab/comma separated rating format</summary>
 		DEFAULT,
+		/// <summary>The MovieLens 1M/10M format (fields separated by "::")</summary>
 		MOVIELENS_1M,
+		/// <summary>The KDD Cup 2011 rating format</summary>
 		KDDCUP_2011,
 	}
 }
