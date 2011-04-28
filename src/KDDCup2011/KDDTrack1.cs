@@ -314,7 +314,7 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 				{
 					Console.Write(recommender.ToString());
 					if (cross_validation > 0) // TODO cross-validation could also be performed on the complete dataset
-					{
+					{                         // TODO support track2
 						Console.WriteLine();
 						var split = new RatingCrossValidationSplit(training_ratings, cross_validation);
 						var results = RatingEval.EvaluateOnSplit(rating_predictor_validate, split);
@@ -353,7 +353,16 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 
 				Console.WriteLine();
 				seconds = Utils.MeasureTime( delegate() {
-						KDDCup.PredictRatings(rating_predictor_final, test_data, prediction_file);
+						if (track2)
+						{
+							KDDCup.PredictRatingsDouble(rating_predictor_validate, validation_ratings, prediction_file + "-validate");
+							KDDCup.PredictRatingsDouble(rating_predictor_final,    test_data, prediction_file);
+						}
+						else
+						{
+							KDDCup.PredictRatings(rating_predictor_validate, validation_ratings, prediction_file + "-validate");
+							KDDCup.PredictRatings(rating_predictor_final,    test_data, prediction_file);
+						}
 				});
 				Console.Error.WriteLine("predicting_time " + seconds);
 			}
@@ -398,7 +407,6 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 		complete_ratings = new CombinedRatings(training_ratings, validation_ratings);
 
 		// read test data
-		Console.Error.WriteLine("Reading {0}", test_file);
 		test_data = MyMediaLite.IO.KDDCup2011.Ratings.ReadTest(test_file);
 
 		// read item data
