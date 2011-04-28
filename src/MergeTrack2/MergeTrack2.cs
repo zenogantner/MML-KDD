@@ -386,7 +386,7 @@ class MergeTrack2
 						if (votes[i][j] == '1')
 							weighted_votes[j] += weights[i];
 
-				var positions = new List<int>(new int[] { 0, 1, 2, 3, 4, 5 });
+				var positions = new List<int>(new int[] { 0, 1, 2, 3, 4, 5 }); // TODO should depend on NUM_CANDIDATES
 				positions.Sort(delegate(int pos1, int pos2) { return weighted_votes[pos2].CompareTo(weighted_votes[pos1]); } );
 
 				for (int i = 0; i < NUM_CANDIDATES; i++)

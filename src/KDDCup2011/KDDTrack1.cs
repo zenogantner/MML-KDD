@@ -39,6 +39,7 @@ class KDDTrack1
 	// data sets
 	static IRatings training_ratings;
 	static IRatings validation_ratings;
+	static IRatings validation_candidates;
 	static IRatings complete_ratings;
 	static IRatings test_data;
 
@@ -355,7 +356,7 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 				seconds = Utils.MeasureTime( delegate() {
 						if (track2)
 						{
-							KDDCup.PredictRatingsDouble(rating_predictor_validate, validation_ratings, prediction_file + "-validate");
+							KDDCup.PredictRatingsDouble(rating_predictor_validate, validation_candidates, prediction_file + "-validate");
 							KDDCup.PredictRatingsDouble(rating_predictor_final,    test_data, prediction_file);
 						}
 						else
@@ -409,6 +410,9 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 		// read test data
 		test_data = MyMediaLite.IO.KDDCup2011.Ratings.ReadTest(test_file);
 
+		if (track2)
+			validation_candidates = MyMediaLite.IO.KDDCup2011.Ratings.ReadTest(Path.Combine(data_dir, sample_data ? "validationCandidatesIdx2.firstLines.txt" : "validationCandidatesIdx2.txt"));
+		
 		// read item data
 		if (recommender is IKDDCupRecommender)
 		{
