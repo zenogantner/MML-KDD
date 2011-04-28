@@ -271,6 +271,32 @@ namespace MyMediaLite.RatingPrediction
 		}
 
 		/// <inheritdoc/>
+		public override double ComputeLoss()
+		{
+			double loss_sum = 0;
+			for (int i = 0; i < ratings.Count; i++)
+			{
+				int user_id = ratings.Users[i];
+				int item_id = ratings.Items[i];
+				loss_sum += Math.Pow(Predict(user_id, item_id) - ratings[i], 2);
+			}
+
+			for (int u = 0; u <= MaxUserID; u++)
+			{
+				loss_sum += ratings.CountByUser[u] * RegU * Math.Pow(VectorUtils.EuclideanNorm(user_factors.GetRow(u)), 2);
+				loss_sum += ratings.CountByUser[u] * BiasReg * Math.Abs(user_bias[u]);
+			}
+
+			for (int i = 0; i <= MaxItemID; i++)
+			{
+				loss_sum += ratings.CountByItem[i] * RegI * Math.Pow(VectorUtils.EuclideanNorm(item_factors.GetRow(i)), 2);
+				loss_sum += ratings.CountByItem[i] * BiasReg * Math.Abs(item_bias[i]);
+			}
+
+			return loss_sum;
+		}
+
+		/// <inheritdoc/>
 		public override string ToString()
 		{
 			var ni = new NumberFormatInfo();

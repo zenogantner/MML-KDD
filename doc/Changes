@@ -10,6 +10,7 @@
             - rename BiasRegularization to BiasReg for consistency with other
               recommenders
             - different regularization parameters for user and item factors
+            - add ComputeLoss() (also for MatrixFactorization)
           - BPRMF:
             - get rid of unnecessary IterationLength parameter
             - only interate once over relevant data points in online learning

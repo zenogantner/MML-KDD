@@ -318,6 +318,27 @@ namespace MyMediaLite.RatingPrediction
 			return Math.Sqrt((double) rmse_sum / ratings.Count);
 		}
 
+		/// <summary>Compute the regularized loss</summary>
+		/// <returns>the regularized loss</returns>
+		public virtual double ComputeLoss()
+		{
+			double loss_sum = 0;
+			for (int i = 0; i < ratings.Count; i++)
+			{
+				int user_id = ratings.Users[i];
+				int item_id = ratings.Items[i];
+				loss_sum += Math.Pow(Predict(user_id, item_id) - ratings[i], 2);
+			}
+
+			for (int u = 0; u <= MaxUserID; u++)
+				loss_sum += ratings.CountByUser[u] * Regularization * Math.Pow(VectorUtils.EuclideanNorm(user_factors.GetRow(u)), 2);
+
+			for (int i = 0; i <= MaxItemID; i++)
+				loss_sum += ratings.CountByItem[i] * Regularization * Math.Pow(VectorUtils.EuclideanNorm(item_factors.GetRow(i)), 2);
+
+			return loss_sum;
+		}
+
 		/// <inheritdoc/>
 		public override string ToString()
 		{
