@@ -52,6 +52,7 @@ namespace MyMediaLite.Data
 				throw new NotSupportedException();
 			}
 		}
+		
 		/// <inheritdoc/>
 		public virtual int Count { get { return Values.Count; } }
 
@@ -91,7 +92,7 @@ namespace MyMediaLite.Data
 			for (int index = 0; index < Count; index++)
 				by_user[Users[index]].Add(index);
 		}
-
+	
 		/// <inheritdoc/>
 		public IList<IList<int>> ByItem
 		{
@@ -135,6 +136,44 @@ namespace MyMediaLite.Data
 			Util.Utils.Shuffle<int>(random_index);
 		}
 
+		/// <inheritdoc/>
+		public IList<int> CountByUser
+		{
+			get {
+				if (count_by_user == null)
+					BuildByUserCounts();
+				return count_by_user;
+			}
+		}
+		IList<int> count_by_user;
+
+		/// <inheritdoc/>
+		public void BuildByUserCounts()
+		{
+			count_by_user = new int[MaxUserID + 1];
+			for (int index = 0; index < Count; index++)
+				count_by_user[Users[index]]++;
+		}		
+		
+		/// <inheritdoc/>
+		public IList<int> CountByItem
+		{
+			get {
+				if (count_by_item == null)
+					BuildByItemCounts();
+				return count_by_item;
+			}
+		}
+		IList<int> count_by_item;
+
+		/// <inheritdoc/>
+		public void BuildByItemCounts()
+		{
+			count_by_item = new int[MaxItemID + 1];
+			for (int index = 0; index < Count; index++)
+				count_by_item[Items[index]]++;
+		}		
+		
 		// TODO speed up
 		/// <inheritdoc/>
 		public double Average

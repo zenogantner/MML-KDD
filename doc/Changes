@@ -30,7 +30,8 @@
         - evaluation
           - add relevant_users feature for item prediction
           - rating evaluation: check arguments for null
-        - data types
+        - data structures
+          - IRatings: add CountByUser and CountByItem
           - fix incorrect error message in Matrix class (reported by
             Chris Newell)
 
