@@ -86,6 +86,7 @@
     <Compile Include="ItemRecommendation\ISemiSupervisedRecommender.cs" />
     <Compile Include="ItemRecommendation\SemiSupervisedBPRMF_KDD.cs" />
     <Compile Include="RatingPrediction\BoldDriverBiasedMatrixFactorization.cs" />
+    <Compile Include="ItemRecommendation\BoldDriverBPRMF_KDD.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AttrToFactor\" />

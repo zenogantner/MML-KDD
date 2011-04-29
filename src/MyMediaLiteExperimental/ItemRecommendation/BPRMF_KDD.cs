@@ -110,6 +110,43 @@ namespace MyMediaLite.ItemRecommendation
 			while (Feedback.UserMatrix[u, j]);
 		}
 
+		/// <summary>Compute approximate loss</summary>
+		/// <returns>the approximate loss</returns>
+		public double ComputeLoss()
+		{
+			double loss = 0;
+			
+			var u_counter = new int[MaxUserID + 1];
+			var i_counter = new int[MaxItemID + 1];
+			var j_counter = new int[MaxItemID + 1];
+			
+			{
+				int u, i, j;
+				
+				for (int x = 0; x <= MaxUserID; x++)
+				{
+					SampleTriple(out u, out i, out j);
+					double x_uij = Predict(u, i) - Predict(u, j);
+					loss += 1 / (1 + Math.Exp(x_uij));
+					
+					u_counter[u]++;
+					i_counter[i]++;
+					j_counter[j]++;
+				}
+			}
+			
+			for (int u = 0; u <= MaxUserID; u++)
+				loss += u_counter[u] * RegU * Math.Pow(VectorUtils.EuclideanNorm(user_factors.GetRow(u)), 2);
+
+			for (int i = 0; i <= MaxItemID; i++)
+				loss += i_counter[i] * RegI * Math.Pow(VectorUtils.EuclideanNorm(item_factors.GetRow(i)), 2);
+			
+			for (int j = 0; j <= MaxItemID; j++)
+				loss += j_counter[j] * RegJ * Math.Pow(VectorUtils.EuclideanNorm(item_factors.GetRow(j)), 2);			
+			
+			return loss;
+		}
+		
 		/// <inheritdoc/>
 		public override string ToString()
 		{
