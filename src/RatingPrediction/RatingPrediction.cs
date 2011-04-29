@@ -51,7 +51,7 @@ class RatingPrediction
 
 	// global command line parameters
 	static bool compute_fit      = false;
-	static bool movielens_format = false;
+	static bool ml1m_format = false;
 	static RatingType rating_type = RatingType.DOUBLE;
 
 	static void Usage(string message)
@@ -77,27 +77,27 @@ MyMediaLite rating prediction
 
 			Console.WriteLine(@"method ARGUMENTS have the form name=value
 
-  general OPTIONS have the form --name=value
-   --recommender-options=OPTIONS  use OPTIONS as recommender options
-   --option-file=FILE             read options from FILE (line format KEY: VALUE)
-   --random-seed=N                set random seed to N
-   --data-dir=DIR                 load all files from DIR
-   --user-attributes=FILE         file containing user attribute information
-   --item-attributes=FILE         file containing item attribute information
-   --user-relations=FILE          file containing user relation information
-   --item-relations=FILE          file containing item relation information
-   --save-model=FILE              save computed model to FILE
-   --load-model=FILE              load model from FILE
-   --min-rating=NUM               the smallest valid rating value
-   --max-rating=NUM               the greatest valid rating value
-   --no-eval=BOOL                 do not evaluate
-   --prediction-file=FILE         write the rating predictions to  FILE ('-' for STDOUT)
-   --cross-validation=K           perform k-fold crossvalidation on the training data
-                                  (ignores the test data)
-   --ml1m-format=BOOL             read rating data in MovieLens 1M (and 10M) format
-   --kddcup-format=BOOL           read rating data in KDDCup-2011 format
-   --use-float=BOOL               store ratings as floats instead of doubles
-   --use-byte=BOOL                store ratings as bytes instead of doubles
+  general OPTIONS:
+   --recommender-options=OPTIONS    use OPTIONS as recommender options
+   --option-file=FILE               read options from FILE (line format KEY: VALUE)
+   --random-seed=N                  set random seed to N
+   --data-dir=DIR                   load all files from DIR
+   --user-attributes=FILE           file containing user attribute information
+   --item-attributes=FILE           file containing item attribute information
+   --user-relations=FILE            file containing user relation information
+   --item-relations=FILE            file containing item relation information
+   --save-model=FILE                save computed model to FILE
+   --load-model=FILE                load model from FILE
+   --min-rating=NUM                 the smallest valid rating value
+   --max-rating=NUM                 the greatest valid rating value
+   --no-eval                        do not evaluate
+   --prediction-file=FILE           write the rating predictions to  FILE ('-' for STDOUT)
+   --cross-validation=K             perform k-fold crossvalidation on the training data
+                                    (ignores the test data)
+   --ml1m-format                    read rating data in MovieLens 1M (and 10M) format
+   --kddcup-format                  read rating data in KDDCup-2011 format
+   --rating-type=float|byte|double  store ratings as floats instead of doubles
+                                    store ratings as bytes instead of doubles
 
   options for finding the right number of iterations (MF methods)
    --find-iter=N                  give out statistics every N iterations
@@ -173,12 +173,14 @@ MyMediaLite rating prediction
 			// enum options
 			{ "rating-type=",         (RatingType v) => rating_type          = v },
 			// boolean options
-			{ "compute-fit",          v              => compute_fit      = v != null },
-			{ "no-eval",              v              => no_eval          = v != null },
-			{ "movielens-format",     v              => movielens_format = v != null },
+			{ "compute-fit",          v              => compute_fit = v != null },
+			{ "no-eval",              v              => no_eval     = v != null },
+			{ "ml1m-format",          v              => ml1m_format = v != null },
    	  	};
    		IList<string> extra_args = p.Parse(args);
 
+		// TODO make sure interaction of --find-iter and --cross-validation works properly
+		
 		// check number of command line parameters
 		if (extra_args.Count < 3)
 			Usage("Not enough arguments.");
@@ -354,7 +356,7 @@ MyMediaLite rating prediction
 		// TODO check for the existence of files before starting to load all of them
 
 		// read training data
-		if (movielens_format)
+		if (ml1m_format)
 			training_data = MovieLensRatingData.Read(Path.Combine(data_dir, training_file), min_rating, max_rating, user_mapping, item_mapping);
 		else
 			training_data = RatingPredictionStatic.Read(Path.Combine(data_dir, training_file), min_rating, max_rating, user_mapping, item_mapping, rating_type);
@@ -403,7 +405,7 @@ MyMediaLite rating prediction
 			}
 
 		// read test data
-		if (movielens_format)
+		if (ml1m_format)
 			test_data = MovieLensRatingData.Read(Path.Combine(data_dir, test_file), min_rating, max_rating, user_mapping, item_mapping);
 		else
 			test_data = RatingPredictionStatic.Read(Path.Combine(data_dir, test_file), min_rating, max_rating, user_mapping, item_mapping, rating_type);
