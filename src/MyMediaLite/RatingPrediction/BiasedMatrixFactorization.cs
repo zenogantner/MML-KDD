@@ -49,12 +49,23 @@ namespace MyMediaLite.RatingPrediction
 			}
 		}
 
+		/// <summary>Use bold driver heuristics for learning rate adaption</summary>
+		/// <remarks>
+		/// See
+		/// Rainer Gemulla, Peter J. Haas, Erik Nijkamp, Yannis Sismanis:
+		/// Large-Scale Matrix Factorization with Distributed Stochastic Gradient Descent
+		/// </remarks>
+		public bool BoldDriver { set; get; }
+		
+		/// <summary>Loss for the last iteration, used by bold driver heuristics</summary>
+		double last_loss = double.NegativeInfinity;		
+		
 		/// <summary>the user biases</summary>
 		protected double[] user_bias;
 		/// <summary>the item biases</summary>
 		protected double[] item_bias;
 
-		/// <inheritdoc/>
+		/// <summary>Default constructor</summary>
 		public BiasedMatrixFactorization()
 		{
 			BiasReg = 0.0001;
@@ -71,6 +82,9 @@ namespace MyMediaLite.RatingPrediction
 			item_bias = new double[MaxItemID + 1];
 			for (int i = 0; i <= MaxItemID; i++)
 				item_bias[i] = 0;
+
+			if (BoldDriver)
+				last_loss = ComputeLoss();
 		}
 
 		/// <inheritdoc/>
@@ -86,6 +100,28 @@ namespace MyMediaLite.RatingPrediction
 				Iterate();
 		}
 
+		/// <inheritdoc/>		
+		public override void Iterate()
+		{
+			base.Iterate();
+		
+			if (BoldDriver)
+			{
+				double loss = ComputeLoss();
+						
+				if (loss > last_loss)
+					LearnRate *= 0.5;
+				else if (loss < last_loss)
+					LearnRate *= 1.05;
+				
+				last_loss = loss;
+				
+				var ni = new NumberFormatInfo();
+				ni.NumberDecimalDigits = '.';		
+				Console.Error.WriteLine(string.Format(ni, "loss {0} learn_rate {1} ", loss, LearnRate));
+			}
+		}		
+		
 		/// <inheritdoc/>
 		protected override void Iterate(IList<int> rating_indices, bool update_user, bool update_item)
 		{
@@ -303,8 +339,8 @@ namespace MyMediaLite.RatingPrediction
 			ni.NumberDecimalDigits = '.';
 
 			return string.Format(ni,
-								 "BiasedMatrixFactorization num_factors={0} bias_reg={1} reg_u={2} reg_i={3} learn_rate={4} num_iter={5} init_mean={6} init_stdev={7}",
-								 NumFactors, BiasReg, RegU, RegI, LearnRate, NumIter, InitMean, InitStdev);
+								 "BiasedMatrixFactorization num_factors={0} bias_reg={1} reg_u={2} reg_i={3} learn_rate={4} num_iter={5} bold_driver={6} init_mean={7} init_stdev={8}",
+								 NumFactors, BiasReg, RegU, RegI, LearnRate, NumIter, BoldDriver, InitMean, InitStdev);
 		}
 	}
 }
