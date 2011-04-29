@@ -322,21 +322,21 @@ namespace MyMediaLite.RatingPrediction
 		/// <returns>the regularized loss</returns>
 		public virtual double ComputeLoss()
 		{
-			double loss_sum = 0;
+			double loss = 0;
 			for (int i = 0; i < ratings.Count; i++)
 			{
 				int user_id = ratings.Users[i];
 				int item_id = ratings.Items[i];
-				loss_sum += Math.Pow(Predict(user_id, item_id) - ratings[i], 2);
+				loss += Math.Pow(Predict(user_id, item_id) - ratings[i], 2);
 			}
 
 			for (int u = 0; u <= MaxUserID; u++)
-				loss_sum += ratings.CountByUser[u] * Regularization * Math.Pow(VectorUtils.EuclideanNorm(user_factors.GetRow(u)), 2);
+				loss += ratings.CountByUser[u] * Regularization * Math.Pow(VectorUtils.EuclideanNorm(user_factors.GetRow(u)), 2);
 
 			for (int i = 0; i <= MaxItemID; i++)
-				loss_sum += ratings.CountByItem[i] * Regularization * Math.Pow(VectorUtils.EuclideanNorm(item_factors.GetRow(i)), 2);
+				loss += ratings.CountByItem[i] * Regularization * Math.Pow(VectorUtils.EuclideanNorm(item_factors.GetRow(i)), 2);
 
-			return loss_sum;
+			return loss;
 		}
 
 		/// <inheritdoc/>
