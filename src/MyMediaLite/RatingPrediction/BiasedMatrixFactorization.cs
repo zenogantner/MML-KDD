@@ -54,6 +54,7 @@ namespace MyMediaLite.RatingPrediction
 		/// See
 		/// Rainer Gemulla, Peter J. Haas, Erik Nijkamp, Yannis Sismanis:
 		/// Large-Scale Matrix Factorization with Distributed Stochastic Gradient Descent
+		/// 2011
 		/// </remarks>
 		public bool BoldDriver { set; get; }
 		
