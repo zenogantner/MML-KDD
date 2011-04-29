@@ -42,6 +42,18 @@ namespace MyMediaLite.ItemRecommendation
 		/// <summary>Weight for test users</summary>
 		public double TestUserWeight { get; set; }
 
+		/// <summary>Use bold driver heuristics for learning rate adaption</summary>
+		/// <remarks>
+		/// See
+		/// Rainer Gemulla, Peter J. Haas, Erik Nijkamp, Yannis Sismanis:
+		/// Large-Scale Matrix Factorization with Distributed Stochastic Gradient Descent
+		/// 2011
+		/// </remarks>
+		public bool BoldDriver { set; get; }
+		
+		/// <summary>Loss for the last iteration, used by bold driver heuristics</summary>
+		double last_loss = double.NegativeInfinity;
+		
 		/// <summary>Default constructor</summary>
 		public BPRMF_KDD()
 		{
@@ -66,6 +78,9 @@ namespace MyMediaLite.ItemRecommendation
 
 					index++;
 				}
+			
+			if (BoldDriver)
+				last_loss = ComputeLoss();
 		}
 
 		/// <inheritdoc/>
@@ -82,6 +97,28 @@ namespace MyMediaLite.ItemRecommendation
 			base.Train();
 		}
 
+		/// <inheritdoc/>		
+		public override void Iterate()
+		{
+			base.Iterate();
+		
+			if (BoldDriver)
+			{
+				double loss = ComputeLoss();
+						
+				if (loss > last_loss)
+					LearnRate *= 0.5;
+				else if (loss < last_loss)
+					LearnRate *= 1.05;
+				
+				last_loss = loss;
+				
+				var ni = new NumberFormatInfo();
+				ni.NumberDecimalDigits = '.';		
+				Console.Error.WriteLine(string.Format(ni, "loss {0} learn_rate {1} ", loss, LearnRate));
+			}
+		}
+		
 		/// <inheritdoc/>
 		protected override void SampleTriple(out int u, out int i, out int j)
 		{
@@ -124,7 +161,7 @@ namespace MyMediaLite.ItemRecommendation
 			{
 				int u, i, j;
 				
-				for (int x = 0; x <= MaxUserID; x++)
+				for (int x = 0; x <= MaxUserID; x++) // TODO doing this |U| times is arbitrary
 				{
 					SampleTriple(out u, out i, out j);
 					double x_uij = Predict(u, i) - Predict(u, j);
@@ -135,6 +172,8 @@ namespace MyMediaLite.ItemRecommendation
 					j_counter[j]++;
 				}
 			}
+			
+			loss *= (double) (Feedback.Count / (MaxUserID + 1));
 			
 			for (int u = 0; u <= MaxUserID; u++)
 				loss += u_counter[u] * RegU * Math.Pow(VectorUtils.EuclideanNorm(user_factors.GetRow(u)), 2);
@@ -154,8 +193,8 @@ namespace MyMediaLite.ItemRecommendation
 			var ni = new NumberFormatInfo();
 			ni.NumberDecimalDigits = '.';
 
-			return string.Format(ni, "BPRMF_KDD num_factors={0} bias_reg={1} reg_u={2} reg_i={3} reg_j={4} num_iter={5} learn_rate={6} init_mean={7} init_stdev={8}",
-								 num_factors, BiasReg, reg_u, reg_i, reg_j, NumIter, learn_rate, InitMean, InitStdev);
+			return string.Format(ni, "BPRMF_KDD num_factors={0} bias_reg={1} reg_u={2} reg_i={3} reg_j={4} num_iter={5} bold_driver={6} learn_rate={7} init_mean={8} init_stdev={8}",
+								 num_factors, BiasReg, reg_u, reg_i, reg_j, NumIter, BoldDriver, learn_rate, InitMean, InitStdev);
 		}
 	}
 }
