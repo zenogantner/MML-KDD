@@ -29,6 +29,12 @@ namespace MyMediaLite.RatingPrediction
 	{
 		double last_loss = double.NegativeInfinity;
 		
+		/// <summary>Default constructor</summary>
+		public BoldDriverBiasedMatrixFactorization()
+		{
+			LearnRate = 0.1;
+		}
+		
 		/// <inheritdoc/>		
 		protected override void InitModel()
 		{
@@ -52,6 +58,17 @@ namespace MyMediaLite.RatingPrediction
 			
 			Console.Error.Write("loss {0} learn_rate {1} ", loss, LearnRate);			
 		}
+		
+		/// <inheritdoc/>
+		public override string ToString()
+		{
+			var ni = new NumberFormatInfo();
+			ni.NumberDecimalDigits = '.';
+
+			return string.Format(ni,
+								 "BoldDriverBiasedMatrixFactorization num_factors={0} bias_reg={1} reg_u={2} reg_i={3} learn_rate={4} num_iter={5} init_mean={6} init_stdev={7}",
+								 NumFactors, BiasReg, RegU, RegI, LearnRate, NumIter, InitMean, InitStdev);
+		}		
 	}
 }
 
