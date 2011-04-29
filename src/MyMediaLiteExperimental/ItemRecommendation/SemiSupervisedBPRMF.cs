@@ -51,6 +51,7 @@ namespace MyMediaLite.ItemRecommendation
 			double learn_rate_i = learn_rate;
 			double learn_rate_j = learn_rate;
 
+			// TODO do this via sampling, not learn rate modification
 			if (! TestUsers.Contains(u))
 				learn_rate_u *= NonTestModifier;
 			if (! TestItems.Contains(i))
