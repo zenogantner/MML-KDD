@@ -38,13 +38,11 @@ namespace MyMediaLite.RatingPrediction
 	{
 		/// <summary>Regularization parameter for the user biases</summary>
 		/// <remarks>If not set, the recommender will try to find suitable values.</remarks>
-		public double RegU { get { return reg_u; } set { reg_u = value; } }
-		private double reg_u = double.NaN;
+		public double RegU { get; set; }
 
 		/// <summary>Regularization parameter for the item biases</summary>
 		/// <remarks>If not set, the recommender will try to find suitable values.</remarks>
-		public double RegI { get { return reg_i; } set { reg_i = value; } }
-		private double reg_i = double.NaN;
+		public double RegI { get; set; }
 
 		private double global_average;
 		private double[] user_biases;
@@ -69,7 +67,7 @@ namespace MyMediaLite.RatingPrediction
 			}
 			for (int i = 0; i < item_biases.Length; i++)
 				if (item_ratings_count[i] != 0)
-					item_biases[i] = item_biases[i] / (reg_i + item_ratings_count[i]);
+					item_biases[i] = item_biases[i] / (RegI + item_ratings_count[i]);
 
 			// compute user biases
 			for (int index = 0; index < Ratings.Count; index++)
@@ -79,7 +77,7 @@ namespace MyMediaLite.RatingPrediction
 			}
 			for (int u = 0; u < user_biases.Length; u++)
 				if (user_ratings_count[u] != 0)
-					user_biases[u] = user_biases[u] / (reg_u + user_ratings_count[u]);
+					user_biases[u] = user_biases[u] / (RegU + user_ratings_count[u]);
 		}
 
 		/// <inheritdoc/>
@@ -105,7 +103,7 @@ namespace MyMediaLite.RatingPrediction
 				foreach (int index in ratings.ByUser[user_id])
 					user_biases[user_id] += Ratings[index] - global_average - item_biases[Ratings.Items[index]];
 				if (ratings.ByUser[user_id].Count != 0)
-					user_biases[user_id] = user_biases[user_id] / (reg_u + ratings.ByUser[user_id].Count);
+					user_biases[user_id] = user_biases[user_id] / (RegU + ratings.ByUser[user_id].Count);
 			}
 		}
 
@@ -117,7 +115,7 @@ namespace MyMediaLite.RatingPrediction
 				foreach (int index in ratings.ByItem[item_id])
 					item_biases[item_id] += Ratings[index] - global_average;
 				if (ratings.ByItem[item_id].Count != 0)
-					item_biases[item_id] = item_biases[item_id] / (reg_i + ratings.ByItem[item_id].Count);
+					item_biases[item_id] = item_biases[item_id] / (RegI + ratings.ByItem[item_id].Count);
 			}
 		}
 
@@ -194,7 +192,7 @@ namespace MyMediaLite.RatingPrediction
 			var ni = new NumberFormatInfo();
 			ni.NumberDecimalDigits = '.';
 
-			return string.Format(ni, "UserItemBaseline reg_u={0} reg_i={1}", reg_u, reg_i);
+			return string.Format(ni, "UserItemBaseline reg_u={0} reg_i={1}", RegU, RegI);
 		}
 	}
 }
