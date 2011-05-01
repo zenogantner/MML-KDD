@@ -38,18 +38,16 @@
     </table>
   </p>
 
-  <!--
   <h3>MovieLens 100k</h3>
   <p>
-    Results on the <it>u1</it> split:
+    5-fold crossvalidation with <tt>--random-seed=1</tt>
     <table border="1">
       <tr> <th>Method</th> <th>Hyperparameters</th> <th>RMSE</th> </tr>
-      [% FOREACH entry IN ml100k_data %]
+      [% FOREACH entry IN ml100k %]
       <tr> <td>[% entry.method %]</td> <td>[% entry.hp %]</td> <td>[% entry.rmse %]</td> </tr>
       [% END %]
     </table>
   </p>
-  -->
    
   <h2>Academic Research using MyMediaLite</h2>
   <p>
