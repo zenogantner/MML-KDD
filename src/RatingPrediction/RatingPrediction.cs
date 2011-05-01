@@ -201,8 +201,13 @@ MyMediaLite rating prediction
 		Recommender.Configure(recommender, recommender_options, Usage);
 
 		// ID mapping objects
-		var user_mapping = new EntityMapping();
-		var item_mapping = new EntityMapping();
+		IEntityMapping user_mapping = new EntityMapping();
+		IEntityMapping item_mapping = new EntityMapping();
+		if (file_format == RatingFileFormat.KDDCUP_2011)
+		{
+			user_mapping = new IdentityMapping();
+			item_mapping = new IdentityMapping();
+		}
 
 		// load all the data
 		TimeSpan loading_time = Utils.MeasureTime(delegate() {
@@ -337,7 +342,7 @@ MyMediaLite rating prediction
     static void LoadData(string data_dir,
 	              string training_file, string test_file,
 	              double min_rating, double max_rating,
-	              EntityMapping user_mapping, EntityMapping item_mapping,
+	              IEntityMapping user_mapping, IEntityMapping item_mapping,
 	              string user_attributes_file, string item_attributes_file,
 	              string user_relation_file, string item_relation_file)
 	{
