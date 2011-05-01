@@ -1,4 +1,4 @@
-1.01	2011-04-??
+1.01	2011-05-??
 	- KDD Cup 2011
           - one program per track
           - add validation functionality for track 2
@@ -32,6 +32,8 @@
         - evaluation
           - add relevant_users feature for item prediction
           - rating evaluation: check arguments for null
+          - rating evaluation cross validation: clone recommender to be
+             unaffected by state changes
         - data structures
           - IRatings: add CountByUser and CountByItem
           - fix incorrect error message in Matrix class (reported by

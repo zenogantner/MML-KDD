@@ -50,9 +50,9 @@ class RatingPrediction
 	static List<double> rmse_eval_stats     = new List<double>();
 
 	// global command line parameters
-	static bool compute_fit      = false;
-	static bool ml1m_format = false;
-	static RatingType rating_type = RatingType.DOUBLE;
+	static bool compute_fit             = false;
+	static RatingFileFormat file_format = RatingFileFormat.DEFAULT;
+	static RatingType rating_type       = RatingType.DOUBLE;
 
 	static void Usage(string message)
 	{
@@ -66,11 +66,9 @@ class RatingPrediction
 		Console.WriteLine(@"
 MyMediaLite rating prediction
 
- usage:  RatingPrediction.exe TRAINING_FILE TEST_FILE METHOD [ARGUMENTS] [OPTIONS]
+ usage:  RatingPrediction.exe --training-file=FILE --recommender=METHOD [ARGUMENTS] [OPTIONS]
 
-  use '-' for either TRAINING_FILE or TEST_FILE to read the data from STDIN
-
-  methods (plus options and their defaults):");
+  recommenders (plus options and their defaults):");
 
 			Console.Write("   - ");
 			Console.WriteLine(string.Join("\n   - ", Recommender.List("MyMediaLite.RatingPrediction")));
@@ -78,8 +76,9 @@ MyMediaLite rating prediction
 			Console.WriteLine(@"method ARGUMENTS have the form name=value
 
   general OPTIONS:
+   --recommender=METHOD             set recommender method (default: BiasedMatrixFactorization)
    --recommender-options=OPTIONS    use OPTIONS as recommender options
-   --option-file=FILE               read options from FILE (line format KEY: VALUE)
+   --test-file=FILE                 read test data from FILE
    --random-seed=N                  set random seed to N
    --data-dir=DIR                   load all files from DIR
    --user-attributes=FILE           file containing user attribute information
@@ -94,10 +93,8 @@ MyMediaLite rating prediction
    --prediction-file=FILE           write the rating predictions to  FILE ('-' for STDOUT)
    --cross-validation=K             perform k-fold crossvalidation on the training data
                                     (ignores the test data)
-   --ml1m-format                    read rating data in MovieLens 1M (and 10M) format
-   --kddcup-format                  read rating data in KDDCup-2011 format
-   --rating-type=float|byte|double  store ratings as floats instead of doubles
-                                    store ratings as bytes instead of doubles
+   --file-format=ml1m|kddcup2011|default
+   --rating-type=float|byte|double  store ratings as floats or bytes or doubles (default)
 
   options for finding the right number of iterations (MF methods)
    --find-iter=N                  give out statistics every N iterations
@@ -105,7 +102,7 @@ MyMediaLite rating prediction
    --epsilon=NUM                  abort iterations if RMSE is more than best result plus NUM
    --rmse-cutoff=NUM              abort if RMSE is above NUM
    --mae-cutoff=NUM               abort if MAE is above NUM
-   --compute-fit=BOOL             display fit on training data every find_iter iterations");
+   --compute-fit                  display fit on training data every find_iter iterations");
 
 		Environment.Exit(exit_code);
 	}
@@ -120,6 +117,7 @@ MyMediaLite rating prediction
 		ni.NumberDecimalDigits = '.';
 
 		// recommender arguments
+		string method              = "BiasedMatrixFactorization";
 		string recommender_options = string.Empty;
 
 		// arguments for iteration search
@@ -129,11 +127,13 @@ MyMediaLite rating prediction
 		double rmse_cutoff = double.MaxValue;
 		double mae_cutoff  = double.MaxValue;
 
-		// collaborative data characteristics
+		// data characteristics
 		double min_rating  = 1;
 		double max_rating  = 5;
 
 		// data arguments
+		string training_file        = null;
+		string test_file            = null;
 		string data_dir             = string.Empty;
 		string user_attributes_file = string.Empty;
 		string item_attributes_file = string.Empty;
@@ -150,6 +150,9 @@ MyMediaLite rating prediction
 
 	   	var p = new OptionSet() {
 			// string-valued options
+			{ "training-file=",       v              => training_file        = v },
+			{ "test-file=",           v              => test_file            = v },
+			{ "recommender=",         v              => method               = v },
 			{ "recommender-options=", v              => recommender_options  = v },
    			{ "data-dir=",            v              => data_dir             = v },
 			{ "user-attributes=",     v              => user_attributes_file = v },
@@ -172,23 +175,14 @@ MyMediaLite rating prediction
 			{ "mae-cutoff=",          (double v)     => mae_cutoff           = v },
 			// enum options
 			{ "rating-type=",         (RatingType v) => rating_type          = v },
+			{ "file-format=",         (RatingFileFormat v) => file_format    = v },
 			// boolean options
 			{ "compute-fit",          v              => compute_fit = v != null },
 			{ "no-eval",              v              => no_eval     = v != null },
-			{ "ml1m-format",          v              => ml1m_format = v != null },
    	  	};
    		IList<string> extra_args = p.Parse(args);
 
 		// TODO make sure interaction of --find-iter and --cross-validation works properly
-		
-		// check number of command line parameters
-		if (extra_args.Count < 3)
-			Usage("Not enough arguments.");
-
-		// read command line parameters
-		string training_file = extra_args[0]; // TODO handley via Mono.Options, too
-		string testfile      = extra_args[1];
-		string method        = extra_args[2];
 
 		CommandLineParameters parameters = null;
 		try	{ parameters = new CommandLineParameters(extra_args, 3); }
@@ -206,24 +200,18 @@ MyMediaLite rating prediction
 
 		Recommender.Configure(recommender, recommender_options, Usage);
 
-
-		// check command-line parameters
-		if (training_file.Equals("-") && testfile.Equals("-"))
-			Usage("Either training or test data, not both, can be read from STDIN.");
-
 		// ID mapping objects
 		var user_mapping = new EntityMapping();
 		var item_mapping = new EntityMapping();
 
 		// load all the data
 		TimeSpan loading_time = Utils.MeasureTime(delegate() {
-			LoadData(data_dir, training_file, testfile, min_rating, max_rating,
+			LoadData(data_dir, training_file, test_file, min_rating, max_rating,
 			         user_mapping, item_mapping, user_attributes_file, item_attributes_file,
 			         user_relations_file, item_relations_file);
 		});
 		Console.WriteLine(string.Format(ni, "loading_time {0,0:0.##}", loading_time.TotalSeconds));
 
-		// TODO move that into the recommender functionality (set from data)
 		recommender.MinRating = min_rating;
 		recommender.MaxRating = max_rating;
 		Console.Error.WriteLine(string.Format(ni, "ratings range: [{0}, {1}]", recommender.MinRating, recommender.MaxRating));
@@ -356,10 +344,13 @@ MyMediaLite rating prediction
 		// TODO check for the existence of files before starting to load all of them
 
 		// read training data
-		if (ml1m_format)
-			training_data = MovieLensRatingData.Read(Path.Combine(data_dir, training_file), min_rating, max_rating, user_mapping, item_mapping);
-		else
+		if (file_format == RatingFileFormat.DEFAULT)
 			training_data = RatingPredictionStatic.Read(Path.Combine(data_dir, training_file), min_rating, max_rating, user_mapping, item_mapping, rating_type);
+		else if (file_format == RatingFileFormat.MOVIELENS_1M)
+			training_data = MovieLensRatingData.Read(Path.Combine(data_dir, training_file), min_rating, max_rating, user_mapping, item_mapping);
+		else if (file_format == RatingFileFormat.KDDCUP_2011)
+			training_data = MyMediaLite.IO.KDDCup2011.Ratings.Read(Path.Combine(data_dir, training_file)); // TODO do something about the mappings
+
 		recommender.Ratings = training_data;
 
 		// user attributes
@@ -405,10 +396,14 @@ MyMediaLite rating prediction
 			}
 
 		// read test data
-		if (ml1m_format)
-			test_data = MovieLensRatingData.Read(Path.Combine(data_dir, test_file), min_rating, max_rating, user_mapping, item_mapping);
-		else
-			test_data = RatingPredictionStatic.Read(Path.Combine(data_dir, test_file), min_rating, max_rating, user_mapping, item_mapping, rating_type);
+		if (test_file != null)
+		{
+			if (file_format == RatingFileFormat.MOVIELENS_1M)
+				test_data = MovieLensRatingData.Read(Path.Combine(data_dir, test_file), min_rating, max_rating, user_mapping, item_mapping);
+			else
+				test_data = RatingPredictionStatic.Read(Path.Combine(data_dir, test_file), min_rating, max_rating, user_mapping, item_mapping, rating_type);
+			// TODO add KDD Cup
+		}
 	}
 
 	static void AbortHandler(object sender, ConsoleCancelEventArgs args)
