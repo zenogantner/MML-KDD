@@ -1,9 +1,7 @@
 1.01	2011-05-??
-	- KDD Cup 2011
-          - one program per track
-          - add validation functionality for track 2
-          - add IKDDCupRecommender interface for recommenders that use the
-            KDDCup item data
+        - API changes
+          - add interface IEntityMapping
+          - IRatings: add CountByUser and CountByItem
         - recommenders
           - make ItemRecommender and RatingPredictor clonable
           - BiasedMatrixFactorization
@@ -35,9 +33,13 @@
           - rating evaluation cross validation: clone recommender to be
              unaffected by state changes
         - data structures
-          - IRatings: add CountByUser and CountByItem
           - fix incorrect error message in Matrix class (reported by
             Chris Newell)
+	- KDD Cup 2011
+          - one program per track
+          - add validation functionality for track 2
+          - add IKDDCupRecommender interface for recommenders that use the
+            KDDCup item data
 
 1.0	2011-03-19
 	- recommenders

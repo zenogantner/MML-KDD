@@ -92,7 +92,7 @@ MyMediaLite rating prediction
    --no-eval                        do not evaluate
    --prediction-file=FILE           write the rating predictions to  FILE ('-' for STDOUT)
    --cross-validation=K             perform k-fold crossvalidation on the training data
-                                    (ignores the test data)
+                                    (does not need test data)
    --file-format=ml1m|kddcup2011|default
    --rating-type=float|byte|double  store ratings as floats or bytes or doubles (default)
 
@@ -341,8 +341,6 @@ MyMediaLite rating prediction
 	              string user_attributes_file, string item_attributes_file,
 	              string user_relation_file, string item_relation_file)
 	{
-		// TODO check for the existence of files before starting to load all of them
-
 		// read training data
 		if (file_format == RatingFileFormat.DEFAULT)
 			training_data = RatingPredictionStatic.Read(Path.Combine(data_dir, training_file), min_rating, max_rating, user_mapping, item_mapping, rating_type);
