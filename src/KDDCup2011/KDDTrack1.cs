@@ -278,7 +278,7 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 					if (prediction_file != string.Empty)
 						if (track2)
 						{
-							KDDCup.PredictRatingsDouble(rating_predictor_validate, validation_ratings, prediction_file + "-validate-it-" + i);
+							KDDCup.PredictRatingsDouble(rating_predictor_validate, validation_candidates, prediction_file + "-validate-it-" + i);
 							KDDCup.PredictRatingsDouble(rating_predictor_final,    test_data, prediction_file + "-it-" + i);
 						}
 						else
@@ -354,16 +354,12 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 
 				Console.WriteLine();
 				seconds = Utils.MeasureTime( delegate() {
+						KDDCup.PredictRatingsDouble(rating_predictor_final,    test_data, prediction_file);
+
 						if (track2)
-						{
 							KDDCup.PredictRatingsDouble(rating_predictor_validate, validation_candidates, prediction_file + "-validate");
-							KDDCup.PredictRatingsDouble(rating_predictor_final,    test_data, prediction_file);
-						}
 						else
-						{
 							KDDCup.PredictRatings(rating_predictor_validate, validation_ratings, prediction_file + "-validate");
-							KDDCup.PredictRatings(rating_predictor_final,    test_data, prediction_file);
-						}
 				});
 				Console.Error.WriteLine("predicting_time " + seconds);
 			}
@@ -412,7 +408,7 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 
 		if (track2)
 			validation_candidates = MyMediaLite.IO.KDDCup2011.Ratings.ReadTest(Path.Combine(data_dir, sample_data ? "validationCandidatesIdx2.firstLines.txt" : "validationCandidatesIdx2.txt"));
-		
+
 		// read item data
 		if (recommender is IKDDCupRecommender)
 		{

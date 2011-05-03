@@ -50,10 +50,10 @@ namespace MyMediaLite.ItemRecommendation
 		/// 2011
 		/// </remarks>
 		public bool BoldDriver { set; get; }
-		
+
 		/// <summary>Loss for the last iteration, used by bold driver heuristics</summary>
 		double last_loss = double.NegativeInfinity;
-		
+
 		/// <summary>Default constructor</summary>
 		public BPRMF_KDD()
 		{
@@ -62,10 +62,9 @@ namespace MyMediaLite.ItemRecommendation
 		}
 
 		/// <inheritdoc/>
-		protected override void InitModel()
+		public override void Train()
 		{
-			base.InitModel();
-
+			// prepare helper data structures for training
 			users = new int[Feedback.Count];
 			items = new int[Feedback.Count];
 
@@ -78,47 +77,46 @@ namespace MyMediaLite.ItemRecommendation
 
 					index++;
 				}
-			
-			if (BoldDriver)
-				last_loss = ComputeLoss();
-		}
-
-		/// <inheritdoc/>
-		public override void Train()
-		{
-			// prepare helper data structures for training
+			/*
 			user_pos_items = new List<IList<int>>();
 			for (int u = 0; u < MaxUserID + 1; u++)
 				user_pos_items.Add(new List<int>(Feedback.UserMatrix[u]));
+			*/
 
 			// suppress using user_neg_items in BPRMF
 			FastSamplingMemoryLimit = 0;
 
-			base.Train();
+			InitModel();
+
+			if (BoldDriver)
+				last_loss = ComputeLoss();
+
+			for (int i = 0; i < NumIter; i++)
+				Iterate();
 		}
 
-		/// <inheritdoc/>		
+		/// <inheritdoc/>
 		public override void Iterate()
 		{
 			base.Iterate();
-		
+
 			if (BoldDriver)
 			{
 				double loss = ComputeLoss();
-						
+
 				if (loss > last_loss)
 					LearnRate *= 0.5;
 				else if (loss < last_loss)
 					LearnRate *= 1.05;
-				
+
 				last_loss = loss;
-				
+
 				var ni = new NumberFormatInfo();
-				ni.NumberDecimalDigits = '.';		
+				ni.NumberDecimalDigits = '.';
 				Console.Error.WriteLine(string.Format(ni, "loss {0} learn_rate {1} ", loss, LearnRate));
 			}
 		}
-		
+
 		/// <inheritdoc/>
 		protected override void SampleTriple(out int u, out int i, out int j)
 		{
@@ -134,7 +132,7 @@ namespace MyMediaLite.ItemRecommendation
 				i = user_pos_items[u][random.Next(0, user_pos_items[u].Count - 1)];
 			}
 			else
-			*/			
+			*/
 			{
 				// sample user from positive user-item pairs
 				int index = random.Next(0, items.Length - 1);
@@ -153,40 +151,40 @@ namespace MyMediaLite.ItemRecommendation
 		public double ComputeLoss()
 		{
 			double loss = 0;
-			
+
 			var u_counter = new int[MaxUserID + 1];
 			var i_counter = new int[MaxItemID + 1];
 			var j_counter = new int[MaxItemID + 1];
-			
+
 			{
 				int u, i, j;
-				
+
 				for (int x = 0; x <= MaxUserID; x++) // TODO doing this |U| times is arbitrary
 				{
 					SampleTriple(out u, out i, out j);
 					double x_uij = Predict(u, i) - Predict(u, j);
 					loss += 1 / (1 + Math.Exp(x_uij));
-					
+
 					u_counter[u]++;
 					i_counter[i]++;
 					j_counter[j]++;
 				}
 			}
-			
+
 			loss *= (double) (Feedback.Count / (MaxUserID + 1));
-			
+
 			for (int u = 0; u <= MaxUserID; u++)
 				loss += u_counter[u] * RegU * Math.Pow(VectorUtils.EuclideanNorm(user_factors.GetRow(u)), 2);
 
 			for (int i = 0; i <= MaxItemID; i++)
 				loss += i_counter[i] * RegI * Math.Pow(VectorUtils.EuclideanNorm(item_factors.GetRow(i)), 2);
-			
+
 			for (int j = 0; j <= MaxItemID; j++)
-				loss += j_counter[j] * RegJ * Math.Pow(VectorUtils.EuclideanNorm(item_factors.GetRow(j)), 2);			
-			
+				loss += j_counter[j] * RegJ * Math.Pow(VectorUtils.EuclideanNorm(item_factors.GetRow(j)), 2);
+
 			return loss;
 		}
-		
+
 		/// <inheritdoc/>
 		public override string ToString()
 		{

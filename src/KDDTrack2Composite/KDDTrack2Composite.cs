@@ -32,6 +32,7 @@ class KDDTrack2Composite
 	const int FILE_SIZE = 607032;
 
 	static string data_dir = null;
+	static bool   sigmoid = false;
 
 	/// <summary>Parameters: num_files weight_1 .. weight_n file_1 .. file_n output_file</summary>
 	/// <param name="args">the command-line arguments</param>
@@ -49,6 +50,7 @@ class KDDTrack2Composite
 	   	var p = new OptionSet() {
    			{ "data-dir=",              v => data_dir = v },
 			{ "prediction-file=",       v => prediction_file = v },
+			{ "sigmoid",                v => sigmoid = v != null },
 			//{ "score-file=",            v => score_file = v },			
    	  	};
    		IList<string> extra_args = p.Parse(args);
@@ -61,8 +63,8 @@ class KDDTrack2Composite
 		IList<double> validation_scores = CombineFiles(ValidationFilename(rated_file), ValidationFilename(rating_file));
 
 		// compute error on validation set
-		string validation_candidates_file = Path.Combine(data_dir, "validationCandidatesIdx2.txt");
-		string validation_hits_file       = Path.Combine(data_dir, "validationHitsIdx2.txt");				
+		string validation_candidates_file = Path.Combine(data_dir, "track2-validation/validationCandidatesIdx2.txt");
+		string validation_hits_file       = Path.Combine(data_dir, "track2-validation/validationHitsIdx2.txt");				
 		var candidates = Track2Items.Read(validation_candidates_file);
 		var hits       = Track2Items.Read(validation_hits_file);
 		double error = KDDCup.EvaluateTrack2(Decide(validation_scores), candidates, hits);
@@ -117,7 +119,10 @@ class KDDTrack2Composite
 		var combined_content = new double[FILE_SIZE];
 		
 		for (int i = 0; i < content1.Count; i++)
-			combined_content[i] = content1[i] * content2[i];
+			if (sigmoid)
+				combined_content[i] = (1 / (1 + Math.Exp(-content1[i]))) * content2[i];
+			else
+				combined_content[i] = content1[i] * content2[i];
 		
 		return combined_content;
 	}

@@ -162,6 +162,8 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		if (predict_rated)
 			predict_score = true;
 		
+		Console.Error.WriteLine("predict_score={0}", predict_score);
+		
 		if (random_seed != -1)
 			MyMediaLite.Util.Random.InitInstance(random_seed);
 
@@ -250,10 +252,16 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 
 						if (prediction_file != string.Empty)
 						{
-							KDDCup.PredictTrack2(recommender_validate, validation_candidates, prediction_file + "-validate-it-" + i);
-
-							// predict test set
-							KDDCup.PredictTrack2(recommender_final, test_candidates, prediction_file + "-it-" + i);
+							if (predict_score)
+							{
+								KDDCup.PredictScoresTrack2(recommender_validate, validation_candidates, prediction_file + "-validate-it-" + i);
+								KDDCup.PredictScoresTrack2(recommender_final, test_candidates, prediction_file + "-it-" + i);								
+							}							
+							else
+							{
+								KDDCup.PredictTrack2(recommender_validate, validation_candidates, prediction_file + "-validate-it-" + i);
+								KDDCup.PredictTrack2(recommender_final, test_candidates, prediction_file + "-it-" + i);
+							}
 						}
 					});
 					eval_time_stats.Add(time.TotalSeconds);
@@ -302,12 +310,12 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 					{
 						if (predict_score)
 						{
-							KDDCup.PredictScoresTrack2(recommender_validate, validation_candidates, prediction_file + "validate");
+							KDDCup.PredictScoresTrack2(recommender_validate, validation_candidates, prediction_file + "-validate");
 							KDDCup.PredictScoresTrack2(recommender_final, test_candidates, prediction_file);
 						}						
 						else
 						{
-							KDDCup.PredictTrack2(recommender_validate, validation_candidates, prediction_file + "validate");
+							KDDCup.PredictTrack2(recommender_validate, validation_candidates, prediction_file + "-validate");
 							KDDCup.PredictTrack2(recommender_final, test_candidates, prediction_file);
 						}
 					}
