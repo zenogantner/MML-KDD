@@ -107,7 +107,7 @@ namespace MyMediaLite.ItemRecommendation
 				if (loss > last_loss)
 					LearnRate *= 0.5;
 				else if (loss < last_loss)
-					LearnRate *= 1.05;
+					LearnRate *= 1.1;
 
 				last_loss = loss;
 
@@ -148,9 +148,9 @@ namespace MyMediaLite.ItemRecommendation
 
 		/// <summary>Compute approximate loss</summary>
 		/// <returns>the approximate loss</returns>
-		public double ComputeLoss()
+		public virtual double ComputeLoss()
 		{
-			double loss = 0;
+			double ranking_loss = 0;
 
 			var u_counter = new int[MaxUserID + 1];
 			var i_counter = new int[MaxItemID + 1];
@@ -159,11 +159,11 @@ namespace MyMediaLite.ItemRecommendation
 			{
 				int u, i, j;
 
-				for (int x = 0; x <= MaxUserID; x++) // TODO doing this |U| times is arbitrary
+				for (int x = 0; x <= MaxUserID; x++) // doing this |U| times is rather arbitrary
 				{
 					SampleTriple(out u, out i, out j);
 					double x_uij = Predict(u, i) - Predict(u, j);
-					loss += 1 / (1 + Math.Exp(x_uij));
+					ranking_loss += 1 / (1 + Math.Exp(x_uij));
 
 					u_counter[u]++;
 					i_counter[i]++;
@@ -171,18 +171,21 @@ namespace MyMediaLite.ItemRecommendation
 				}
 			}
 
-			loss *= (double) (Feedback.Count / (MaxUserID + 1));
-
+			double complexity = 0;
 			for (int u = 0; u <= MaxUserID; u++)
-				loss += u_counter[u] * RegU * Math.Pow(VectorUtils.EuclideanNorm(user_factors.GetRow(u)), 2);
-
+				complexity += u_counter[u] * RegU * Math.Pow(VectorUtils.EuclideanNorm(user_factors.GetRow(u)), 2);
 			for (int i = 0; i <= MaxItemID; i++)
-				loss += i_counter[i] * RegI * Math.Pow(VectorUtils.EuclideanNorm(item_factors.GetRow(i)), 2);
-
+			{
+				complexity += i_counter[i] * RegI * Math.Pow(VectorUtils.EuclideanNorm(item_factors.GetRow(i)), 2);
+				complexity += i_counter[i] * BiasReg * Math.Pow(item_bias[i], 2);
+			}
 			for (int j = 0; j <= MaxItemID; j++)
-				loss += j_counter[j] * RegJ * Math.Pow(VectorUtils.EuclideanNorm(item_factors.GetRow(j)), 2);
+			{
+				complexity += j_counter[j] * RegJ * Math.Pow(VectorUtils.EuclideanNorm(item_factors.GetRow(j)), 2);
+				complexity += j_counter[j] * BiasReg * Math.Pow(item_bias[j], 2);
+			}
 
-			return loss;
+			return ranking_loss + 0.5 * complexity;
 		}
 
 		/// <inheritdoc/>
