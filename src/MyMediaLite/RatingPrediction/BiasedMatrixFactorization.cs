@@ -57,10 +57,10 @@ namespace MyMediaLite.RatingPrediction
 		/// 2011
 		/// </remarks>
 		public bool BoldDriver { set; get; }
-		
+
 		/// <summary>Loss for the last iteration, used by bold driver heuristics</summary>
-		double last_loss = double.NegativeInfinity;		
-		
+		double last_loss = double.NegativeInfinity;
+
 		/// <summary>the user biases</summary>
 		protected double[] user_bias;
 		/// <summary>the item biases</summary>
@@ -101,28 +101,28 @@ namespace MyMediaLite.RatingPrediction
 				Iterate();
 		}
 
-		/// <inheritdoc/>		
+		/// <inheritdoc/>
 		public override void Iterate()
 		{
 			base.Iterate();
-		
+
 			if (BoldDriver)
 			{
 				double loss = ComputeLoss();
-						
+
 				if (loss > last_loss)
 					LearnRate *= 0.5;
 				else if (loss < last_loss)
 					LearnRate *= 1.05;
-				
+
 				last_loss = loss;
-				
+
 				var ni = new NumberFormatInfo();
-				ni.NumberDecimalDigits = '.';		
+				ni.NumberDecimalDigits = '.';
 				Console.Error.WriteLine(string.Format(ni, "loss {0} learn_rate {1} ", loss, LearnRate));
 			}
-		}		
-		
+		}
+
 		/// <inheritdoc/>
 		protected override void Iterate(IList<int> rating_indices, bool update_user, bool update_item)
 		{
@@ -310,27 +310,28 @@ namespace MyMediaLite.RatingPrediction
 		/// <inheritdoc/>
 		public override double ComputeLoss()
 		{
-			double loss = 0;
+			double square_loss = 0;
 			for (int i = 0; i < ratings.Count; i++)
 			{
 				int user_id = ratings.Users[i];
 				int item_id = ratings.Items[i];
-				loss += Math.Pow(Predict(user_id, item_id) - ratings[i], 2);
+				square_loss += Math.Pow(Predict(user_id, item_id) - ratings[i], 2);
 			}
 
+			double complexity = 0;
 			for (int u = 0; u <= MaxUserID; u++)
 			{
-				loss += ratings.CountByUser[u] * RegU * Math.Pow(VectorUtils.EuclideanNorm(user_factors.GetRow(u)), 2);
-				loss += ratings.CountByUser[u] * BiasReg * Math.Abs(user_bias[u]);
+				complexity += ratings.CountByUser[u] * RegU * Math.Pow(VectorUtils.EuclideanNorm(user_factors.GetRow(u)), 2);
+				complexity += ratings.CountByUser[u] * BiasReg * Math.Pow(user_bias[u], 2);
 			}
 
 			for (int i = 0; i <= MaxItemID; i++)
 			{
-				loss += ratings.CountByItem[i] * RegI * Math.Pow(VectorUtils.EuclideanNorm(item_factors.GetRow(i)), 2);
-				loss += ratings.CountByItem[i] * BiasReg * Math.Abs(item_bias[i]);
+				complexity += ratings.CountByItem[i] * RegI * Math.Pow(VectorUtils.EuclideanNorm(item_factors.GetRow(i)), 2);
+				complexity += ratings.CountByItem[i] * BiasReg * Math.Pow(item_bias[i], 2);
 			}
 
-			return loss;
+			return square_loss + 0.5 * complexity;
 		}
 
 		/// <inheritdoc/>
