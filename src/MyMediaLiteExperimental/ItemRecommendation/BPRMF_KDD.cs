@@ -36,9 +36,6 @@ namespace MyMediaLite.ItemRecommendation
 		/// <summary>Modification factor for the learning rate of users to weight them higher or lower than items</summary>
 		public double UserLearnRateModifier { get; set; }
 
-		/// <summary>If true, sample users uniformly</summary>
-		//public bool UniformUserSampling { get; set; }
-
 		/// <summary>Weight for test users</summary>
 		public double TestUserWeight { get; set; }
 
@@ -58,7 +55,6 @@ namespace MyMediaLite.ItemRecommendation
 		public BPRMF_KDD()
 		{
 			UserLearnRateModifier = 1;
-			//UniformUserSampling = false;
 		}
 
 		/// <inheritdoc/>
@@ -77,11 +73,6 @@ namespace MyMediaLite.ItemRecommendation
 
 					index++;
 				}
-			/*
-			user_pos_items = new List<IList<int>>();
-			for (int u = 0; u < MaxUserID + 1; u++)
-				user_pos_items.Add(new List<int>(Feedback.UserMatrix[u]));
-			*/
 
 			// suppress using user_neg_items in BPRMF
 			FastSamplingMemoryLimit = 0;

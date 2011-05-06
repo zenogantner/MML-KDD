@@ -5,9 +5,7 @@ namespace MovieDemo
 	public partial class UserNameInput
 	{
 		private global::Gtk.Entry entry1;
-
 		private global::Gtk.Button buttonCancel;
-
 		private global::Gtk.Button buttonOk;
 
 		protected virtual void Build ()
@@ -18,8 +16,8 @@ namespace MovieDemo
 			this.Title = global::Mono.Unix.Catalog.GetString ("Enter Name");
 			this.WindowPosition = ((global::Gtk.WindowPosition)(4));
 			this.Modal = true;
-			// Internal child MovieDemo.UserNameInput.VBox
-			global::Gtk.VBox w1 = this.VBox;
+            // Internal child MovieDemo.UserNameInput.VBox
+            global::Gtk.VBox w1 = this.VBox;
 			w1.Name = "dialog1_VBox";
 			w1.BorderWidth = ((uint)(2));
 			// Container child dialog1_VBox.Gtk.Box+BoxChild
@@ -29,12 +27,12 @@ namespace MovieDemo
 			this.entry1.IsEditable = true;
 			this.entry1.InvisibleChar = '●';
 			w1.Add (this.entry1);
-			global::Gtk.Box.BoxChild w2 = ((global::Gtk.Box.BoxChild)(w1[this.entry1]));
+            global::Gtk.Box.BoxChild w2 = ((global::Gtk.Box.BoxChild)(w1 [this.entry1]));
 			w2.Position = 0;
 			w2.Expand = false;
 			w2.Fill = false;
-			// Internal child MovieDemo.UserNameInput.ActionArea
-			global::Gtk.HButtonBox w3 = this.ActionArea;
+            // Internal child MovieDemo.UserNameInput.ActionArea
+            global::Gtk.HButtonBox w3 = this.ActionArea;
 			w3.Name = "dialog1_ActionArea";
 			w3.Spacing = 10;
 			w3.BorderWidth = ((uint)(5));
@@ -48,7 +46,7 @@ namespace MovieDemo
 			this.buttonCancel.UseUnderline = true;
 			this.buttonCancel.Label = "gtk-cancel";
 			this.AddActionWidget (this.buttonCancel, -6);
-			global::Gtk.ButtonBox.ButtonBoxChild w4 = ((global::Gtk.ButtonBox.ButtonBoxChild)(w3[this.buttonCancel]));
+            global::Gtk.ButtonBox.ButtonBoxChild w4 = ((global::Gtk.ButtonBox.ButtonBoxChild)(w3 [this.buttonCancel]));
 			w4.Expand = false;
 			w4.Fill = false;
 			// Container child dialog1_ActionArea.Gtk.ButtonBox+ButtonBoxChild
@@ -60,7 +58,7 @@ namespace MovieDemo
 			this.buttonOk.UseUnderline = true;
 			this.buttonOk.Label = "gtk-ok";
 			this.AddActionWidget (this.buttonOk, -5);
-			global::Gtk.ButtonBox.ButtonBoxChild w5 = ((global::Gtk.ButtonBox.ButtonBoxChild)(w3[this.buttonOk]));
+            global::Gtk.ButtonBox.ButtonBoxChild w5 = ((global::Gtk.ButtonBox.ButtonBoxChild)(w3 [this.buttonOk]));
 			w5.Position = 1;
 			w5.Expand = false;
 			w5.Fill = false;

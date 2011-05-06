@@ -22,6 +22,7 @@ using System.IO;
 using System.Linq;
 using System.Reflection;
 using System.Text;
+using System.Threading.Tasks;
 using MyMediaLite;
 using MyMediaLite.Data;
 using MyMediaLite.DataType;
@@ -150,8 +151,8 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		else
 			data_dir = "mml-track2";
 		sample_data      = parameters.GetRemoveBool(   "sample_data",   false);
-		predict_rated    = parameters.GetRemoveBool(   "predict_rated", false); 
-		predict_score    = parameters.GetRemoveBool(   "predict_score", false); 
+		predict_rated    = parameters.GetRemoveBool(   "predict_rated", false);
+		predict_score    = parameters.GetRemoveBool(   "predict_score", false);
 
 		// other arguments
 		save_model_file  = parameters.GetRemoveString( "save_model");
@@ -161,9 +162,9 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 
 		if (predict_rated)
 			predict_score = true;
-		
+
 		Console.Error.WriteLine("predict_score={0}", predict_score);
-		
+
 		if (random_seed != -1)
 			MyMediaLite.Util.Random.InitInstance(random_seed);
 
@@ -223,11 +224,22 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 			Console.WriteLine();
 
 			if (load_model_file == string.Empty)
-			{
-				recommender_validate.Train(); // TODO parallelize
+				/*
 				if (prediction_file != string.Empty)
+					Parallel.Invoke(
+						() => { recommender_final.Train();    },
+						() => { recommender_validate.Train(); }
+					);
+				*/
+				if (prediction_file != string.Empty)
+				{
 					recommender_final.Train();
-			}
+					recommender_validate.Train();
+				}
+				else
+				{
+					recommender_validate.Train();
+				}
 
 			// evaluate and display results
 			double error = KDDCup.EvaluateTrack2(recommender_validate, validation_candidates, validation_hits);
@@ -236,15 +248,20 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 			for (int i = iterative_recommender_validate.NumIter + 1; i <= max_iter; i++)
 			{
 				TimeSpan time = Utils.MeasureTime(delegate() {
-					iterative_recommender_validate.Iterate(); // TODO parallelize
 					if (prediction_file != string.Empty)
-						iterative_recommender_final.Iterate();
+						Parallel.Invoke(
+							() => { Console.Error.WriteLine("parallel iteration"); },
+							() => { iterative_recommender_final.Iterate();         },
+							() => { iterative_recommender_validate.Iterate();      }
+						);
+					else
+						iterative_recommender_validate.Iterate();
 				});
 				training_time_stats.Add(time.TotalSeconds);
 
 				if (i % find_iter == 0)
 				{
-					time = Utils.MeasureTime(delegate() { // TODO parallelize
+					time = Utils.MeasureTime(delegate() { // TODO parallelize (maybe)
 						// evaluate
 						error = KDDCup.EvaluateTrack2(recommender_validate, validation_candidates, validation_hits);
 						err_eval_stats.Add(error);
@@ -255,8 +272,8 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 							if (predict_score)
 							{
 								KDDCup.PredictScoresTrack2(recommender_validate, validation_candidates, prediction_file + "-validate-it-" + i);
-								KDDCup.PredictScoresTrack2(recommender_final, test_candidates, prediction_file + "-it-" + i);								
-							}							
+								KDDCup.PredictScoresTrack2(recommender_final, test_candidates, prediction_file + "-it-" + i);
+							}
 							else
 							{
 								KDDCup.PredictTrack2(recommender_validate, validation_candidates, prediction_file + "-validate-it-" + i);
@@ -312,7 +329,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 						{
 							KDDCup.PredictScoresTrack2(recommender_validate, validation_candidates, prediction_file + "-validate");
 							KDDCup.PredictScoresTrack2(recommender_final, test_candidates, prediction_file);
-						}						
+						}
 						else
 						{
 							KDDCup.PredictTrack2(recommender_validate, validation_candidates, prediction_file + "-validate");
@@ -387,7 +404,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 			for (int index = 0; index < validation_ratings.Count; index++)
 				validation_rated_hits[validation_ratings.Users[index]].Add(validation_ratings.Items[index]);
 			validation_hits = validation_rated_hits;
-			
+
 			recommender_validate.Feedback = CreatePosOnlyFeedback(training_ratings);
 			recommender_final.Feedback    = CreatePosOnlyFeedback(complete_ratings);
 		}
@@ -436,11 +453,12 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 			feedback.Add(ratings.Users[i], ratings.Items[i]);
 
 		return feedback;
-	}	
-	
+	}
+
 	static void AbortHandler(object sender, ConsoleCancelEventArgs args)
 	{
 		DisplayIterationStats();
+		Console.Error.WriteLine("memory {0}", Memory.Usage);
 	}
 
 	static void DisplayIterationStats()

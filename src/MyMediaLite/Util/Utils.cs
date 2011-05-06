@@ -115,22 +115,13 @@ namespace MyMediaLite.Util
 			return types.ToArray();
 		}
 
-		/// <summary>Display dataset statistics</summary>
-		/// <param name="train">the training data</param>
-		/// <param name="test">the test data</param>
-		/// <param name="recommender">the recommender (to get attribute information)</param>
-		public static void DisplayDataStats(IRatings train, IRatings test, RatingPredictor recommender)
-		{
-			DisplayDataStats(train, test, recommender, false);
-		}
-		
 		// TODO get rid of recommender argument
 		/// <summary>Display dataset statistics</summary>
 		/// <param name="train">the training data</param>
 		/// <param name="test">the test data</param>
 		/// <param name="recommender">the recommender (to get attribute information)</param>
 		/// <param name="display_overlap">if set true, display the user/item overlap between train and test</param>
-		public static void DisplayDataStats(IRatings train, IRatings test, RatingPredictor recommender, bool display_overlap)
+		public static void DisplayDataStats(IRatings train, IRatings test, RatingPredictor recommender, bool display_overlap = false)
 		{
 			var ni = new NumberFormatInfo();
 			ni.NumberDecimalDigits = '.';

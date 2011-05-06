@@ -420,6 +420,7 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 	static void AbortHandler(object sender, ConsoleCancelEventArgs args)
 	{
 		DisplayIterationStats();
+		Console.Error.WriteLine(Memory.Usage);
 	}
 
 	static void DisplayIterationStats()

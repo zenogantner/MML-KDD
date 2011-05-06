@@ -171,8 +171,8 @@ class ItemPrediction
 			LoadData(data_dir, trainfile, testfile, user_mapping, item_mapping, relevant_items_file, user_attributes_file, item_attributes_file, user_relation_file, item_relation_file);
 		});
 		Console.WriteLine(string.Format(ni, "loading_time {0,0:0.##}", loading_time.TotalSeconds));
-
-		Utils.DisplayDataStats(training_data, test_data, recommender);
+		
+		MyMediaLite.Util.Utils.DisplayDataStats(training_data, test_data, recommender);
 
 		TimeSpan time_span;
 
@@ -319,7 +319,7 @@ class ItemPrediction
 		training_data = ItemRecommendation.Read(trainfile, user_mapping, item_mapping);
 
 		// relevant items
-		if (! relevant_items_file.Equals(string.Empty) )
+		if (relevant_items_file != string.Empty)
 			relevant_items = new HashSet<int>(item_mapping.ToInternalID(Utils.ReadIntegers(Path.Combine(data_dir, relevant_items_file))));
 		else
 			relevant_items = training_data.AllItems;
@@ -386,6 +386,7 @@ class ItemPrediction
 	static void AbortHandler(object sender, ConsoleCancelEventArgs args)
 	{
 		DisplayIterationStats();
+		Console.Error.WriteLine(Memory.Usage);
 	}
 
 	static void DisplayIterationStats()
