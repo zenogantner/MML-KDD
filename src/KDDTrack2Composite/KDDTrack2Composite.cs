@@ -32,7 +32,9 @@ class KDDTrack2Composite
 	const int FILE_SIZE = 607032;
 
 	static string data_dir = null;
-	static bool   sigmoid = false;
+	static bool sigmoid       = false;
+	static bool pairwise_prob = false;
+	static bool pairwise_wins = false;
 
 	/// <summary>Parameters: num_files weight_1 .. weight_n file_1 .. file_n output_file</summary>
 	/// <param name="args">the command-line arguments</param>
@@ -48,9 +50,11 @@ class KDDTrack2Composite
 		string prediction_file = null;
 		//string score_file      = null;
 	   	var p = new OptionSet() {
-   			{ "data-dir=",              v => data_dir = v },
-			{ "prediction-file=",       v => prediction_file = v },
-			{ "sigmoid",                v => sigmoid = v != null },
+   			{ "data-dir=",              v => data_dir = v         },
+			{ "prediction-file=",       v => prediction_file = v  },
+			{ "sigmoid",                v => sigmoid = v != null  },
+			{ "pairwise-probability",   v => pairwise_prob = v != null },
+			{ "pairwise-wins",          v => pairwise_wins = v != null },
 			//{ "score-file=",            v => score_file = v },			
    	  	};
    		IList<string> extra_args = p.Parse(args);
@@ -118,13 +122,45 @@ class KDDTrack2Composite
 		
 		var combined_content = new double[FILE_SIZE];
 		
-		for (int i = 0; i < content1.Count; i++)
-			if (sigmoid)
-				combined_content[i] = (1 / (1 + Math.Exp(-content1[i]))) * content2[i];
-			else
-				combined_content[i] = content1[i] * content2[i];
+		for (int i = 0; i < content1.Count; i += 6)
+		{
+			var candidate_scores = new double[NUM_CANDIDATES];
+
+			// do something with the candidates
+			for (int j = 0; j < NUM_CANDIDATES; j++)
+				if (sigmoid)
+					candidate_scores[j] = Sigmoid(content1[i + j]) * content2[i + j];
+				else if (pairwise_prob)
+				{
+					double prob = 0;
+					for (int k = 0; k < NUM_CANDIDATES; k++)
+						if (k != j)
+							prob += Sigmoid(content1[i + j] - content2[i + k]);
+					candidate_scores[j] = prob; // not normalized
+				}
+				else if (pairwise_wins)
+				{
+					int wins = 0;
+					for (int k = 0; k < NUM_CANDIDATES; k++)
+						if (k != j && content1[i + j] > content2[i + k])
+							wins++;
+					candidate_scores[j] = wins;
+				}			
+				else
+					candidate_scores[j] = content1[i + j] * content2[i + j];
+				
+			
+			// move candidates to the output
+			for (int j = 0; j < candidate_scores.Length; j++)
+				combined_content[i + j] = candidate_scores[j];
+		}
 		
 		return combined_content;
+	}
+	
+	static double Sigmoid(double x)
+	{
+		return (double) 1 / (1 + Math.Exp(-x));
 	}
 	
 	static string ValidationFilename(string filename)
