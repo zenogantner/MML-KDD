@@ -32,9 +32,11 @@ class KDDTrack2Composite
 	const int FILE_SIZE = 607032;
 
 	static string data_dir = null;
+	// TODO the following should be a enum
 	static bool sigmoid       = false;
 	static bool pairwise_prob = false;
 	static bool pairwise_wins = false;
+	static bool rated_prob    = false;
 
 	/// <summary>Parameters: num_files weight_1 .. weight_n file_1 .. file_n output_file</summary>
 	/// <param name="args">the command-line arguments</param>
@@ -55,6 +57,7 @@ class KDDTrack2Composite
 			{ "sigmoid",                v => sigmoid = v != null  },
 			{ "pairwise-probability",   v => pairwise_prob = v != null },
 			{ "pairwise-wins",          v => pairwise_wins = v != null },
+			{ "rated-probability",      v => rated_prob = v != null    },
 			//{ "score-file=",            v => score_file = v },			
    	  	};
    		IList<string> extra_args = p.Parse(args);
@@ -145,7 +148,9 @@ class KDDTrack2Composite
 						if (k != j && content1[i + j] > content2[i + k])
 							wins++;
 					candidate_scores[j] = wins;
-				}			
+				}
+				else if (rated_prob)
+					candidate_scores[j] = ComputeRatedProbability(i, j, content1) * content2[i + j];
 				else
 					candidate_scores[j] = content1[i + j] * content2[i + j];
 				
@@ -156,6 +161,27 @@ class KDDTrack2Composite
 		}
 		
 		return combined_content;
+	}
+	
+	static double ComputeRatedProbability(int offset, int index, IList<double> all_scores)
+	{
+		double prob = 0;
+		
+		double score = all_scores[offset + index];
+		
+		var other_scores = new double[NUM_CANDIDATES - 1];
+		for (int i = 0; i < NUM_CANDIDATES; i++)
+			if (i < index)
+				other_scores[i] = all_scores[offset + i];
+			else if (i > index)
+				other_scores[i - 1] = all_scores[offset + i];
+		
+		for (int i = 0; i < other_scores.Length; i++)
+			for (int j = 1; j < other_scores.Length; j++)
+				for (int k = 2; k < other_scores.Length; k++)
+					prob += Sigmoid(score - other_scores[i]) * Sigmoid(score - other_scores[j]) * Sigmoid(score - other_scores[k]);
+		
+		return prob;
 	}
 	
 	static double Sigmoid(double x)
@@ -171,7 +197,7 @@ class KDDTrack2Composite
 		else if (tokens.Length == 1)
 			return filename + "-validate";
 		else
-			throw new Exception();
+			throw new Exception("Could not create validation filename for " + filename);
 	}
 
 	static IList<double> ReadFile(string file)

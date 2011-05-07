@@ -51,7 +51,7 @@ class MergeTrack2
 		double err_threshold  = 1;
 	   	var p = new OptionSet() {
    			{ "data-dir=",                 v => data_dir = v },
-			{ "output-file=",              v => output_file = v },
+			{ "prediction-file=",          v => output_file = v },
 			{ "greedy-forward",            v => greedy_forward = v != null },
 			{ "error-threshold=",          (double v) => err_threshold = v },
 			{ "k|pick-most-diverse-from=", (int v) => diversification_k = v },
@@ -146,6 +146,12 @@ class MergeTrack2
 
 		// init merged predictions
 		IList<byte> ensemble_merged_predictions = ensemble_validation_predictions.First();
+		/*
+		IList<double> ensemble_merged_predictions = new double[ensemble_validation_predictions.First().Count];
+		int index = 0;
+		foreach (byte b in ensemble_validation_predictions.First())
+			ensemble_merged_predictions[index++] = b;
+		*/
 
 		while (files_by_error.Count() > 0)
 		{
@@ -198,25 +204,40 @@ class MergeTrack2
 
 		// show results
 		foreach (var file in ensemble)
-			Console.WriteLine("{0} ({1})", file, error[file]);		
+			Console.WriteLine("{0} ({1})", file, error[file]);
 		Console.WriteLine("files {0} of {1} ERR {2:F7} memory {3}", ensemble.Count, error.Count, best_result, Memory.Usage);
 
 		return ensemble;
 	}
 
-	static int ComputeDifference(IList<byte> predictions1, IList<byte> predictions2)
+	static double ComputeDifference(IList<byte> predictions1, IList<byte> predictions2)
 	{
 		if (predictions1.Count != predictions2.Count)
 			throw new ArgumentException("predictions must have equal lengths.");
 
-		int diffs = 0;
+		double diff = 0;
 
 		for (int i = 0; i < predictions1.Count; i++)
 			if (predictions1[i] != predictions2[i])
-				diffs++;
+				diff += 1.0;
 
-		return diffs;
+		return diff;
 	}
+
+	/*
+	static double ComputeDifference(IList<byte> predictions1, IList<double> predictions2)
+	{
+		if (predictions1.Count != predictions2.Count)
+			throw new ArgumentException("predictions must have equal lengths.");
+
+		double diff = 0;
+
+		for (int i = 0; i < predictions1.Count; i++)
+			diff += Math.Abs(predictions1[i] - predictions2[i]);
+
+		return diff;
+	}
+	*/
 
 	static double Eval(IList<byte> predictions)
 	{
@@ -297,7 +318,7 @@ class MergeTrack2
 		else if (tokens.Length == 1)
 			return filename + "-validate";
 		else
-			throw new Exception();
+			throw new Exception("Could not create validation filename for " + filename);
 	}
 
 	static IList<byte> MergeFiles(IList<string> files)
