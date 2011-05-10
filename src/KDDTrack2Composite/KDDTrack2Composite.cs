@@ -33,10 +33,12 @@ class KDDTrack2Composite
 
 	static string data_dir = null;
 	// TODO the following should be a enum
-	static bool sigmoid       = false;
-	static bool pairwise_prob = false;
-	static bool pairwise_wins = false;
-	static bool rated_prob    = false;
+	static bool sigmoid         = false;
+	static bool pairwise_prob   = false;
+	static bool pairwise_wins   = false;
+	static bool rated_prob      = false;
+
+	static bool constant_rating = false;
 
 	/// <summary>Parameters: num_files weight_1 .. weight_n file_1 .. file_n output_file</summary>
 	/// <param name="args">the command-line arguments</param>
@@ -58,31 +60,43 @@ class KDDTrack2Composite
 			{ "pairwise-probability",   v => pairwise_prob = v != null },
 			{ "pairwise-wins",          v => pairwise_wins = v != null },
 			{ "rated-probability",      v => rated_prob = v != null    },
-			//{ "score-file=",            v => score_file = v },			
+			{ "constant-rating",        v => constant_rating = v != null    },
+			//{ "score-file=",            v => score_file = v },
    	  	};
    		IList<string> extra_args = p.Parse(args);
 
 		string rated_file  = extra_args[0];
-		string rating_file = extra_args[1];
-		
+
 		// combine files
-		IList<double> test_scores       = CombineFiles(rated_file, rating_file);
-		IList<double> validation_scores = CombineFiles(ValidationFilename(rated_file), ValidationFilename(rating_file));
+		IList<double> test_scores;
+		IList<double> validation_scores;
+
+		if (constant_rating)
+		{
+			test_scores = ReadFile(rated_file);
+			validation_scores = ReadFile(ValidationFilename(rated_file));
+		}
+		else
+		{
+			string rating_file = extra_args[1];
+			test_scores = CombineFiles(rated_file, rating_file);
+			validation_scores = CombineFiles(ValidationFilename(rated_file), ValidationFilename(rating_file));
+		}
 
 		// compute error on validation set
 		string validation_candidates_file = Path.Combine(data_dir, "mml-track2/validationCandidatesIdx2.txt");
-		string validation_hits_file       = Path.Combine(data_dir, "mml-track2/validationHitsIdx2.txt");				
+		string validation_hits_file       = Path.Combine(data_dir, "mml-track2/validationHitsIdx2.txt");
 		var candidates = Track2Items.Read(validation_candidates_file);
 		var hits       = Track2Items.Read(validation_hits_file);
 		double error = KDDCup.EvaluateTrack2(Decide(validation_scores), candidates, hits);
 		Console.WriteLine("ERR {0:F7}", error);
-		
+
 		if (prediction_file != null)
 		{
 			WritePredictions(Decide(test_scores), prediction_file);
 			WritePredictions(Decide(validation_scores), ValidationFilename(prediction_file));
 		}
-		
+
 		/*
 		if (score_file != null)
 		{
@@ -95,7 +109,7 @@ class KDDTrack2Composite
 	static IList<byte> Decide(IList<double> scores)
 	{
 		var decisions = new byte[scores.Count];
-		
+
 		for (int i = 0; i < scores.Count; i += 6)
 		{
 			var candidate_scores = new double[NUM_CANDIDATES];
@@ -111,20 +125,20 @@ class KDDTrack2Composite
 				else
 					decisions[i + j] = 0;
 		}
-		
+
 		return decisions;
 	}
-	
+
 	static IList<double> CombineFiles(string file1, string file2)
 	{
 		IList<double> content1 = ReadFile(file1);
 		IList<double> content2 = ReadFile(file2);
-		
+
 		if (content1.Count != content2.Count)
 			throw new Exception();
-		
+
 		var combined_content = new double[FILE_SIZE];
-		
+
 		for (int i = 0; i < content1.Count; i += 6)
 		{
 			var candidate_scores = new double[NUM_CANDIDATES];
@@ -153,42 +167,42 @@ class KDDTrack2Composite
 					candidate_scores[j] = ComputeRatedProbability(i, j, content1) * content2[i + j];
 				else
 					candidate_scores[j] = content1[i + j] * content2[i + j];
-				
-			
+
+
 			// move candidates to the output
 			for (int j = 0; j < candidate_scores.Length; j++)
 				combined_content[i + j] = candidate_scores[j];
 		}
-		
+
 		return combined_content;
 	}
-	
+
 	static double ComputeRatedProbability(int offset, int index, IList<double> all_scores)
 	{
 		double prob = 0;
-		
+
 		double score = all_scores[offset + index];
-		
+
 		var other_scores = new double[NUM_CANDIDATES - 1];
 		for (int i = 0; i < NUM_CANDIDATES; i++)
 			if (i < index)
 				other_scores[i] = all_scores[offset + i];
 			else if (i > index)
 				other_scores[i - 1] = all_scores[offset + i];
-		
+
 		for (int i = 0; i < other_scores.Length; i++)
 			for (int j = 1; j < other_scores.Length; j++)
 				for (int k = 2; k < other_scores.Length; k++)
 					prob += Sigmoid(score - other_scores[i]) * Sigmoid(score - other_scores[j]) * Sigmoid(score - other_scores[k]);
-		
+
 		return prob;
 	}
-	
+
 	static double Sigmoid(double x)
 	{
 		return (double) 1 / (1 + Math.Exp(-x));
 	}
-	
+
 	static string ValidationFilename(string filename)
 	{
 		string[] tokens = filename.Split(new string[] { "-it-" }, StringSplitOptions.None);
@@ -203,11 +217,11 @@ class KDDTrack2Composite
 	static IList<double> ReadFile(string file)
 	{
 		var content = new double[FILE_SIZE];
-		
+
 		using (var reader = new BinaryReader(new FileStream(file, FileMode.Open, FileAccess.Read)))
 			for (int i = 0; i < FILE_SIZE; i++)
 				content[i] = reader.ReadDouble();
-			
+
 		return content;
 	}
 
