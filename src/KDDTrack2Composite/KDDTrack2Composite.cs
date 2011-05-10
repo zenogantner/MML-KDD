@@ -70,8 +70,8 @@ class KDDTrack2Composite
 		IList<double> validation_scores = CombineFiles(ValidationFilename(rated_file), ValidationFilename(rating_file));
 
 		// compute error on validation set
-		string validation_candidates_file = Path.Combine(data_dir, "track2-validation/validationCandidatesIdx2.txt");
-		string validation_hits_file       = Path.Combine(data_dir, "track2-validation/validationHitsIdx2.txt");				
+		string validation_candidates_file = Path.Combine(data_dir, "mml-track2/validationCandidatesIdx2.txt");
+		string validation_hits_file       = Path.Combine(data_dir, "mml-track2/validationHitsIdx2.txt");				
 		var candidates = Track2Items.Read(validation_candidates_file);
 		var hits       = Track2Items.Read(validation_hits_file);
 		double error = KDDCup.EvaluateTrack2(Decide(validation_scores), candidates, hits);

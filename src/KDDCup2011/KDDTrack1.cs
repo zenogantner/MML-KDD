@@ -151,9 +151,9 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 		string data_dir  = parameters.GetRemoveString( "data_dir");
 		track2           = parameters.GetRemoveBool(   "track2", false);
 		if (data_dir != string.Empty)
-			data_dir = data_dir + (track2 ? "/track2-validation" : "/track1");
+			data_dir = data_dir + (track2 ? "/mml-track2" : "/track1");
 		else
-			data_dir = track2 ? "/track2-validation" : "track1";
+			data_dir = track2 ? "/mml-track2" : "track1";
 		sample_data      = parameters.GetRemoveBool(   "sample_data", false);
 
 		// other arguments
