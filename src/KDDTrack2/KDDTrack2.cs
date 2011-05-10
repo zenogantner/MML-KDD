@@ -196,19 +196,6 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		Console.Error.WriteLine("memory {0}", Memory.Usage);
 	}
 
-	static PosOnlyFeedback CreateFeedback(IRatings ratings)
-	{
-		var feedback = new PosOnlyFeedback();
-
-		for (int i = 0; i < ratings.Count; i++)
-			if (ratings[i] >= 80)
-				feedback.Add(ratings.Users[i], ratings.Items[i]);
-
-		Console.Error.WriteLine("{0} ratings > 80", feedback.Count);
-
-		return feedback;
-	}
-
 	static void DoTrack2()
 	{
 		TimeSpan seconds;
@@ -388,14 +375,14 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 				validation_rated_hits[validation_ratings.Users[index]].Add(validation_ratings.Items[index]);
 			validation_hits = validation_rated_hits;
 			
-			recommender_validate.Feedback = CreatePosOnlyFeedback(training_ratings);
-			recommender_final.Feedback    = CreatePosOnlyFeedback(complete_ratings);
+			recommender_validate.Feedback = CreateRatingFeedback(training_ratings);
+			recommender_final.Feedback    = CreateRatingFeedback(complete_ratings);
 		}
 		else
 		{
 			// normal item recommenders
-			recommender_validate.Feedback = CreateFeedback(training_ratings);
-			recommender_final.Feedback    = CreateFeedback(complete_ratings);
+			recommender_validate.Feedback = Create80PlusFeedback(training_ratings);
+			recommender_final.Feedback    = Create80PlusFeedback(complete_ratings);
 		}
 		if (recommender_validate is ISemiSupervisedRecommender)
 		{
@@ -428,12 +415,25 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 	/// <summary>Create positive-only feedback from rating data</summary>
 	/// <param name="ratings">the rating data</param>
 	/// <returns>the positive-only feedback</returns>
-	static protected PosOnlyFeedback CreatePosOnlyFeedback(IRatings ratings)
+	static protected PosOnlyFeedback CreateRatingFeedback(IRatings ratings)
 	{
 		var feedback = new PosOnlyFeedback();
 
 		for (int i = 0; i < ratings.Count; i++)
 			feedback.Add(ratings.Users[i], ratings.Items[i]);
+
+		return feedback;
+	}	
+
+	static PosOnlyFeedback Create80PlusFeedback(IRatings ratings)
+	{
+		var feedback = new PosOnlyFeedback();
+
+		for (int i = 0; i < ratings.Count; i++)
+			if (ratings[i] >= 80)
+				feedback.Add(ratings.Users[i], ratings.Items[i]);
+
+		Console.Error.WriteLine("{0} ratings > 80", feedback.Count);
 
 		return feedback;
 	}	
