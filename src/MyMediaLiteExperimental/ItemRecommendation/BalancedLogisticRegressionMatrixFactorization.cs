@@ -21,8 +21,10 @@ using MyMediaLite.DataType;
 
 namespace MyMediaLite.ItemRecommendation
 {
+	/// <summary>Matrix factorization model optimized for balanced logistic regression.</summary>
 	public class BalancedLogisticRegressionMatrixFactorization : BPRMF_KDD
 	{
+		/// <inheritdoc/>
 		protected override void UpdateFactors(int u, int i, int j, bool update_u, bool update_i, bool update_j)
 		{
 			double i_gradient = 1 - Predict(u, i);
