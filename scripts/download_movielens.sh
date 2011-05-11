@@ -1,6 +1,6 @@
 #!/bin/sh
 
-# to be run from the root directory of MyMediaLite
+# NOTE: to be run from the root directory of MyMediaLite
 
 echo "The MovieLens datasets are for NON-COMMERCIAL use only."
 echo "Refer to the README file for the details of the usage license."
