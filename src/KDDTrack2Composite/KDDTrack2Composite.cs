@@ -57,10 +57,10 @@ class KDDTrack2Composite
    			{ "data-dir=",              v => data_dir = v         },
 			{ "prediction-file=",       v => prediction_file = v  },
 			{ "sigmoid",                v => sigmoid = v != null  },
-			{ "pairwise-probability",   v => pairwise_prob = v != null },
-			{ "pairwise-wins",          v => pairwise_wins = v != null },
-			{ "rated-probability",      v => rated_prob = v != null    },
-			{ "constant-rating",        v => constant_rating = v != null    },
+			{ "pairwise-probability",   v => pairwise_prob = v != null   },
+			{ "pairwise-wins",          v => pairwise_wins = v != null   },
+			{ "rated-probability",      v => rated_prob = v != null      },
+			{ "constant-rating",        v => constant_rating = v != null },
 			//{ "score-file=",            v => score_file = v },
    	  	};
    		IList<string> extra_args = p.Parse(args);
