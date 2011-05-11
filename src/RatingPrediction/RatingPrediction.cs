@@ -360,7 +360,7 @@ MyMediaLite rating prediction
 		if (recommender is IUserAttributeAwareRecommender) // TODO also support the MovieLens format here
 		{
 			if (user_attributes_file.Equals(string.Empty))
-				Usage("Recommender expects user_attributes=FILE.");
+				Usage("Recommender expects --user-attributes=FILE.");
 			else
 				((IUserAttributeAwareRecommender)recommender).UserAttributes = AttributeData.Read(Path.Combine(data_dir, user_attributes_file), user_mapping);
 		}
@@ -369,7 +369,7 @@ MyMediaLite rating prediction
 		if (recommender is IItemAttributeAwareRecommender)
 		{
 			if (item_attributes_file.Equals(string.Empty))
-				Usage("Recommender expects item_attributes=FILE.");
+				Usage("Recommender expects --item-attributes=FILE.");
 			else
 				((IItemAttributeAwareRecommender)recommender).ItemAttributes = AttributeData.Read(Path.Combine(data_dir, item_attributes_file), item_mapping);
 		}
@@ -378,7 +378,7 @@ MyMediaLite rating prediction
 		if (recommender is IUserRelationAwareRecommender)
 			if (user_relation_file.Equals(string.Empty))
 			{
-				Usage("Recommender expects user_relation=FILE.");
+				Usage("Recommender expects --user-relations=FILE.");
 			}
 			else
 			{
@@ -390,7 +390,7 @@ MyMediaLite rating prediction
 		if (recommender is IItemRelationAwareRecommender)
 			if (user_relation_file.Equals(string.Empty))
 			{
-				Usage("Recommender expects item_relation=FILE.");
+				Usage("Recommender expects --item-relations=FILE.");
 			}
 			else
 			{
