@@ -78,9 +78,11 @@ class MergeTrack2
 			var greedy_files = GreedyForwardSearch(files, diversification_k, err_threshold); // ignore the weights for now
 
 			IList<byte> final_prediction = MergeFiles(greedy_files);
-			WritePredictions(final_prediction, output_file);
+			
+			if (output_file != null)
+				WritePredictions(final_prediction, output_file);
 		}
-		else
+		else if (output_file != null)
 		{
 			if (data_dir != null)
 			{
