@@ -34,13 +34,13 @@ public partial class MainWindow
 	private global::Gtk.HBox hbox1;
 	private global::Gtk.ScrolledWindow scrolledwindow2;
 	private global::Gtk.TreeView treeview1;
-
+    
 	protected virtual void Build ()
 	{
 		global::Stetic.Gui.Initialize (this);
 		// Widget MainWindow
 		this.UIManager = new global::Gtk.UIManager ();
-        global::Gtk.ActionGroup w1 = new global::Gtk.ActionGroup ("Default");
+		global::Gtk.ActionGroup w1 = new global::Gtk.ActionGroup ("Default");
 		this.FilterAction = new global::Gtk.Action ("FilterAction", global::Mono.Unix.Catalog.GetString ("Filter"), null, null);
 		this.FilterAction.ShortLabel = global::Mono.Unix.Catalog.GetString ("Filter");
 		w1.Add (this.FilterAction, null);
@@ -131,7 +131,7 @@ public partial class MainWindow
 		this.menubar1 = ((global::Gtk.MenuBar)(this.UIManager.GetWidget ("/menubar1")));
 		this.menubar1.Name = "menubar1";
 		this.vbox1.Add (this.menubar1);
-        global::Gtk.Box.BoxChild w2 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.menubar1]));
+		global::Gtk.Box.BoxChild w2 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.menubar1]));
 		w2.Position = 0;
 		w2.Expand = false;
 		w2.Fill = false;
@@ -143,7 +143,7 @@ public partial class MainWindow
 		this.filter_entry.IsEditable = true;
 		this.filter_entry.InvisibleChar = '●';
 		this.vbox1.Add (this.filter_entry);
-        global::Gtk.Box.BoxChild w3 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.filter_entry]));
+		global::Gtk.Box.BoxChild w3 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.filter_entry]));
 		w3.Position = 1;
 		w3.Expand = false;
 		w3.Fill = false;
@@ -163,10 +163,10 @@ public partial class MainWindow
 		this.treeview1.Name = "treeview1";
 		this.scrolledwindow2.Add (this.treeview1);
 		this.hbox1.Add (this.scrolledwindow2);
-        global::Gtk.Box.BoxChild w5 = ((global::Gtk.Box.BoxChild)(this.hbox1 [this.scrolledwindow2]));
+		global::Gtk.Box.BoxChild w5 = ((global::Gtk.Box.BoxChild)(this.hbox1 [this.scrolledwindow2]));
 		w5.Position = 0;
 		this.vbox1.Add (this.hbox1);
-        global::Gtk.Box.BoxChild w6 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.hbox1]));
+		global::Gtk.Box.BoxChild w6 = ((global::Gtk.Box.BoxChild)(this.vbox1 [this.hbox1]));
 		w6.Position = 2;
 		this.Add (this.vbox1);
 		if ((this.Child != null)) {
