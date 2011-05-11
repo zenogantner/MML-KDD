@@ -49,12 +49,20 @@ namespace MyMediaLite.RatingPrediction
 		private double[] item_biases;
 
 		/// <inheritdoc/>
-		public override void Train()
+		protected override void InitModel()
 		{
-			global_average = Ratings.Average;
+			base.InitModel();
 
 			user_biases = new double[MaxUserID + 1];
 			item_biases = new double[MaxItemID + 1];
+		}
+
+		/// <inheritdoc/>
+		public override void Train()
+		{
+			InitModel();
+
+			global_average = Ratings.Average;
 
 			int[] user_ratings_count = new int[MaxUserID + 1];
 			int[] item_ratings_count = new int[MaxItemID + 1];

@@ -17,6 +17,8 @@
             - significant training speed-up
           - BPR_Linear
             - significant training speed-up
+          - kNN recommenders
+            - improve API documentation
           - Random: remove unnecessary methods
           - Zero: new item recommender that always predicts the score 0
           - rename MyMediaLite.ensemble namespace to MyMediaLite.Ensemble
