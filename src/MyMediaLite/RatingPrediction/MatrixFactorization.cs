@@ -79,8 +79,10 @@ namespace MyMediaLite.RatingPrediction
 		}
 
 		/// <summary>Initialize the model data structure</summary>
-		protected virtual void InitModel()
+		protected override void InitModel()
 		{
+			base.InitModel();
+
 			// init factor matrices
 			user_factors = new Matrix<double>(Ratings.MaxUserID + 1, NumFactors);
 			item_factors = new Matrix<double>(Ratings.MaxItemID + 1, NumFactors);
