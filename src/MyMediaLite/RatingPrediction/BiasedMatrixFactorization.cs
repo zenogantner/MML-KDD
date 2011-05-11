@@ -94,7 +94,7 @@ namespace MyMediaLite.RatingPrediction
 			InitModel();
 
 			// compute global average
-			double global_average = ratings.Average;
+			double global_average = Ratings.Average;
 
 			global_bias = Math.Log( (global_average - MinRating) / (MaxRating - global_average) );
 			for (int current_iter = 0; current_iter < NumIter; current_iter++)
