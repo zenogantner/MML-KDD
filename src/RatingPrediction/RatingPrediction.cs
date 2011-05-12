@@ -412,6 +412,7 @@ MyMediaLite rating prediction
 	static void AbortHandler(object sender, ConsoleCancelEventArgs args)
 	{
 		DisplayIterationStats();
+		Console.Error.WriteLine("memory {0}", Memory.Usage);
 	}
 
 	static void DisplayIterationStats()

@@ -386,6 +386,7 @@ class ItemPrediction
 	static void AbortHandler(object sender, ConsoleCancelEventArgs args)
 	{
 		DisplayIterationStats();
+		Console.Error.WriteLine("memory {0}", Memory.Usage);
 	}
 
 	static void DisplayIterationStats()
@@ -399,7 +400,7 @@ class ItemPrediction
 		if (eval_time_stats.Count > 0)
 			Console.Error.WriteLine(string.Format(
 			    ni,
-				"eval_time: min={0,0:0.##}, max={1,0:0.##}, avg={2,0:0.##}",
+				"eval_time: min={0,0:0.###}, max={1,0:0.###}, avg={2,0:0.###}",
 	            eval_time_stats.Min(), eval_time_stats.Max(), eval_time_stats.Average()
 			));
 		if (compute_fit && fit_time_stats.Count > 0)
