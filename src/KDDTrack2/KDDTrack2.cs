@@ -367,14 +367,6 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		// connect data and recommenders
 		if (predict_rated)
 		{
-			// create rated_hits
-			var validation_rated_hits = new Dictionary<int, IList<int>>();
-			foreach (int u in validation_candidates.Keys)
-				validation_rated_hits[u] = new List<int>();
-			for (int index = 0; index < validation_ratings.Count; index++)
-				validation_rated_hits[validation_ratings.Users[index]].Add(validation_ratings.Items[index]);
-			validation_hits = validation_rated_hits;
-			
 			recommender_validate.Feedback = CreateRatingFeedback(training_ratings);
 			recommender_final.Feedback    = CreateRatingFeedback(complete_ratings);
 		}
