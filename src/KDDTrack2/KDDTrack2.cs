@@ -367,14 +367,14 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		// connect data and recommenders
 		if (predict_rated)
 		{
-			recommender_validate.Feedback = CreateRatingFeedback(training_ratings);
-			recommender_final.Feedback    = CreateRatingFeedback(complete_ratings);
+			recommender_validate.Feedback = CreateFeedback(training_ratings);
+			recommender_final.Feedback    = CreateFeedback(complete_ratings);
 		}
 		else
 		{
 			// normal item recommenders
-			recommender_validate.Feedback = Create80PlusFeedback(training_ratings);
-			recommender_final.Feedback    = Create80PlusFeedback(complete_ratings);
+			recommender_validate.Feedback = CreateFeedback(training_ratings, 80);
+			recommender_final.Feedback    = CreateFeedback(complete_ratings, 80);
 		}
 		if (recommender_validate is ISemiSupervisedRecommender)
 		{
@@ -404,32 +404,24 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		Utils.DisplayDataStats(recommender_final.Feedback, null, recommender_final);
 	}
 
-	/// <summary>Create positive-only feedback from rating data</summary>
-	/// <param name="ratings">the rating data</param>
-	/// <returns>the positive-only feedback</returns>
-	static protected PosOnlyFeedback CreateRatingFeedback(IRatings ratings)
+	static PosOnlyFeedback CreateFeedback(IRatings ratings)
+	{
+		return CreateFeedback(ratings, 0);
+	}
+	
+	static PosOnlyFeedback CreateFeedback(IRatings ratings, double threshold)
 	{
 		var feedback = new PosOnlyFeedback();
 
 		for (int i = 0; i < ratings.Count; i++)
-			feedback.Add(ratings.Users[i], ratings.Items[i]);
-
-		return feedback;
-	}	
-
-	static PosOnlyFeedback Create80PlusFeedback(IRatings ratings)
-	{
-		var feedback = new PosOnlyFeedback();
-
-		for (int i = 0; i < ratings.Count; i++)
-			if (ratings[i] >= 80)
+			if (ratings[i] >= threshold)
 				feedback.Add(ratings.Users[i], ratings.Items[i]);
 
-		Console.Error.WriteLine("{0} ratings > 80", feedback.Count);
+		Console.Error.WriteLine("{0} ratings > {1}", feedback.Count, threshold);
 
 		return feedback;
 	}	
-	
+
 	static void AbortHandler(object sender, ConsoleCancelEventArgs args)
 	{
 		DisplayIterationStats();
