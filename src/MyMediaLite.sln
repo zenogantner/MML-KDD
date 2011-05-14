@@ -23,11 +23,13 @@ Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KDDTrack1", "KDDCup2011\KDD
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MergeRatings", "MergeRatings\MergeRatings.csproj", "{6231F69B-7D90-4FD8-B261-383100664E30}"
 EndProject
-Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MergeTrack2", "MergeTrack2\MergeTrack2.csproj", "{E1505676-49E1-4398-9D3C-3574FC7EB9FD}"
-EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KDDTrack2", "KDDTrack2\KDDTrack2.csproj", "{3F324371-0D96-4CDF-B375-20B1EC45D934}"
 EndProject
 Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "KDDTrack2Composite", "KDDTrack2Composite\KDDTrack2Composite.csproj", "{60DB839D-78F1-401F-9249-4382FD6FAC32}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MergeTrack2", "MergeTrack2\MergeTrack2.csproj", "{E1505676-49E1-4398-9D3C-3574FC7EB9FD}"
+EndProject
+Project("{FAE04EC0-301F-11D3-BF4B-00C04F79EFBC}") = "MergeScoresTrack2", "MergeScoresTrack2\MergeScoresTrack2.csproj", "{B6BCD6FE-08A6-4D8B-AA34-8F4683D1DD95}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -79,6 +81,10 @@ Global
 		{92954F48-7C7D-4F84-BB6C-6A7E4DC3191B}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{92954F48-7C7D-4F84-BB6C-6A7E4DC3191B}.Release|Any CPU.ActiveCfg = Release|Any CPU
 		{92954F48-7C7D-4F84-BB6C-6A7E4DC3191B}.Release|Any CPU.Build.0 = Release|Any CPU
+		{B6BCD6FE-08A6-4D8B-AA34-8F4683D1DD95}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
+		{B6BCD6FE-08A6-4D8B-AA34-8F4683D1DD95}.Debug|Any CPU.Build.0 = Debug|Any CPU
+		{B6BCD6FE-08A6-4D8B-AA34-8F4683D1DD95}.Release|Any CPU.ActiveCfg = Release|Any CPU
+		{B6BCD6FE-08A6-4D8B-AA34-8F4683D1DD95}.Release|Any CPU.Build.0 = Release|Any CPU
 		{BF080B4A-B4BD-48B1-AE57-A67505F655BE}.Debug|Any CPU.ActiveCfg = Debug|Any CPU
 		{BF080B4A-B4BD-48B1-AE57-A67505F655BE}.Debug|Any CPU.Build.0 = Debug|Any CPU
 		{BF080B4A-B4BD-48B1-AE57-A67505F655BE}.Release|Any CPU.ActiveCfg = Release|Any CPU

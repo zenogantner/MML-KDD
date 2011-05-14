@@ -26,7 +26,7 @@ using MyMediaLite.Eval;
 using MyMediaLite.IO.KDDCup2011;
 using MyMediaLite.Util;
 
-class MergeTrack2
+class MergeScoresTrack2
 {
 	const int NUM_CANDIDATES = 6;
 	const int FILE_SIZE      = 607032;
@@ -46,12 +46,14 @@ class MergeTrack2
 
 		string output_file    = null;
 		bool greedy_forward   = false;
+		bool prob80plus       = false;
 		int diversification_k = 1;
 		double err_threshold  = 1;
 	   	var p = new OptionSet() {
    			{ "data-dir=",                 v => data_dir = v },
 			{ "prediction-file=",          v => output_file = v },
 			{ "greedy-forward",            v => greedy_forward = v != null },
+			{ "prob-80-plus",              v => prob80plus = v != null },
 			{ "error-threshold=",          (double v) => err_threshold = v },
 			{ "k|pick-most-diverse-from=", (int v) => diversification_k = v },
    	  	};
@@ -76,9 +78,17 @@ class MergeTrack2
 			var greedy_files = GreedyForwardSearch(files, diversification_k, err_threshold); // ignore the weights for now
 
 			IList<byte> final_prediction = MergeFiles(greedy_files);
-			
+
 			if (output_file != null)
 				WritePredictions(final_prediction, output_file);
+		}
+		else if (prob80plus)
+		{
+			IList<double> test_probs = ComputeProb80Plus(files);
+			IList<double> valid_probs = ComputeProb80Plus(ValidationFilenames(files));
+
+			WriteScores(test_probs, output_file); // maybe change to different param
+			WriteScores(valid_probs, ValidationFilename(output_file)); // maybe change to different param
 		}
 		else if (output_file != null)
 		{
@@ -96,22 +106,40 @@ class MergeTrack2
 		}
 	}
 
-	// TODO more structure
+	static IList<double> ComputeProb80Plus(IList<string> filenames)
+	{
+		var scores = new List<IList<double>>();
+		foreach (string f in filenames)
+			scores.Add(ReadFile(f));
+
+		var probs = new double [FILE_SIZE];
+		for (int i = 0; i < FILE_SIZE; i++)
+		{
+			for (int j = 0; j < filenames.Count; j++)
+				probs[i] += scores[j][i];
+			probs[i] /= filenames.Count;
+		}
+
+		return probs;
+	}
+
+	// TODO implement for scores ...
 	static IList<string> GreedyForwardSearch(IList<string> candidate_files, int k, double err_threshold)
 	{
 		var candidate_items = Track2Items.Read(data_dir + "/mml-track2/validationCandidatesIdx2.txt");
 		var item_hits       = Track2Items.Read(data_dir + "/mml-track2/validationHitsIdx2.txt");
 
 		// prediction cache (to save IO)
-		var prediction_cache = new Dictionary<string, IList<byte>>();
+		var score_cache = new Dictionary<string, IList<double>>();
 
 		// get eval results for all predictions
 		Console.Write("Calculating the errors of {0} candidates ... ", candidate_files.Count);
 		var error = new Dictionary<string, double>();
 		foreach (string file in candidate_files)
 		{
-			prediction_cache[file] = ReadFile(ValidationFilename(file));
-			double err = Eval(prediction_cache[file], candidate_items, item_hits);
+			score_cache[file] = ReadFile(ValidationFilename(file));  // TODO-score
+			/*
+			double err = Eval(score_cache[file], candidate_items, item_hits);
 
 			// only keep if error is below threshold
 			if (err < err_threshold)
@@ -121,15 +149,18 @@ class MergeTrack2
 			}
 			else
 			{
-				prediction_cache.Remove(file);
+				score_cache.Remove(file);
 				Console.Error.Write("_");
 			}
+			*/
 		}
 		Console.WriteLine("done: candidates {0} memory {1}", error.Count, Memory.Usage);
 
 		// the ensemble
 		var ensemble = new List<string>();
 		var ensemble_validation_predictions = new List<IList<byte>>();
+
+		/*
 
 		double best_result = 10;
 
@@ -196,10 +227,14 @@ class MergeTrack2
 			}
 		}
 
+		*/
+
 		// show results
 		foreach (var file in ensemble)
 			Console.WriteLine("{0} ({1})", file, error[file]);
-		Console.WriteLine("files {0} of {1} ERR {2:F7} memory {3}", ensemble.Count, error.Count, best_result, Memory.Usage);
+		//Console.WriteLine("files {0} of {1} ERR {2:F7} memory {3}", ensemble.Count, error.Count, best_result, Memory.Usage);
+
+
 
 		return ensemble;
 	}
@@ -216,6 +251,30 @@ class MergeTrack2
 				diff += 1.0;
 
 		return diff;
+	}
+
+	static IList<byte> Scores2Predictions(IList<double> scores)
+	{
+		var predictions = new byte[scores.Count];
+
+		for (int offset = 0; offset < scores.Count; offset += NUM_CANDIDATES)
+		{
+			var positions = new List<int>(new int[] { 0, 1, 2, 3, 4, 5 });
+			positions.Sort(delegate(int pos1, int pos2) { return scores[offset + pos2].CompareTo(scores[offset + pos1]); } );
+
+			for (int i = 0; i < positions.Count; i++)
+				if (positions.IndexOf(i) < 3)
+					predictions[offset + i] = 1;
+				else
+					predictions[offset + i] = 0;
+		}
+
+		return predictions;
+	}
+
+	static double Eval(IList<double> scores)
+	{
+		return Eval(Scores2Predictions(scores));
 	}
 
 	static double Eval(IList<byte> predictions)
@@ -300,6 +359,15 @@ class MergeTrack2
 			throw new Exception("Could not create validation filename for " + filename);
 	}
 
+	static IList<string> ValidationFilenames(IList<string> filenames)
+	{
+		var validation_filenames = new string[filenames.Count];
+		for (int i = 0; i < filenames.Count; i++)
+			validation_filenames[i] = ValidationFilename(filenames[i]);
+
+		return validation_filenames;
+	}
+
 	static IList<byte> MergeFiles(IList<string> files)
 	{
 		var weights = new double[files.Count];
@@ -311,25 +379,15 @@ class MergeTrack2
 		return MergeFiles(files, weights);
 	}
 
-	static IList<byte> ReadFile(string file)
+	static IList<double> ReadFile(string file)
 	{
-		var reader = new BinaryReader(new FileStream(file, FileMode.Open, FileAccess.Read));
+		var scores = new double[FILE_SIZE];
 
-		IList<char> content = null;
+		using (var reader = new BinaryReader(new FileStream(file, FileMode.Open, FileAccess.Read)))
+			for (int i = 0; i < FILE_SIZE; i++)
+				scores[i] = reader.ReadDouble();
 
-		try { content = reader.ReadChars(FILE_SIZE); }
-		catch (EndOfStreamException) { /* do nothing */ }
-
-		var predictions = new byte[content.Count];
-		for (int i = 0; i < predictions.Length; i++)
-			if (content[i] == '1')
-				predictions[i] = 1;
-			else if (content[i] == '0')
-				predictions[i] = 0;
-			else
-				throw new IOException("Unknown value: " + predictions[i]);
-
-		return predictions;
+		return scores;
 	}
 
 	static IList<byte> MergePredictions(IList<IList<byte>> predictions, IList<double> weights)
@@ -394,6 +452,13 @@ class MergeTrack2
 		catch (EndOfStreamException) { /* do nothing */ }
 
 		return combined_predictions;
+	}
+
+	static void WriteScores(IList<double> scores, string output_file)
+	{
+		using (var writer = new BinaryWriter(new FileStream(output_file, FileMode.Open, FileAccess.Write)))
+			foreach (double p in scores)
+				writer.Write(p);
 	}
 
 	static void WritePredictions(IList<byte> predictions, string output_file)
