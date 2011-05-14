@@ -31,7 +31,6 @@ class MergeTrack2
 	const int NUM_CANDIDATES = 6;
 	const int FILE_SIZE      = 607032;
 
-	static bool read_compressed = false;
 	static string data_dir      = null;
 
 	/// <summary>Parameters: num_files weight_1 .. weight_n file_1 .. file_n output_file</summary>
@@ -55,7 +54,6 @@ class MergeTrack2
 			{ "greedy-forward",            v => greedy_forward = v != null },
 			{ "error-threshold=",          (double v) => err_threshold = v },
 			{ "k|pick-most-diverse-from=", (int v) => diversification_k = v },
-			{ "read-compressed",           v => read_compressed = v != null },
    	  	};
    		IList<string> extra_args = p.Parse(args);
 
@@ -336,9 +334,7 @@ class MergeTrack2
 
 	static IList<byte> ReadFile(string file)
 	{
-		var reader = read_compressed
-			? new BinaryReader(new GZipStream(new FileStream(file + ".gz", FileMode.Open, FileAccess.Read), CompressionMode.Decompress))
-			: new BinaryReader(               new FileStream(file,         FileMode.Open, FileAccess.Read));
+		var reader = new BinaryReader(new FileStream(file, FileMode.Open, FileAccess.Read));
 
 		IList<char> content = null;
 
@@ -387,9 +383,6 @@ class MergeTrack2
 		// open files
 		var readers = new BinaryReader[files.Count];
 		for (int i = 0; i < files.Count; i++)
-			if (read_compressed)
-				readers[i] = new BinaryReader(new GZipStream(new FileStream(files[i] + ".gz", FileMode.Open, FileAccess.Read), CompressionMode.Decompress));
-			else
 				readers[i] = new BinaryReader(new FileStream(files[i], FileMode.Open, FileAccess.Read));
 
 		var combined_predictions = new List<byte>();
