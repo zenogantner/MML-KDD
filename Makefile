@@ -120,7 +120,8 @@ gendarme:
 	gendarme ${GENDARME_OPTIONS} ${SRC_DIR}/MappingRatingPrediction/bin/Debug/*.exe
 	gendarme ${GENDARME_OPTIONS} ${SRC_DIR}/MappingItemPrediction/bin/Debug/*.exe
 	gendarme ${GENDARME_OPTIONS} ${SRC_DIR}/MyMediaLite/bin/Debug/MyMediaLite.dll
-	gendarme ${GENDARME_OPTIONS} ${SRC_DIR}/MyMediaLite/bin/Debug/SVM.dll
+	gendarme ${GENDARME_OPTIONS} ${SRC_DIR}/MyMediaLiteExperimental/bin/Debug/MyMediaLiteExperimental.dll
+	gendarme ${GENDARME_OPTIONS} ${SRC_DIR}/MyMediaLiteExperimental/bin/Debug/SVM.dll
 
 apidoc: mdoc-html doxygen immdoc
 
