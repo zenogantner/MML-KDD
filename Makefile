@@ -97,6 +97,9 @@ data:
 download-movielens: data
 	scripts/download_movielens.sh
 
+download-imdb: data
+	scripts/download_imdb.sh
+
 todo:
 	ack --type=csharp TODO                    ${SRC_DIR}; echo
 	ack --type=csharp FIXME                   ${SRC_DIR}; echo

@@ -37,6 +37,10 @@
         - data structures
           - fix incorrect error message in Matrix class (reported by
             Chris Newell)
+        - documentation
+          - update performance stats
+        - misc
+          - add target download-imdb to Makefile
 	- KDD Cup 2011
           - one program per track
           - add validation functionality for track 2
