@@ -65,7 +65,7 @@ class KDDTrack2Composite
    	  	};
    		IList<string> extra_args = p.Parse(args);
 
-		string rated_file  = extra_args[0];
+		string rated_file = extra_args[0];
 
 		// combine files
 		IList<double> test_scores;
