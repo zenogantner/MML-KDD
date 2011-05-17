@@ -89,7 +89,6 @@ MyMediaLite rating prediction
    --load-model=FILE                load model from FILE
    --min-rating=NUM                 the smallest valid rating value
    --max-rating=NUM                 the greatest valid rating value
-   --no-eval                        do not evaluate
    --prediction-file=FILE           write the rating predictions to  FILE ('-' for STDOUT)
    --cross-validation=K             perform k-fold crossvalidation on the training data
                                     (does not need test data)
@@ -144,7 +143,6 @@ MyMediaLite rating prediction
 		string save_model_file = string.Empty;
 		string load_model_file = string.Empty;
 		int random_seed        = -1;
-		bool no_eval           = false;
 		string prediction_file = string.Empty;
 		int cross_validation   = 0;
 
@@ -178,17 +176,14 @@ MyMediaLite rating prediction
 			{ "file-format=",         (RatingFileFormat v) => file_format    = v },
 			// boolean options
 			{ "compute-fit",          v              => compute_fit = v != null },
-			{ "no-eval",              v              => no_eval     = v != null },
    	  	};
    		IList<string> extra_args = p.Parse(args);
 
 		// TODO make sure interaction of --find-iter and --cross-validation works properly
 
-		CommandLineParameters parameters = null;
-		try	{ parameters = new CommandLineParameters(extra_args, 3); }
-		catch (ArgumentException e) { Usage(e.Message); }
-
-		if (parameters.CheckForLeftovers())
+		bool no_eval = test_file == null;
+		
+		if (extra_args.Count > 0)
 			Usage(-1);
 
 		if (random_seed != -1)
@@ -346,6 +341,9 @@ MyMediaLite rating prediction
 	              string user_attributes_file, string item_attributes_file,
 	              string user_relation_file, string item_relation_file)
 	{
+		if (training_file == null)
+			Usage("Program expects --training-file=FILE.");
+		
 		// read training data
 		if (file_format == RatingFileFormat.DEFAULT)
 			training_data = RatingPredictionStatic.Read(Path.Combine(data_dir, training_file), min_rating, max_rating, user_mapping, item_mapping, rating_type);
