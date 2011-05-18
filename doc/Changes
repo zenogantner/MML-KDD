@@ -28,7 +28,7 @@
           - move DisplayDataStats() for item recommendation from the program
             to the library
           - improved usage information
-          - rating prediction: use Mono.Options for command-line parsing
+          - use Mono.Options for command-line argument parsing
         - evaluation
           - add relevant_users feature for item prediction
           - rating evaluation: check arguments for null
