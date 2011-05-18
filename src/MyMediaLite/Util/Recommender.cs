@@ -117,7 +117,7 @@ namespace MyMediaLite.Util
 		/// <returns>the configured recommender engine</returns>
 		public static T Configure<T>(T engine, string parameters, takes_string report_error)
 		{
-			var parameters_dictionary = new CommandLineParameters(parameters);
+			var parameters_dictionary = new RecommenderParameters(parameters);
 			return Configure(engine, parameters_dictionary, report_error);
 		}
 		

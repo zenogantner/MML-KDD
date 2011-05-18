@@ -135,8 +135,8 @@ MyMediaLite KDD Cup 2011 Track 1 tool
 		// read command line parameters
 		string method = args[0];
 
-		CommandLineParameters parameters = null;
-		try	{ parameters = new CommandLineParameters(args, 1); }
+		RecommenderParameters parameters = null;
+		try	{ parameters = new RecommenderParameters(args, 1); }
 		catch (ArgumentException e) { Usage(e.Message);	}
 
 		// arguments for iteration search
