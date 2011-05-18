@@ -78,6 +78,7 @@ MyMediaLite rating prediction
   general OPTIONS:
    --recommender=METHOD             set recommender method (default: BiasedMatrixFactorization)
    --recommender-options=OPTIONS    use OPTIONS as recommender options
+   --training-file=FILE             read training data from FILE
    --test-file=FILE                 read test data from FILE
    --random-seed=N                  set random seed to N
    --data-dir=DIR                   load all files from DIR
