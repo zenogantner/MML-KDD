@@ -94,6 +94,9 @@ GUI demo
 Misc features
  - command-line tools: standalone only for prediction based on model files
  - command-line tools: read from DB
+ - command-line tools: time stats for CV
+ - command-line tools: give out partial results for t-test etc.
+ - command-line tools: --version
  - rewrite MF techniques using vector/matrix abstractions
  - output a nice table format for evaluation w/ R etc.
 Documentation/website

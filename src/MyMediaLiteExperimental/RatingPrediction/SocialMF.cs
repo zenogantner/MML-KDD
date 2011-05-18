@@ -226,7 +226,7 @@ namespace MyMediaLite.RatingPrediction
 			ni.NumberDecimalDigits = '.';
 
 			return string.Format(ni,
-			                     "SocialMF NumFactors={0} regularization={1} social_regularization={2} LearnRate={3} num_iter={4} init_mean={5} init_stdev={6}",
+			                     "SocialMF num_factors={0} regularization={1} social_regularization={2} learn_rate={3} num_iter={4} init_mean={5} init_stdev={6}",
 				                 NumFactors, Regularization, SocialRegularization, LearnRate, NumIter, InitMean, InitStdev);
 		}
 	}

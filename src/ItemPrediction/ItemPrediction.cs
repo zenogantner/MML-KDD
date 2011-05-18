@@ -60,10 +60,9 @@ class ItemPrediction
 
 	static void Usage(int exit_code)
 	{
-		Console.WriteLine(@"
-MyMediaLite item prediction from implicit feedback
+		Console.WriteLine(@"MyMediaLite item prediction from implicit feedback
 
- usage:   ItemPrediction.exe --training-file=FILE --recommender=METHOD [ARGUMENTS] [OPTIONS]
+ usage:   ItemPrediction.exe --training-file=FILE --recommender=METHOD [OPTIONS]
 
    methods (plus arguments and their defaults):");
 
@@ -72,24 +71,24 @@ MyMediaLite item prediction from implicit feedback
 
 		Console.WriteLine(@"  method ARGUMENTS have the form name=value
 
-  general OPTIONS have the form name=value
+  general OPTIONS:
    --recommender=METHOD             set recommender method (default: BiasedMatrixFactorization)
    --recommender-options=OPTIONS    use OPTIONS as recommender options
    --training-file=FILE             read training data from FILE
    --test-file=FILE                 read test data from FILE
-		
+
    --random-seed=N
    --data-dir=DIR               load all files from DIR
    --relevant-items=FILE        use the items in FILE for evaluation, otherwise all items that occur in the training set
    --user-attributes=FILE       file containing user attribute information
    --item-attributes=FILE       file containing item attribute information
-   --user-relation=FILE         file containing user relation information
-   --item-relation=FILE         file containing item relation information
+   --user-relations=FILE        file containing user relation information
+   --item-relations=FILE        file containing item relation information
    --save-model=FILE            save computed model to FILE
    --load-model=FILE            load model from FILE
    --prediction-file=FILE       write ranked predictions to FILE ('-' for STDOUT), one user per line
    --predict-items-number=N     predict N items per user (needs --predict-items-file)
-   --predict-for-users=FILE     predict items for users specified in FILE (one user per line, needs predict_items_file)
+   --predict-for-users=FILE     predict items for users specified in FILE (one user per line, needs --predict-items-file)
    --test-ratio=NUM             evaluate by splitting of a NUM part of the feedback
 
   options for finding the right number of iterations (MF methods and BPR-Linear)
@@ -112,24 +111,24 @@ MyMediaLite item prediction from implicit feedback
 
 		// recommender arguments
 		string method              = "MostPopular";
-		string recommender_options = string.Empty;		
-		
+		string recommender_options = string.Empty;
+
 		// variables for iteration search
-		int find_iter                 = 0;
-		int max_iter                  = 500;
-		double auc_cutoff             = 0;
-		double prec5_cutoff           = 0;
-		compute_fit                   = false;
+		int find_iter       = 0;
+		int max_iter        = 500;
+		double auc_cutoff   = 0;
+		double prec5_cutoff = 0;
+		compute_fit         = false;
 
 		// data parameters
 		string training_file = null;
-		string test_file     = null;		
-		string data_dir               = "";
-		string relevant_items_file    = string.Empty;
-		string user_attributes_file   = string.Empty;
-		string item_attributes_file   = string.Empty;
-		string user_relations_file    = string.Empty;
-		string item_relations_file    = string.Empty;
+		string test_file     = null;
+		string data_dir             = "";
+		string relevant_items_file  = string.Empty;
+		string user_attributes_file = string.Empty;
+		string item_attributes_file = string.Empty;
+		string user_relations_file  = string.Empty;
+		string item_relations_file  = string.Empty;
 
 		// other parameters
 		string save_model_file        = string.Empty;
@@ -138,7 +137,7 @@ MyMediaLite item prediction from implicit feedback
 		string prediction_file        = string.Empty;
 		int predict_items_number      = -1;
 		string predict_for_users_file = string.Empty;
-		test_ratio                    = 0; // TODO support by options
+		test_ratio                    = 0;
 
 	   	var p = new OptionSet() {
 			// string-valued options
@@ -154,17 +153,17 @@ MyMediaLite item prediction from implicit feedback
 			{ "save-model=",          v              => save_model_file      = v },
 			{ "load-model=",          v              => load_model_file      = v },
 			{ "prediction-file=",     v              => prediction_file      = v },
-			{ "predict-for-users=",   v              => predict_for_users_file = v },			
+			{ "predict-for-users=",   v              => predict_for_users_file = v },
 			// integer-valued options
    			{ "find-iter=",            (int v) => find_iter            = v },
 			{ "max-iter=",             (int v) => max_iter             = v },
 			{ "random-seed=",          (int v) => random_seed          = v },
 			{ "predict-items-number=", (int v) => predict_items_number = v },
-//			{ "cross-validation=",     (int v) => cross_validation     = v },
 			// double-valued options
-//			{ "epsilon=",             (double v)     => epsilon              = v },
-			{ "auc-cutoff=",          (double v)     => auc_cutoff            = v },
-			{ "prec5-cutoff=",        (double v)     => prec5_cutoff          = v },
+//			{ "epsilon=",             (double v) => epsilon      = v },
+			{ "auc-cutoff=",          (double v) => auc_cutoff   = v },
+			{ "prec5-cutoff=",        (double v) => prec5_cutoff = v },
+			{ "test-ratio=",          (double v) => test_ratio   = v },
 			// enum options
 			//   * currently none *
 			// boolean options
@@ -173,10 +172,13 @@ MyMediaLite item prediction from implicit feedback
    		IList<string> extra_args = p.Parse(args);
 
 		bool no_eval = test_file == null;
-		
+
+		if (training_file == null)
+			Usage("Parameter --training-file=FILE is missing.");
+
 		if (extra_args.Count > 0)
 			Usage("Did not understand " + extra_args[0]);
-		
+
 		if (random_seed != -1)
 			MyMediaLite.Util.Random.InitInstance(random_seed);
 
@@ -185,7 +187,6 @@ MyMediaLite item prediction from implicit feedback
 			Usage(string.Format("Unknown method: '{0}'", method));
 
 		Recommender.Configure(recommender, recommender_options, Usage);
-
 
 		// ID mapping objects
 		var user_mapping = new EntityMapping();

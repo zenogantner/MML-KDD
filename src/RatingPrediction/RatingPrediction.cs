@@ -63,17 +63,16 @@ class RatingPrediction
 
 	static void Usage(int exit_code)
 	{
-		Console.WriteLine(@"
-MyMediaLite rating prediction
+		Console.WriteLine(@"MyMediaLite rating prediction
 
- usage:  RatingPrediction.exe --training-file=FILE --recommender=METHOD [ARGUMENTS] [OPTIONS]
+ usage:  RatingPrediction.exe --training-file=FILE --recommender=METHOD [OPTIONS]
 
   recommenders (plus options and their defaults):");
 
 			Console.Write("   - ");
 			Console.WriteLine(string.Join("\n   - ", Recommender.List("MyMediaLite.RatingPrediction")));
 
-			Console.WriteLine(@"method ARGUMENTS have the form name=value
+			Console.WriteLine(@"  method ARGUMENTS have the form name=value
 
   general OPTIONS:
    --recommender=METHOD             set recommender method (default: BiasedMatrixFactorization)
@@ -183,10 +182,13 @@ MyMediaLite rating prediction
 		// TODO make sure interaction of --find-iter and --cross-validation works properly
 
 		bool no_eval = test_file == null;
-		
+				
 		if (extra_args.Count > 0)
-			Usage(-1);
+			Usage("Did not understand " + extra_args[0]);
 
+		if (training_file == null)
+			Usage("Parameter --training-file=FILE is missing.");		
+		
 		if (random_seed != -1)
 			MyMediaLite.Util.Random.InitInstance(random_seed);
 

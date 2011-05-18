@@ -314,13 +314,13 @@ namespace MyMediaLite.Util
 			// determine necessary data
 			var needs = new List<string>();
 			if (recommender is IUserRelationAwareRecommender)
-				needs.Add("user_relation=FILE");
+				needs.Add("--user-relations=FILE");
 			if (recommender is IItemRelationAwareRecommender)
-				needs.Add("item_relation=FILE");
+				needs.Add("--item-relations=FILE");
 			if (recommender is IUserAttributeAwareRecommender)
-				needs.Add("user_attributes=FILE");
+				needs.Add("--user-attributes=FILE");
 			if (recommender is IItemAttributeAwareRecommender)
-				needs.Add("item_attributes=FILE");
+				needs.Add("--item-attributes=FILE");
 
 			return string.Join(", ", needs.ToArray());
 		}
