@@ -376,24 +376,24 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 			recommender_validate.Feedback = CreateFeedback(training_ratings, 80);
 			recommender_final.Feedback    = CreateFeedback(complete_ratings, 80);
 		}
-		if (recommender_validate is ISemiSupervisedRecommender)
+		if (recommender_validate is ISemiSupervisedItemRecommender)
 		{
 			// add additional data to semi-supervised models
 			//   for the validation recommender
-			((ISemiSupervisedRecommender) recommender_validate).TestUsers = new HashSet<int>(validation_candidates.Keys);
+			((ISemiSupervisedItemRecommender) recommender_validate).TestUsers = new HashSet<int>(validation_candidates.Keys);
 			var validation_items = new HashSet<int>();
 			foreach (var l in validation_candidates.Values)
 				foreach (var i in l)
 					validation_items.Add(i);
-			((ISemiSupervisedRecommender) recommender_validate).TestItems = validation_items;
+			((ISemiSupervisedItemRecommender) recommender_validate).TestItems = validation_items;
 
 			//   for the test/final recommender
-			((ISemiSupervisedRecommender) recommender_final).TestUsers = new HashSet<int>(test_candidates.Keys);
+			((ISemiSupervisedItemRecommender) recommender_final).TestUsers = new HashSet<int>(test_candidates.Keys);
 			var test_items = new HashSet<int>();
 			foreach (var l in test_candidates.Values)
 				foreach (var i in l)
 					test_items.Add(i);
-			((ISemiSupervisedRecommender) recommender_final).TestItems = test_items;
+			((ISemiSupervisedItemRecommender) recommender_final).TestItems = test_items;
 		}
 
 		Console.Error.WriteLine("memory before deleting ratings: {0}", Memory.Usage);

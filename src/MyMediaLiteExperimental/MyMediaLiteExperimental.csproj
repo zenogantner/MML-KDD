@@ -83,11 +83,11 @@
     <Compile Include="ItemRecommendation\WRMF_KDD.cs" />
     <Compile Include="ItemRecommendation\TypedBPRMF.cs" />
     <Compile Include="ItemRecommendation\SemiSupervisedBPRMF.cs" />
-    <Compile Include="ItemRecommendation\ISemiSupervisedRecommender.cs" />
     <Compile Include="ItemRecommendation\SemiSupervisedBPRMF_KDD.cs" />
     <Compile Include="RatingPrediction\LogisticRegressionMatrixFactorization.cs" />
     <Compile Include="ItemRecommendation\BalancedLogisticRegressionMatrixFactorization.cs" />
     <Compile Include="AssemblyInfo.cs" />
+    <Compile Include="ItemRecommendation\ISemiSupervisedItemRecommender.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AttrToFactor\" />

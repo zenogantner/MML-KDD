@@ -22,7 +22,7 @@ using System.Globalization;
 namespace MyMediaLite.ItemRecommendation
 {
 	/// <summary>BPR variant that takes into account some test data for training</summary>
-	public class SemiSupervisedBPRMF : BPRMF, ISemiSupervisedRecommender
+	public class SemiSupervisedBPRMF : BPRMF, ISemiSupervisedItemRecommender
 	{
 		/// <summary>Set containing all test users</summary>
 		public HashSet<int> TestUsers { get; set; }
