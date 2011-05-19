@@ -91,7 +91,6 @@
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AttrToFactor\" />
-    <Folder Include="Util\" />
     <Folder Include="Diversification\" />
     <Folder Include="IO\" />
     <Folder Include="IO\KDDCup2011\" />
