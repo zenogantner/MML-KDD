@@ -18,12 +18,12 @@ PROJECT_REFERENCES =  \
 	../MyMediaLite/bin/Debug/MyMediaLite.dll
 BUILD_DIR = bin/Debug
 
+MYMEDIALITETEST_DLL_MDB_SOURCE=bin/Debug/MyMediaLiteTest.dll.mdb
+MYMEDIALITETEST_DLL_MDB=$(BUILD_DIR)/MyMediaLiteTest.dll.mdb
 MYMEDIALITE_DLL_SOURCE=../MyMediaLite/bin/Debug/MyMediaLite.dll
 MATHNET_IRIDIUM_DLL_SOURCE=../../lib/MathNet/MathNet.Iridium.dll
 MYMEDIALITE_DLL_MDB_SOURCE=../MyMediaLite/bin/Debug/MyMediaLite.dll.mdb
 MYMEDIALITE_DLL_MDB=$(BUILD_DIR)/MyMediaLite.dll.mdb
-MYMEDIALITETEST_DLL_MDB_SOURCE=bin/Debug/MyMediaLiteTest.dll.mdb
-MYMEDIALITETEST_DLL_MDB=$(BUILD_DIR)/MyMediaLiteTest.dll.mdb
 
 endif
 
@@ -37,10 +37,10 @@ PROJECT_REFERENCES =  \
 	../MyMediaLite/bin/Release/MyMediaLite.dll
 BUILD_DIR = bin/Release
 
+MYMEDIALITETEST_DLL_MDB=
 MYMEDIALITE_DLL_SOURCE=../MyMediaLite/bin/Release/MyMediaLite.dll
 MATHNET_IRIDIUM_DLL_SOURCE=../../lib/MathNet/MathNet.Iridium.dll
 MYMEDIALITE_DLL_MDB=
-MYMEDIALITETEST_DLL_MDB=
 
 endif
 
@@ -48,10 +48,10 @@ AL=al2
 SATELLITE_ASSEMBLY_NAME=$(notdir $(basename $(ASSEMBLY))).resources.dll
 
 PROGRAMFILES = \
+	$(MYMEDIALITETEST_DLL_MDB) \
 	$(MYMEDIALITE_DLL) \
 	$(MATHNET_IRIDIUM_DLL) \
-	$(MYMEDIALITE_DLL_MDB) \
-	$(MYMEDIALITETEST_DLL_MDB)  
+	$(MYMEDIALITE_DLL_MDB)  
 
 LINUX_PKGCONFIG = \
 	$(MYMEDIALITETEST_PC)  
@@ -98,7 +98,7 @@ EXTRAS = \
 
 REFERENCES =  \
 	../MyMediaLite/bin/Debug/MyMediaLite.dll \
-	-pkg:mono-nunit \
+	-pkg:nunit \
 	System.Core
 
 DLL_REFERENCES = 
@@ -139,10 +139,10 @@ install-local: $(ASSEMBLY) $(ASSEMBLY_MDB)
 	mkdir -p '$(DESTDIR)$(libdir)/$(PACKAGE)'
 	$(call cp,$(ASSEMBLY),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call cp,$(ASSEMBLY_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
+	$(call cp,$(MYMEDIALITETEST_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call cp,$(MYMEDIALITE_DLL),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call cp,$(MATHNET_IRIDIUM_DLL),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call cp,$(MYMEDIALITE_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
-	$(call cp,$(MYMEDIALITETEST_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	mkdir -p '$(DESTDIR)$(libdir)/pkgconfig'
 	$(call cp,$(MYMEDIALITETEST_PC),$(DESTDIR)$(libdir)/pkgconfig)
 	make post-install-local-hook prefix=$(prefix)
@@ -152,10 +152,10 @@ uninstall-local: $(ASSEMBLY) $(ASSEMBLY_MDB)
 	make uninstall-satellite-assemblies prefix=$(prefix)
 	$(call rm,$(ASSEMBLY),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call rm,$(ASSEMBLY_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
+	$(call rm,$(MYMEDIALITETEST_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call rm,$(MYMEDIALITE_DLL),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call rm,$(MATHNET_IRIDIUM_DLL),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call rm,$(MYMEDIALITE_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
-	$(call rm,$(MYMEDIALITETEST_DLL_MDB),$(DESTDIR)$(libdir)/$(PACKAGE))
 	$(call rm,$(MYMEDIALITETEST_PC),$(DESTDIR)$(libdir)/pkgconfig)
 	make post-uninstall-local-hook prefix=$(prefix)
 

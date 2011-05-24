@@ -48,7 +48,14 @@ namespace MyMediaLite.RatingPrediction
 		private double[] user_biases;
 		private double[] item_biases;
 
-		/// <inheritdoc/>
+		/// <summary>Default constructor</summary>
+		public UserItemBaseline()
+		{
+			RegU = 15;
+			RegI = 10;
+		}
+
+		///
 		protected override void InitModel()
 		{
 			base.InitModel();
@@ -57,7 +64,7 @@ namespace MyMediaLite.RatingPrediction
 			item_biases = new double[MaxItemID + 1];
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void Train()
 		{
 			InitModel();
@@ -88,7 +95,7 @@ namespace MyMediaLite.RatingPrediction
 					user_biases[u] = user_biases[u] / (RegU + user_ratings_count[u]);
 		}
 
-		/// <inheritdoc/>
+		///
 		public override double Predict(int user_id, int item_id)
 		{
 			double user_bias = (user_id <= MaxUserID && user_id >= 0) ? user_biases[user_id] : 0;
@@ -103,7 +110,7 @@ namespace MyMediaLite.RatingPrediction
 			return result;
 		}
 
-		/// <inheritdoc/>
+		///
 		protected virtual void RetrainUser(int user_id)
 		{
 			if (UpdateUsers)
@@ -115,7 +122,7 @@ namespace MyMediaLite.RatingPrediction
 			}
 		}
 
-		/// <inheritdoc/>
+		///
 		protected virtual void RetrainItem(int item_id)
 		{
 			if (UpdateItems)
@@ -127,7 +134,7 @@ namespace MyMediaLite.RatingPrediction
 			}
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void Add(int user_id, int item_id, double rating)
 		{
 			base.Add(user_id, item_id, rating);
@@ -135,7 +142,7 @@ namespace MyMediaLite.RatingPrediction
 			RetrainUser(user_id);
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void UpdateRating(int user_id, int item_id, double rating)
 		{
 			base.UpdateRating(user_id, item_id, rating);
@@ -143,7 +150,7 @@ namespace MyMediaLite.RatingPrediction
 			RetrainUser(user_id);
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void RemoveRating(int user_id, int item_id)
 		{
 			base.RemoveRating(user_id, item_id);
@@ -151,7 +158,7 @@ namespace MyMediaLite.RatingPrediction
 			RetrainUser(user_id);
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void AddUser(int user_id)
 		{
 			base.AddUser(user_id);
@@ -163,7 +170,7 @@ namespace MyMediaLite.RatingPrediction
 			}
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void AddItem(int item_id)
 		{
 			base.AddItem(item_id);
@@ -175,7 +182,7 @@ namespace MyMediaLite.RatingPrediction
 			}
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void SaveModel(string filename)
 		{
 			using ( StreamWriter writer = Recommender.GetWriter(filename, this.GetType()) )
@@ -184,7 +191,7 @@ namespace MyMediaLite.RatingPrediction
 			}
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void LoadModel(string filename)
 		{
 			using ( StreamReader reader = Recommender.GetReader(filename, this.GetType()) )
@@ -194,7 +201,7 @@ namespace MyMediaLite.RatingPrediction
 			Train(); // instead ;-)
 		}
 
-		/// <inheritdoc/>
+		///
 		public override string ToString()
 		{
 			var ni = new NumberFormatInfo();

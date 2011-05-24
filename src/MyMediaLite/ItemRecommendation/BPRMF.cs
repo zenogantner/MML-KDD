@@ -19,9 +19,11 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.IO;
 using System.Linq;
 using MyMediaLite.DataType;
 using MyMediaLite.Eval;
+using MyMediaLite.Util;
 
 namespace MyMediaLite.ItemRecommendation
 {
@@ -78,7 +80,7 @@ namespace MyMediaLite.ItemRecommendation
 		/// <summary>Random number generator</summary>
 		protected System.Random random;
 
-		/// <inheritdoc/>
+		///
 		protected override void InitModel()
 		{
 			base.InitModel();
@@ -242,7 +244,7 @@ namespace MyMediaLite.ItemRecommendation
 			}
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void AddFeedback(int user_id, int item_id)
 		{
 			base.AddFeedback(user_id, item_id);
@@ -255,7 +257,7 @@ namespace MyMediaLite.ItemRecommendation
 			RetrainItem(item_id);
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void RemoveFeedback(int user_id, int item_id)
 		{
 			base.RemoveFeedback(user_id, item_id);
@@ -268,7 +270,7 @@ namespace MyMediaLite.ItemRecommendation
 			RetrainItem(item_id);
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void AddUser(int user_id)
 		{
 			if (user_id > MaxUserID)
@@ -280,7 +282,7 @@ namespace MyMediaLite.ItemRecommendation
 			base.AddUser(user_id);
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void AddItem(int item_id)
 		{
 			if (item_id > MaxItemID)
@@ -292,7 +294,7 @@ namespace MyMediaLite.ItemRecommendation
 			base.AddItem(item_id);
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void RemoveUser(int user_id)
 		{
 			base.RemoveUser(user_id);
@@ -307,7 +309,7 @@ namespace MyMediaLite.ItemRecommendation
 			user_factors.SetRowToOneValue(user_id, 0);
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void RemoveItem(int item_id)
 		{
 			base.RemoveItem(item_id);
@@ -409,7 +411,7 @@ namespace MyMediaLite.ItemRecommendation
 			user_neg_items[u] = neg_list.ToArray();
 		}
 
-		/// <inheritdoc/>
+		///
 		protected void CheckSampling()
 		{
 			try
@@ -437,20 +439,59 @@ namespace MyMediaLite.ItemRecommendation
 			}
 		}
 
-		/// <inheritdoc/>
+		///
 		public override double Predict(int user_id, int item_id)
 		{
 			return item_bias[item_id] + MatrixUtils.RowScalarProduct(user_factors, user_id, item_factors, item_id);
 		}
 
-		/// <inheritdoc/>
-		public override void LoadModel(string filename)
+		///
+		public override void SaveModel(string file)
 		{
-			base.LoadModel(filename);
+			using ( StreamWriter writer = Recommender.GetWriter(file, this.GetType()) )
+			{
+				IMatrixUtils.WriteMatrix(writer, user_factors);
+				VectorUtils.WriteVector(writer, item_bias);
+				IMatrixUtils.WriteMatrix(writer, item_factors);
+			}
+		}
+
+		///
+		public override void LoadModel(string file)
+		{
+			using ( StreamReader reader = Recommender.GetReader(file, this.GetType()) )
+			{
+				var user_factors = (Matrix<double>) IMatrixUtils.ReadMatrix(reader, new Matrix<double>(0, 0));
+				IList<double> item_bias = VectorUtils.ReadVector(reader);
+				var item_factors = (Matrix<double>) IMatrixUtils.ReadMatrix(reader, new Matrix<double>(0, 0));
+
+				if (user_factors.NumberOfColumns != item_factors.NumberOfColumns)
+					throw new IOException(
+									string.Format("Number of user and item factors must match: {0} != {1}",
+												  user_factors.NumberOfColumns, item_factors.NumberOfColumns));
+				if (item_bias.Count != item_factors.dim1)
+					throw new IOException(
+								  string.Format(
+									  "Number of items must be the same for biases and factors: {0} != {1}",
+									  item_bias.Count, item_factors.dim1));
+
+				this.MaxUserID = user_factors.NumberOfRows - 1;
+				this.MaxItemID = item_factors.NumberOfRows - 1;
+
+				// assign new model
+				if (this.num_factors != user_factors.NumberOfColumns)
+				{
+					Console.Error.WriteLine("Set num_factors to {0}", user_factors.NumberOfColumns);
+					this.num_factors = user_factors.NumberOfColumns;
+				}
+				this.user_factors = user_factors;
+				this.item_bias    = item_bias;
+				this.item_factors = item_factors;
+			}
 			random = Util.Random.GetInstance();
 		}
 
-		/// <inheritdoc/>
+		///
 		public override string ToString()
 		{
 			var ni = new NumberFormatInfo();

@@ -39,7 +39,7 @@ namespace MyMediaLite.RatingPrediction
 		/// <summary>regularization constant for the user factors</summary>
 		public double RegI { get; set; }
 
-		/// <inheritdoc/>
+		///
 		public override double Regularization
 		{
 			set {
@@ -72,7 +72,7 @@ namespace MyMediaLite.RatingPrediction
 			BiasReg = 0.0001;
 		}
 
-		/// <inheritdoc/>
+		///
 		protected override void InitModel()
 		{
 			base.InitModel();
@@ -88,20 +88,19 @@ namespace MyMediaLite.RatingPrediction
 				last_loss = ComputeLoss();
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void Train()
 		{
 			InitModel();
 
 			// compute global average
-			double global_average = Ratings.Average;
+			global_bias = ratings.Average;
 
-			global_bias = Math.Log( (global_average - MinRating) / (MaxRating - global_average) );
 			for (int current_iter = 0; current_iter < NumIter; current_iter++)
 				Iterate();
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void Iterate()
 		{
 			base.Iterate();
@@ -123,7 +122,7 @@ namespace MyMediaLite.RatingPrediction
 			}
 		}
 
-		/// <inheritdoc/>
+		///
 		protected override void Iterate(IList<int> rating_indices, bool update_user, bool update_item)
 		{
 			double rating_range_size = MaxRating - MinRating;
@@ -133,11 +132,11 @@ namespace MyMediaLite.RatingPrediction
 				int u = ratings.Users[index];
 				int i = ratings.Items[index];
 
-				double dot_product = global_bias + user_bias[u] + item_bias[i]
-				                   + MatrixUtils.RowScalarProduct(user_factors, u, item_factors, i);
+				double dot_product = user_bias[u] + item_bias[i] + MatrixUtils.RowScalarProduct(user_factors, u, item_factors, i);
 				double sig_dot = 1 / (1 + Math.Exp(-dot_product));
 
 				double p = MinRating + sig_dot * rating_range_size;
+
 				double err = ratings[index] - p;
 
 				double gradient_common = err * sig_dot * (1 - sig_dot) * rating_range_size;
@@ -165,25 +164,23 @@ namespace MyMediaLite.RatingPrediction
 					{
 						double delta_i = gradient_common * u_f - RegI * i_f;
 						MatrixUtils.Inc(item_factors, i, f, LearnRate * delta_i);
-						// item_factors[i, f] += learn_rate * delta_i;
 					}
 				}
 			}
 		}
 
-		/// <inheritdoc/>
+		///
 		public override double Predict(int user_id, int item_id)
 		{
 			if (user_id >= user_factors.dim1 || item_id >= item_factors.dim1)
-				return MinRating + ( 1 / (1 + Math.Exp(-global_bias)) ) * (MaxRating - MinRating);
+				return global_bias;
 
-			double score = global_bias + user_bias[user_id] + item_bias[item_id]
-			             + MatrixUtils.RowScalarProduct(user_factors, user_id, item_factors, item_id);
+			double score = user_bias[user_id] + item_bias[item_id] + MatrixUtils.RowScalarProduct(user_factors, user_id, item_factors, item_id);
 
 			return MinRating + ( 1 / (1 + Math.Exp(-score)) ) * (MaxRating - MinRating);
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void SaveModel(string filename)
 		{
 			var ni = new NumberFormatInfo();
@@ -199,7 +196,7 @@ namespace MyMediaLite.RatingPrediction
 			}
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void LoadModel(string filename)
 		{
 			var ni = new NumberFormatInfo();
@@ -209,9 +206,9 @@ namespace MyMediaLite.RatingPrediction
 			{
 				var bias = double.Parse(reader.ReadLine(), ni);
 
-				ICollection<double> user_bias = VectorUtils.ReadVector(reader);
+				IList<double> user_bias = VectorUtils.ReadVector(reader);
 				var user_factors = (Matrix<double>) IMatrixUtils.ReadMatrix(reader, new Matrix<double>(0, 0));
-				ICollection<double> item_bias = VectorUtils.ReadVector(reader);
+				IList<double> item_bias = VectorUtils.ReadVector(reader);
 				var item_factors = (Matrix<double>) IMatrixUtils.ReadMatrix(reader, new Matrix<double>(0, 0));
 
 				if (user_factors.dim2 != item_factors.dim2)
@@ -249,7 +246,7 @@ namespace MyMediaLite.RatingPrediction
 			}
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void AddUser(int user_id)
 		{
 			if (user_id > MaxUserID)
@@ -263,7 +260,7 @@ namespace MyMediaLite.RatingPrediction
 			}
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void AddItem(int item_id)
 		{
 			if (item_id > MaxItemID)
@@ -277,21 +274,21 @@ namespace MyMediaLite.RatingPrediction
 			}
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void RetrainUser(int user_id)
 		{
 			user_bias[user_id] = 0;
 			base.RetrainUser(user_id);
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void RetrainItem(int item_id)
 		{
 			item_bias[item_id] = 0;
 			base.RetrainItem(item_id);
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void RemoveUser(int user_id)
 		{
 			base.RemoveUser(user_id);
@@ -299,7 +296,7 @@ namespace MyMediaLite.RatingPrediction
 			user_bias[user_id] = 0;
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void RemoveItem(int item_id)
 		{
 			base.RemoveItem(item_id);
@@ -307,7 +304,7 @@ namespace MyMediaLite.RatingPrediction
 			item_bias[item_id] = 0;
 		}
 
-		/// <inheritdoc/>
+		///
 		public override double ComputeLoss()
 		{
 			double square_loss = 0;
@@ -334,7 +331,7 @@ namespace MyMediaLite.RatingPrediction
 			return square_loss + 0.5 * complexity;
 		}
 
-		/// <inheritdoc/>
+		///
 		public override string ToString()
 		{
 			var ni = new NumberFormatInfo();

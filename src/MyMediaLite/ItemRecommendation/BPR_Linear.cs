@@ -32,7 +32,7 @@ namespace MyMediaLite.ItemRecommendation
 	/// </remarks>
 	public class BPR_Linear : ItemRecommender, IItemAttributeAwareRecommender, IIterativeModel
 	{
-		/// <inheritdoc/>
+		///
 		public SparseBooleanMatrix ItemAttributes
 		{
 			get { return this.item_attributes; }
@@ -44,7 +44,7 @@ namespace MyMediaLite.ItemRecommendation
 		}
 		private SparseBooleanMatrix item_attributes;
 
-		/// <inheritdoc/>
+		///
 		public int NumItemAttributes { get;	set; }
 
 		// Item attribute weights
@@ -86,14 +86,14 @@ namespace MyMediaLite.ItemRecommendation
 		// support data structure for fast sampling
 		private IList<int>[] user_neg_items;
 
-		/// <inheritdoc/>
+		///
 		public override void Train()
 		{
 			random = Util.Random.GetInstance();
 
 			// prepare fast sampling, if necessary
 			int support_data_size = ((MaxUserID + 1) * (MaxItemID + 1) * 4) / (1024 * 1024);
-			Console.Error.WriteLine("BPR-LIN sds=" + support_data_size);
+			Console.Error.WriteLine("sds=" + support_data_size);
 			if (support_data_size <= fast_sampling_memory_limit)
 			{
 				fast_sampling = true;
@@ -116,10 +116,7 @@ namespace MyMediaLite.ItemRecommendation
 			MatrixUtils.InitNormal(item_attribute_weight_by_user, init_mean, init_stdev);
 
 			for (int i = 0; i < NumIter; i++)
-			{
 				Iterate();
-				Console.Error.WriteLine(i);
-			}
 		}
 
 		/// <summary>
@@ -189,9 +186,7 @@ namespace MyMediaLite.ItemRecommendation
 			SampleItemPair(u, out i, out j);
 		}
 
-		/// <summary>
-		/// Modified feature update method that exploits attribute sparsity
-		/// </summary>
+		/// <summary>Modified feature update method that exploits attribute sparsity</summary>
 		protected virtual void UpdateFeatures(int u, int i, int j)
 		{
 			double x_uij = Predict(u, i) - Predict(u, j);
@@ -221,7 +216,7 @@ namespace MyMediaLite.ItemRecommendation
 			}
 		}
 
-		/// <inheritdoc/>
+		///
 		public override double Predict(int user_id, int item_id)
 		{
 			if ((user_id < 0) || (user_id >= item_attribute_weight_by_user.dim1))
@@ -242,28 +237,28 @@ namespace MyMediaLite.ItemRecommendation
 			return result;
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void SaveModel(string filename)
 		{
 			using ( StreamWriter writer = Recommender.GetWriter(filename, this.GetType()) )
 				IMatrixUtils.WriteMatrix(writer, item_attribute_weight_by_user);
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void LoadModel(string filename)
 		{
 			using ( StreamReader reader = Recommender.GetReader(filename, this.GetType()) )
 				this.item_attribute_weight_by_user = (Matrix<double>) IMatrixUtils.ReadMatrix(reader, new Matrix<double>(0, 0));
 		}
 
-		/// <inheritdoc/>
+		///
 		public double ComputeFit()
 		{
 			// TODO
 			return -1;
 		}
 
-		/// <inheritdoc/>
+		///
 		public override string ToString()
 		{
 			var ni = new NumberFormatInfo();

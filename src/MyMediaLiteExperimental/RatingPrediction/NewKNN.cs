@@ -30,11 +30,12 @@ namespace MyMediaLite.RatingPrediction
 {
 	// FIXME implementation is not complete and DOES NOT WORK
 	
-	/// <summary>kNN-based rating predictors</summary>
+	/// <summary>kNN-based rating predictors (not working yet)</summary>
 	/// <remarks>
 	/// The method is described in section 2.2 of
-	/// Yehuda Koren: Factor in the Neighbors: Scalable and Accurate Collaborative Filtering,
-	/// Transactions on Knowledge Discovery from Data (TKDD), 2009.
+	///   Yehuda Koren
+	///   Factor in the Neighbors: Scalable and Accurate Collaborative Filtering
+	///   Transactions on Knowledge Discovery from Data (TKDD), 2009
 	///
 	/// This recommender does NOT support online updates.
 	///
@@ -154,7 +155,7 @@ namespace MyMediaLite.RatingPrediction
 			return result;
         }
 
-        /// <inheritdoc/>
+        ///
         public override void Train()
         {
 			base.Train();
@@ -180,7 +181,7 @@ namespace MyMediaLite.RatingPrediction
 			}
         }
 
-		/// <inheritdoc/>
+		///
 		public override void SaveModel(string filename)
 		{
 			// TODO extend
@@ -188,7 +189,7 @@ namespace MyMediaLite.RatingPrediction
 				correlation.Write(writer);
 		}
 
-		/// <inheritdoc/>
+		///
 		public override void LoadModel(string filename)
 		{
 			// TODO extend
@@ -201,7 +202,7 @@ namespace MyMediaLite.RatingPrediction
 			}
 		}
 
-        /// <inheritdoc/>
+        ///
 		public override string ToString()
 		{
 			var ni = new NumberFormatInfo();
