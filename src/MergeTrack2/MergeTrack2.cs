@@ -226,32 +226,6 @@ class MergeTrack2
 		return Eval(predictions, candidates, hits);
 	}
 
-	static double Eval(string file, Dictionary<int, IList<int>> candidates, Dictionary<int, IList<int>> hits)
-	{
-		var files   = new List<string>();
-		var weights = new List<double>();
-
-		files.Add(file);
-		weights.Add(1);
-
-		return Eval(files, weights, candidates, hits);
-	}
-
-	static double Eval(IList<string> files, IList<double> weights)
-	{
-		var candidates = Track2Items.Read(data_dir + "/mml-track2/validationCandidatesIdx2.txt");
-		var hits       = Track2Items.Read(data_dir + "/mml-track2/validationHitsIdx2.txt");
-
-		return Eval(files, weights, candidates, hits);
-	}
-
-	static double Eval(IList<string> files, IList<double> weights, Dictionary<int, IList<int>> candidates, Dictionary<int, IList<int>> hits)
-	{
-		IList<byte> validation_predictions = MergeValidationFiles(files, weights);
-
-		return Eval(validation_predictions, candidates, hits);
-	}
-
 	static double Eval(IList<byte> predictions, Dictionary<int, IList<int>> candidates, Dictionary<int, IList<int>> hits)
 	{
 		double result = KDDCup.EvaluateTrack2(predictions, candidates, hits);

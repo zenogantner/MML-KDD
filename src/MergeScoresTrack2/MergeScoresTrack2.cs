@@ -77,10 +77,14 @@ class MergeScoresTrack2
 		{
 			var greedy_files = GreedyForwardSearch(files, diversification_k, err_threshold); // ignore the weights for now
 
-			IList<byte> final_prediction = MergeFiles(greedy_files);
+			IList<double> final_scores = MergeFiles(greedy_files);
+			IList<byte> final_predictions = Scores2Predictions(final_scores);
 
 			if (output_file != null)
-				WritePredictions(final_prediction, output_file);
+			{
+				WritePredictions(final_predictions, output_file);
+				// TODO write final scores, also for validation
+			}
 		}
 		else if (prob80plus)
 		{
@@ -94,14 +98,14 @@ class MergeScoresTrack2
 		{
 			if (data_dir != null)
 			{
-				IList<byte> validation_predictions = MergeValidationFiles(files, weights);
+				IList<byte> validation_predictions = Scores2Predictions(MergeValidationFiles(files, weights));
 				double result = Eval(validation_predictions);
 				Console.WriteLine("ERR {0:0.#######}", result);
 				WritePredictions(validation_predictions, output_file + "-validation");
 			}
 
 			Console.WriteLine("{0} files", files.Count);
-			IList<byte> final_prediction = MergeFiles(files, weights);
+			IList<byte> final_prediction = Scores2Predictions(MergeFiles(files, weights));
 			WritePredictions(final_prediction, output_file);
 		}
 	}
@@ -123,7 +127,6 @@ class MergeScoresTrack2
 		return probs;
 	}
 
-	// TODO implement for scores ...
 	static IList<string> GreedyForwardSearch(IList<string> candidate_files, int k, double err_threshold)
 	{
 		var candidate_items = Track2Items.Read(data_dir + "/mml-track2/validationCandidatesIdx2.txt");
@@ -137,8 +140,7 @@ class MergeScoresTrack2
 		var error = new Dictionary<string, double>();
 		foreach (string file in candidate_files)
 		{
-			score_cache[file] = ReadFile(ValidationFilename(file));  // TODO-score
-			/*
+			score_cache[file] = ReadFile(ValidationFilename(file));
 			double err = Eval(score_cache[file], candidate_items, item_hits);
 
 			// only keep if error is below threshold
@@ -152,17 +154,14 @@ class MergeScoresTrack2
 				score_cache.Remove(file);
 				Console.Error.Write("_");
 			}
-			*/
 		}
 		Console.WriteLine("done: candidates {0} memory {1}", error.Count, Memory.Usage);
 
 		// the ensemble
 		var ensemble = new List<string>();
-		var ensemble_validation_predictions = new List<IList<byte>>();
+		var ensemble_validation_scores = new List<IList<double>>();
 
-		/*
-
-		double best_result = 10;
+		double best_result = double.MaxValue;
 
 		var files_by_error = new List<string>(
 			from file in error.Keys
@@ -173,10 +172,10 @@ class MergeScoresTrack2
 		var top_file = files_by_error.First();
 		files_by_error.Remove(top_file);
 		ensemble.Add(top_file);
-		ensemble_validation_predictions.Add(ReadFile(ValidationFilename(top_file)));
+		ensemble_validation_scores.Add(ReadFile(ValidationFilename(top_file)));
 
 		// init merged predictions
-		IList<byte> ensemble_merged_predictions = ensemble_validation_predictions.First();
+		IList<double> ensemble_merged_scores = ensemble_validation_scores.First();
 
 		while (files_by_error.Count() > 0)
 		{
@@ -187,8 +186,8 @@ class MergeScoresTrack2
 			if (k > 1)
 			{
 				// compute difference
-				foreach (string file in top_k)
-					difference[file] = ComputeDifference(prediction_cache[file], ensemble_merged_predictions);
+				foreach (string file in top_k) // TODO optimize for speed
+					difference[file] = ComputeDifference(Scores2Predictions(score_cache[file]), Scores2Predictions(ensemble_merged_scores)); // TODO maybe compare scores and merged_scores
 			}
 			else
 			{
@@ -205,19 +204,19 @@ class MergeScoresTrack2
 			var next_candidate = files_by_difference.First();
 			files_by_error.Remove(next_candidate);
 			ensemble.Add(next_candidate);
-			ensemble_validation_predictions.Add(prediction_cache[next_candidate]);
+			ensemble_validation_scores.Add(score_cache[next_candidate]);
 			Console.Write("({0}/{1}) {2}: {3:F7} ... ", error.Count - files_by_error.Count, error.Count, next_candidate, error[next_candidate]);
 
 			// cache entry not needed any more
-			prediction_cache.Remove(next_candidate);
+			score_cache.Remove(next_candidate);
 
-			ensemble_merged_predictions = MergePredictions(ensemble_validation_predictions);
-			double result = Eval(ensemble_merged_predictions, candidate_items, item_hits);
+			ensemble_merged_scores = MergeScores(ensemble_validation_scores);
+			double result = Eval(ensemble_merged_scores, candidate_items, item_hits);
 			Console.Write("ERR {0:F7} ... ", result);
 			if (result > best_result) // if no improvement
 			{
 				ensemble.RemoveAt(ensemble.Count - 1); // remove last
-				ensemble_validation_predictions.RemoveAt(ensemble_validation_predictions.Count - 1); // remove last
+				ensemble_validation_scores.RemoveAt(ensemble_validation_scores.Count - 1); // remove last
 				Console.WriteLine(".");
 			}
 			else
@@ -226,8 +225,6 @@ class MergeScoresTrack2
 				Console.WriteLine("keep ({0}).", ensemble.Count);
 			}
 		}
-
-		*/
 
 		// show results
 		foreach (var file in ensemble)
@@ -285,36 +282,14 @@ class MergeScoresTrack2
 		return Eval(predictions, candidates, hits);
 	}
 
-	static double Eval(string file, Dictionary<int, IList<int>> candidates, Dictionary<int, IList<int>> hits)
+	static double Eval(IList<double> scores, Dictionary<int, IList<int>> candidates, Dictionary<int, IList<int>> hits)
 	{
-		var files   = new List<string>();
-		var weights = new List<double>();
-
-		files.Add(file);
-		weights.Add(1);
-
-		return Eval(files, weights, candidates, hits);
-	}
-
-	static double Eval(IList<string> files, IList<double> weights)
-	{
-		var candidates = Track2Items.Read(data_dir + "/mml-track2/validationCandidatesIdx2.txt");
-		var hits       = Track2Items.Read(data_dir + "/mml-track2/validationHitsIdx2.txt");
-
-		return Eval(files, weights, candidates, hits);
-	}
-
-	static double Eval(IList<string> files, IList<double> weights, Dictionary<int, IList<int>> candidates, Dictionary<int, IList<int>> hits)
-	{
-		IList<byte> validation_predictions = MergeValidationFiles(files, weights);
-
-		return Eval(validation_predictions, candidates, hits);
+		return KDDCup.EvaluateTrack2(Scores2Predictions(scores), candidates, hits);
 	}
 
 	static double Eval(IList<byte> predictions, Dictionary<int, IList<int>> candidates, Dictionary<int, IList<int>> hits)
 	{
-		double result = KDDCup.EvaluateTrack2(predictions, candidates, hits);
-		return result;
+		return KDDCup.EvaluateTrack2(predictions, candidates, hits);
 	}
 
 	static IList<byte> MergePredictions(IList<IList<byte>> predictions)
@@ -328,7 +303,18 @@ class MergeScoresTrack2
 		return MergePredictions(predictions, weights);
 	}
 
-	static IList<byte> MergeValidationFiles(IList<string> files)
+	static IList<double> MergeScores(IList<IList<double>> scores)
+	{
+		var weights = new double[scores.Count];
+		for (int i = 0; i < weights.Length; i++)
+			weights[i] = 1;
+
+		weights[0] = 1.1; // tie-breaker
+
+		return MergeScores(scores, weights);
+	}
+
+	static IList<double> MergeValidationFiles(IList<string> files)
 	{
 		var weights = new double[files.Count];
 		for (int i = 0; i < weights.Length; i++)
@@ -339,7 +325,7 @@ class MergeScoresTrack2
 		return MergeValidationFiles(files, weights);
 	}
 
-	static IList<byte> MergeValidationFiles(IList<string> files, IList<double> weights)
+	static IList<double> MergeValidationFiles(IList<string> files, IList<double> weights)
 	{
 		IList<string> validation_files = new List<string>();
 		foreach (string filename in files)
@@ -368,7 +354,7 @@ class MergeScoresTrack2
 		return validation_filenames;
 	}
 
-	static IList<byte> MergeFiles(IList<string> files)
+	static IList<double> MergeFiles(IList<string> files)
 	{
 		var weights = new double[files.Count];
 		for (int i = 0; i < weights.Length; i++)
@@ -414,44 +400,44 @@ class MergeScoresTrack2
 		return combined_predictions;
 	}
 
-	// TODO get rid of this?
-	static IList<byte> MergeFiles(IList<string> files, IList<double> weights)
+	static IList<double> MergeScores(IList<IList<double>> scores, IList<double> weights)
+	{
+		// compute weighted sums
+		var combined_scores = new double[scores[0].Count];
+		for (int pos = 0; pos < combined_scores.Length; pos += NUM_CANDIDATES)
+			for (int i = 0; i < scores.Count; i++)
+				combined_scores[pos] += weights[i] * scores[i][pos];
+		
+		// compute averages
+		for (int pos = 0; pos < combined_scores.Length; pos++)
+			combined_scores[pos] /= weights.Sum();
+		
+		return combined_scores;
+	}
+
+	static IList<double> MergeFiles(IList<string> files, IList<double> weights)
 	{
 		// open files
 		var readers = new BinaryReader[files.Count];
 		for (int i = 0; i < files.Count; i++)
 				readers[i] = new BinaryReader(new FileStream(files[i], FileMode.Open, FileAccess.Read));
 
-		var combined_predictions = new List<byte>();
-
+		// compute weighted sums
+		var combined_scores = new double[FILE_SIZE];
 		try
 		{
 			// read and merge
-			var votes = new char[files.Count][];
-			while ( (votes[0] = readers[0].ReadChars(NUM_CANDIDATES)).Length > 0 )
-			{
-				for (int i = 1; i < readers.Length; i++)
-					votes[i] = readers[i].ReadChars(NUM_CANDIDATES);
-
-				var weighted_votes = new double[NUM_CANDIDATES];
-				for (int i = 0; i < readers.Length; i++)
-					for (int j = 0; j < NUM_CANDIDATES; j++)
-						if (votes[i][j] == '1')
-							weighted_votes[j] += weights[i];
-
-				var positions = new List<int>(new int[] { 0, 1, 2, 3, 4, 5 }); // TODO should depend on NUM_CANDIDATES
-				positions.Sort(delegate(int pos1, int pos2) { return weighted_votes[pos2].CompareTo(weighted_votes[pos1]); } );
-
-				for (int i = 0; i < NUM_CANDIDATES; i++)
-					if (positions.IndexOf(i) < 3)
-						combined_predictions.Add(1);
-					else
-						combined_predictions.Add(0);
-			}
+			for (int i = 0; i < FILE_SIZE; i++)
+				for (int j = 0; j < readers.Length; j++)
+					combined_scores[i] += weights[j] * readers[j].ReadDouble();
 		}
 		catch (EndOfStreamException) { /* do nothing */ }
 
-		return combined_predictions;
+		// compute averages
+		for (int pos = 0; pos < combined_scores.Length; pos++)
+			combined_scores[pos] /= weights.Sum();		
+		
+		return combined_scores;
 	}
 
 	static void WriteScores(IList<double> scores, string output_file)
