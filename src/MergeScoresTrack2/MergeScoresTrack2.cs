@@ -256,7 +256,8 @@ class MergeScoresTrack2
 
 		for (int offset = 0; offset < scores.Count; offset += NUM_CANDIDATES)
 		{
-			var positions = new List<int>(new int[] { 0, 1, 2, 3, 4, 5 });
+			var positions = new List<int>(new int[] { 0, 1, 2, 3, 4, 5 }); // TODO
+
 			positions.Sort(delegate(int pos1, int pos2) { return scores[offset + pos2].CompareTo(scores[offset + pos1]); } );
 
 			for (int i = 0; i < positions.Count; i++)
@@ -292,24 +293,11 @@ class MergeScoresTrack2
 		return KDDCup.EvaluateTrack2(predictions, candidates, hits);
 	}
 
-	static IList<byte> MergePredictions(IList<IList<byte>> predictions)
-	{
-		var weights = new double[predictions.Count];
-		for (int i = 0; i < weights.Length; i++)
-			weights[i] = 1;
-
-		weights[0] = 1.1; // tie-breaker
-
-		return MergePredictions(predictions, weights);
-	}
-
 	static IList<double> MergeScores(IList<IList<double>> scores)
 	{
 		var weights = new double[scores.Count];
 		for (int i = 0; i < weights.Length; i++)
 			weights[i] = 1;
-
-		weights[0] = 1.1; // tie-breaker
 
 		return MergeScores(scores, weights);
 	}
@@ -319,8 +307,6 @@ class MergeScoresTrack2
 		var weights = new double[files.Count];
 		for (int i = 0; i < weights.Length; i++)
 			weights[i] = 1;
-
-		weights[0] = 1.1; // tie-breaker
 
 		return MergeValidationFiles(files, weights);
 	}
@@ -360,8 +346,6 @@ class MergeScoresTrack2
 		for (int i = 0; i < weights.Length; i++)
 			weights[i] = 1;
 
-		weights[0] = 1.1; // tie-breaker
-
 		return MergeFiles(files, weights);
 	}
 
@@ -374,30 +358,6 @@ class MergeScoresTrack2
 				scores[i] = reader.ReadDouble();
 
 		return scores;
-	}
-
-	static IList<byte> MergePredictions(IList<IList<byte>> predictions, IList<double> weights)
-	{
-		var combined_predictions = new byte[predictions[0].Count];
-
-		for (int pos = 0; pos < combined_predictions.Length; pos += NUM_CANDIDATES)
-		{
-			var weighted_votes = new double[NUM_CANDIDATES];
-			for (int i = 0; i < predictions.Count; i++)
-				for (int j = 0; j < weighted_votes.Length; j++)
-					weighted_votes[j] += weights[i] * predictions[i][pos + j];
-
-			var positions = new List<int>(new int[] { 0, 1, 2, 3, 4, 5 });
-			positions.Sort(delegate(int pos1, int pos2) { return weighted_votes[pos2].CompareTo(weighted_votes[pos1]); } );
-
-			for (int i = 0; i < positions.Count; i++)
-				if (positions.IndexOf(i) < 3)
-					combined_predictions[pos + i] = 1;
-				else
-					combined_predictions[pos + i] = 0;
-		}
-
-		return combined_predictions;
 	}
 
 	static IList<double> MergeScores(IList<IList<double>> scores, IList<double> weights)
