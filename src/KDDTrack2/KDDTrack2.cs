@@ -404,14 +404,14 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		Utils.DisplayDataStats(recommender_final.Feedback, null, recommender_final);
 	}
 
-	static PosOnlyFeedback CreateFeedback(IRatings ratings)
+	static IPosOnlyFeedback CreateFeedback(IRatings ratings)
 	{
 		return CreateFeedback(ratings, 0);
 	}
 	
-	static PosOnlyFeedback CreateFeedback(IRatings ratings, double threshold)
+	static IPosOnlyFeedback CreateFeedback(IRatings ratings, double threshold)
 	{
-		var feedback = new PosOnlyFeedback();
+		var feedback = new PosOnlyFeedback<SparseBooleanMatrixBinarySearch>();
 
 		for (int i = 0; i < ratings.Count; i++)
 			if (ratings[i] >= threshold)
