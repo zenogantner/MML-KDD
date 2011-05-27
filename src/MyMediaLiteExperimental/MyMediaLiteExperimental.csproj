@@ -8,7 +8,7 @@
     <ProjectGuid>{750EE318-9B7E-4825-8E42-5D9ABDD6E050}</ProjectGuid>
     <OutputType>Library</OutputType>
     <RootNamespace>MyMediaLiteExperimental</RootNamespace>
-    <ReleaseVersion>1.02</ReleaseVersion>
+    <ReleaseVersion>1.01</ReleaseVersion>
     <AssemblyName>MyMediaLiteExperimental</AssemblyName>
     <TargetFrameworkVersion>v3.5</TargetFrameworkVersion>
   </PropertyGroup>
@@ -53,6 +53,17 @@
     <Compile Include="IO\KDDCup2011\Track2Items.cs" />
     <Compile Include="ItemRecommendation\ItemAttributeSVM.cs" />
     <Compile Include="ItemRecommendation\ISemiSupervisedItemRecommender.cs" />
+    <Compile Include="ItemRecommendation\AlbumCounter.cs" />
+    <Compile Include="ItemRecommendation\ArtistCounter.cs" />
+    <Compile Include="ItemRecommendation\AttributeCounter.cs" />
+    <Compile Include="ItemRecommendation\BalancedLogisticRegressionMatrixFactorization.cs" />
+    <Compile Include="ItemRecommendation\BPRMF_KDD.cs" />
+    <Compile Include="ItemRecommendation\BPR_SMF_KDD.cs" />
+    <Compile Include="ItemRecommendation\GenreCounter.cs" />
+    <Compile Include="ItemRecommendation\SemiSupervisedBPRMF.cs" />
+    <Compile Include="ItemRecommendation\SemiSupervisedBPRMF_KDD.cs" />
+    <Compile Include="ItemRecommendation\TypedBPRMF.cs" />
+    <Compile Include="ItemRecommendation\WRMF_KDD.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AttrToFactor\" />
@@ -80,6 +91,10 @@
     <Reference Include="System.Core" />
     <Reference Include="System" />
     <Reference Include="System.Data" />
+    <Reference Include="MathNet.Iridium, Version=2008.8.16.470, Culture=neutral, PublicKeyToken=c061a3ec32cc0c6f">
+      <SpecificVersion>False</SpecificVersion>
+      <HintPath>..\..\lib\MathNet\MathNet.Iridium.dll</HintPath>
+    </Reference>
   </ItemGroup>
   <Import Project="$(MSBuildBinPath)\Microsoft.CSharp.targets" />
 </Project>

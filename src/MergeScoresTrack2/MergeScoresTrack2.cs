@@ -78,18 +78,22 @@ class MergeScoresTrack2
 			var greedy_files = GreedyForwardSearch(files, diversification_k, err_threshold); // ignore the weights for now
 
 			IList<double> final_scores = MergeFiles(greedy_files);
+			IList<double> valid_scores = MergeFiles(ValidationFilenames(greedy_files));
 			IList<byte> final_predictions = Scores2Predictions(final_scores);
 
 			if (output_file != null)
 			{
 				WritePredictions(final_predictions, output_file);
-				// TODO write final scores, also for validation
+				WriteScores(final_scores, output_file + "-scores");
+				WriteScores(valid_scores, ValidationFilename(output_file + "-scores"));
 			}
 		}
 		else if (prob80plus)
 		{
+			Console.Write("Computing >80 porbabilities for {0} files ...", files.Count);
 			IList<double> test_probs = ComputeProb80Plus(files);
 			IList<double> valid_probs = ComputeProb80Plus(ValidationFilenames(files));
+			Console.WriteLine(" done");
 
 			WriteScores(test_probs, output_file); // maybe change to different param
 			WriteScores(valid_probs, ValidationFilename(output_file)); // maybe change to different param
@@ -364,7 +368,7 @@ class MergeScoresTrack2
 	{
 		// compute weighted sums
 		var combined_scores = new double[scores[0].Count];
-		for (int pos = 0; pos < combined_scores.Length; pos += NUM_CANDIDATES)
+		for (int pos = 0; pos < combined_scores.Length; pos++)
 			for (int i = 0; i < scores.Count; i++)
 				combined_scores[pos] += weights[i] * scores[i][pos];
 		
@@ -402,7 +406,7 @@ class MergeScoresTrack2
 
 	static void WriteScores(IList<double> scores, string output_file)
 	{
-		using (var writer = new BinaryWriter(new FileStream(output_file, FileMode.Open, FileAccess.Write)))
+		using (var writer = new BinaryWriter(new FileStream(output_file, FileMode.OpenOrCreate, FileAccess.Write)))
 			foreach (double p in scores)
 				writer.Write(p);
 	}
