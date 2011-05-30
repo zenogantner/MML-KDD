@@ -150,8 +150,8 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		else
 			data_dir = "mml-track2";
 		sample_data      = parameters.GetRemoveBool(   "sample_data",   false);
-		predict_rated    = parameters.GetRemoveBool(   "predict_rated", false); 
-		predict_score    = parameters.GetRemoveBool(   "predict_score", false); 
+		predict_rated    = parameters.GetRemoveBool(   "predict_rated", false);
+		predict_score    = parameters.GetRemoveBool(   "predict_score", false);
 
 		// other arguments
 		save_model_file  = parameters.GetRemoveString( "save_model");
@@ -161,9 +161,9 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 
 		if (predict_rated)
 			predict_score = true;
-		
+
 		Console.Error.WriteLine("predict_score={0}", predict_score);
-		
+
 		if (random_seed != -1)
 			MyMediaLite.Util.Random.InitInstance(random_seed);
 
@@ -242,8 +242,8 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 							if (predict_score)
 							{
 								KDDCup.PredictScoresTrack2(recommender_validate, validation_candidates, prediction_file + "-validate-it-" + i);
-								KDDCup.PredictScoresTrack2(recommender_final, test_candidates, prediction_file + "-it-" + i);								
-							}							
+								KDDCup.PredictScoresTrack2(recommender_final, test_candidates, prediction_file + "-it-" + i);
+							}
 							else
 							{
 								KDDCup.PredictTrack2(recommender_validate, validation_candidates, prediction_file + "-validate-it-" + i);
@@ -299,7 +299,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 						{
 							KDDCup.PredictScoresTrack2(recommender_validate, validation_candidates, prediction_file + "-validate");
 							KDDCup.PredictScoresTrack2(recommender_final, test_candidates, prediction_file);
-						}						
+						}
 						else
 						{
 							KDDCup.PredictTrack2(recommender_validate, validation_candidates, prediction_file + "-validate");
@@ -408,11 +408,10 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 	{
 		return CreateFeedback(ratings, 0);
 	}
-	
+
 	static IPosOnlyFeedback CreateFeedback(IRatings ratings, double threshold)
 	{
 		var feedback = new PosOnlyFeedback<SparseBooleanMatrixBinarySearch>();
-
 		for (int i = 0; i < ratings.Count; i++)
 			if (ratings[i] >= threshold)
 				feedback.Add(ratings.Users[i], ratings.Items[i]);
@@ -420,7 +419,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		Console.Error.WriteLine("{0} ratings > {1}", feedback.Count, threshold);
 
 		return feedback;
-	}	
+	}
 
 	static void AbortHandler(object sender, ConsoleCancelEventArgs args)
 	{
