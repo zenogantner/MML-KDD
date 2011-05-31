@@ -192,8 +192,6 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 		Console.Write(recommender_validate.ToString());
 
 		DoTrack2();
-
-		Console.Error.WriteLine("memory {0}", Memory.Usage);
 	}
 
 	static void DoTrack2()
@@ -223,8 +221,10 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 			for (int i = iterative_recommender_validate.NumIter + 1; i <= max_iter; i++)
 			{
 				TimeSpan time = Utils.MeasureTime(delegate() {
+					Console.Error.WriteLine("validation set: iterate");
 					iterative_recommender_validate.Iterate(); // TODO parallelize
-					if (prediction_file != string.Empty)
+					Console.Error.WriteLine("prediction set: iterate");
+					if (prediction_file != string.Empty)				
 						iterative_recommender_final.Iterate();
 				});
 				training_time_stats.Add(time.TotalSeconds);
@@ -241,7 +241,9 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 						{
 							if (predict_score)
 							{
+								Console.Error.WriteLine("Predicting validation scores ...");
 								KDDCup.PredictScoresTrack2(recommender_validate, validation_candidates, prediction_file + "-validate-it-" + i);
+								Console.Error.WriteLine("Predicting real scores ...");
 								KDDCup.PredictScoresTrack2(recommender_final, test_candidates, prediction_file + "-it-" + i);
 							}
 							else
@@ -271,10 +273,12 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 						Console.Error.WriteLine(string.Format(ni, "Reached convergence (eps={0:0.######}) on training/validation data after {1} iterations.", epsilon, i));
 						break;
 					}
+
+					DisplayStats();
 				}
 			} // for
 
-			DisplayIterationStats();
+			DisplayStats();
 		}
 		else
 		{
@@ -406,16 +410,41 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 
 	static IPosOnlyFeedback CreateFeedback(IRatings ratings)
 	{
-		return CreateFeedback(ratings, 0);
+		SparseBooleanMatrixStatic user_item_matrix = new SparseBooleanMatrixStatic();
+		
+		for (int u = 0; u <= ratings.MaxUserID; u++)
+		{
+			var items = new int[ratings.ByUser[u].Count];
+			
+			int pos = 0;
+			foreach (int index in ratings.ByUser[u])
+				items[pos++] = ratings.Items[index];
+			
+			user_item_matrix[u] = items;
+		}
+
+		var feedback = new PosOnlyFeedback<SparseBooleanMatrixStatic>(user_item_matrix);
+		Console.Error.WriteLine("{0} ratings", feedback.Count);
+
+		return feedback;
 	}
 
 	static IPosOnlyFeedback CreateFeedback(IRatings ratings, double threshold)
 	{
-		var feedback = new PosOnlyFeedback<SparseBooleanMatrixBinarySearch>();
-		for (int i = 0; i < ratings.Count; i++)
-			if (ratings[i] >= threshold)
-				feedback.Add(ratings.Users[i], ratings.Items[i]);
-
+		SparseBooleanMatrixStatic user_item_matrix = new SparseBooleanMatrixStatic();
+		
+		for (int u = 0; u <= ratings.MaxUserID; u++)
+		{
+			var items = new List<int>();
+			
+			foreach (int index in ratings.ByUser[u])
+				if (ratings[index] >= threshold)
+					items.Add(ratings.Items[index]);
+			
+			user_item_matrix[u] = items.ToArray();
+		}
+		var feedback = new PosOnlyFeedback<SparseBooleanMatrixStatic>(user_item_matrix);			
+		
 		Console.Error.WriteLine("{0} ratings > {1}", feedback.Count, threshold);
 
 		return feedback;
@@ -423,11 +452,10 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 
 	static void AbortHandler(object sender, ConsoleCancelEventArgs args)
 	{
-		DisplayIterationStats();
-		Console.Error.WriteLine("memory {0}", Memory.Usage);
+		DisplayStats();
 	}
 
-	static void DisplayIterationStats()
+	static void DisplayStats()
 	{
 		if (training_time_stats.Count > 0)
 			Console.Error.WriteLine(string.Format(
@@ -441,5 +469,7 @@ MyMediaLite KDD Cup 2011 Track 2 tool
 				"eval_time: min={0,0:0.##}, max={1,0:0.##}, avg={2,0:0.##}",
 	            eval_time_stats.Min(), eval_time_stats.Max(), eval_time_stats.Average()
 			));
+
+		Console.Error.WriteLine("memory {0}", Memory.Usage);
 	}
 }
