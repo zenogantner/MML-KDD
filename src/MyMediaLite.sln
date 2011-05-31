@@ -112,6 +112,6 @@ Global
 		$4.MessageStyle = $5
 		$5.LineAlign = 0
 		$4.inheritsSet = Mono
-		version = 1.01
+		version = 1.03
 	EndGlobalSection
 EndGlobal
