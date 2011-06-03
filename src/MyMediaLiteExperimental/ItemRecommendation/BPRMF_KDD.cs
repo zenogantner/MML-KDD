@@ -18,6 +18,7 @@
 using System;
 using System.Collections.Generic;
 using System.Globalization;
+using System.Linq;
 using MyMediaLite.DataType;
 using MyMediaLite.Util;
 
@@ -54,6 +55,13 @@ namespace MyMediaLite.ItemRecommendation
 		/// <summary>Loss for the last iteration, used by bold driver heuristics</summary>
 		double last_loss = double.NegativeInfinity;
 
+		/// <summary>array of user components of triples to use for approximate loss computation</summary>
+		int[] loss_sample_u;
+		/// <summary>array of user components of triples to use for approximate loss computation</summary>
+		int[] loss_sample_i;
+		/// <summary>array of user components of triples to use for approximate loss computation</summary>
+		int[] loss_sample_j;
+
 		/// <summary>Default constructor</summary>
 		public BPRMF_KDD()
 		{
@@ -77,11 +85,6 @@ namespace MyMediaLite.ItemRecommendation
 
 					index++;
 				}
-			/*
-			user_pos_items = new List<IList<int>>();
-			for (int u = 0; u < MaxUserID + 1; u++)
-				user_pos_items.Add(new List<int>(Feedback.UserMatrix[u]));
-			*/
 
 			// suppress using user_neg_items in BPRMF
 			FastSamplingMemoryLimit = 0;
@@ -89,7 +92,26 @@ namespace MyMediaLite.ItemRecommendation
 			InitModel();
 
 			if (BoldDriver)
+			{
+				int num_sample_triples = (int) Math.Sqrt(Feedback.MaxUserID) * 100; // TODO make configurable
+				Console.Error.WriteLine("loss_num_sample_triples={0}", num_sample_triples);
+
+				loss_sample_u = new int[num_sample_triples];
+				loss_sample_i = new int[num_sample_triples];
+				loss_sample_j = new int[num_sample_triples];
+
+				int u, i, j;
+				for (int c = 0; c < num_sample_triples; c++)
+				{
+					SampleTriple(out u, out i, out j);
+					loss_sample_u[c] = u;
+					loss_sample_i[c] = i;
+					loss_sample_j[c] = j;
+				}
+
+
 				last_loss = ComputeLoss();
+			}
 
 			for (int i = 0; i < NumIter; i++)
 				Iterate();
@@ -120,19 +142,6 @@ namespace MyMediaLite.ItemRecommendation
 		/// <inheritdoc/>
 		protected override void SampleTriple(out int u, out int i, out int j)
 		{
-			/*
-			if (UniformUserSampling)
-			{
-				// sample user uniformly
-				do
-					u = random.Next(0, MaxUserID + 1);
-				while (user_pos_items[u].Count == 0);
-
-				// sample positive item
-				i = user_pos_items[u][random.Next(0, user_pos_items[u].Count - 1)];
-			}
-			else
-			*/
 			{
 				// sample user from positive user-item pairs
 				int index = random.Next(0, items.Length - 1);
@@ -151,38 +160,20 @@ namespace MyMediaLite.ItemRecommendation
 		public virtual double ComputeLoss()
 		{
 			double ranking_loss = 0;
-
-			var u_counter = new int[MaxUserID + 1];
-			var i_counter = new int[MaxItemID + 1];
-			var j_counter = new int[MaxItemID + 1];
-
+			for (int c = 0; c < loss_sample_u.Length; c++)
 			{
-				int u, i, j;
-
-				for (int x = 0; x <= MaxUserID; x++) // doing this |U| times is rather arbitrary
-				{
-					SampleTriple(out u, out i, out j);
-					double x_uij = Predict(u, i) - Predict(u, j);
-					ranking_loss += 1 / (1 + Math.Exp(x_uij));
-
-					u_counter[u]++;
-					i_counter[i]++;
-					j_counter[j]++;
-				}
+				double x_uij = Predict(loss_sample_u[c], loss_sample_i[c]) - Predict(loss_sample_u[c], loss_sample_j[c]);
+				ranking_loss += 1 / (1 + Math.Exp(x_uij));
 			}
 
 			double complexity = 0;
-			for (int u = 0; u <= MaxUserID; u++)
-				complexity += u_counter[u] * RegU * Math.Pow(VectorUtils.EuclideanNorm(user_factors.GetRow(u)), 2);
-			for (int i = 0; i <= MaxItemID; i++)
+			for (int c = 0; c < loss_sample_u.Length; c++)
 			{
-				complexity += i_counter[i] * RegI * Math.Pow(VectorUtils.EuclideanNorm(item_factors.GetRow(i)), 2);
-				complexity += i_counter[i] * BiasReg * Math.Pow(item_bias[i], 2);
-			}
-			for (int j = 0; j <= MaxItemID; j++)
-			{
-				complexity += j_counter[j] * RegJ * Math.Pow(VectorUtils.EuclideanNorm(item_factors.GetRow(j)), 2);
-				complexity += j_counter[j] * BiasReg * Math.Pow(item_bias[j], 2);
+				complexity += RegU * Math.Pow(VectorUtils.EuclideanNorm(user_factors.GetRow(loss_sample_u[c])), 2);
+				complexity += RegI * Math.Pow(VectorUtils.EuclideanNorm(item_factors.GetRow(loss_sample_i[c])), 2);
+				complexity += RegJ * Math.Pow(VectorUtils.EuclideanNorm(item_factors.GetRow(loss_sample_j[c])), 2);
+				complexity += BiasReg * Math.Pow(item_bias[loss_sample_i[c]], 2);
+				complexity += BiasReg * Math.Pow(item_bias[loss_sample_j[c]], 2);
 			}
 
 			return ranking_loss + 0.5 * complexity;
