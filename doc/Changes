@@ -1,4 +1,6 @@
 1.03	2011-0?-??
+        - API changes
+          - IRatingPredictor: Add() is now AddRating()
 	- recommenders
           - new rating predictor BiasedMatrixFactorizationMAE, which is BMF
             optimized for MAE instead of RMSE
