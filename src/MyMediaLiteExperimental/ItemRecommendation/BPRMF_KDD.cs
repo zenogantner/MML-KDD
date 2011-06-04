@@ -34,9 +34,7 @@ namespace MyMediaLite.ItemRecommendation
 		protected int[] items;
 
 		/// <summary>Default constructor</summary>
-		public BPRMF_KDD()
-		{
-		}
+		public BPRMF_KDD() { }
 
 		///
 		public override void Train()
