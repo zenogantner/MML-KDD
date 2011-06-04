@@ -29,6 +29,8 @@
             (reported by Chris Newell)
 	- documentation
           - some API doc improvements
+          - get rid of the word 'engine', as it usually carries no relevant
+            information
 
 1.02	2011-05-24
 	- recommenders
