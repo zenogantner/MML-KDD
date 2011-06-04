@@ -26,7 +26,7 @@ using MyMediaLite.Util;
 
 namespace MyMediaLite.RatingPrediction
 {
-	/// <summary>Matrix factorization engine with explicit user and item bias that takes item relations into account</summary>
+	/// <summary>Matrix factorization with explicit user and item bias that takes item relations into account</summary>
 	public class SharedFactorsMatrixFactorization : BiasedMatrixFactorization, IKDDCupRecommender
 	{
 		Matrix<double> user_shared_artist_factors;
