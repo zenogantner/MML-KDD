@@ -3,6 +3,8 @@
           - IRatingPredictor
            - Add() is now AddRating()
            - remove AddUser() and AddItem()
+          - IItemRecommender
+           - remove AddUser() and AddItem()
 	- recommenders
           - new rating predictor BiasedMatrixFactorizationMAE, which is BMF
             optimized for MAE instead of RMSE
