@@ -1,7 +1,5 @@
 #!/bin/sh -e
 
-# TODO use relevant_items
-
 PROGRAM="mono --debug ItemPrediction.exe"
 THIS_DIR=`pwd`/tests
 
@@ -16,8 +14,8 @@ echo "--------------------"
 
 for method in ItemKNN WeightedItemKNN UserKNN WeightedUserKNN
 do
-	echo $PROGRAM $THIS_DIR/example.train $THIS_DIR/example.test $method k=20
-	     $PROGRAM $THIS_DIR/example.train $THIS_DIR/example.test $method k=20
+	echo $PROGRAM --training-file=$THIS_DIR/example.train --test-file=$THIS_DIR/example.test --recommender=$method --recommender-options="k=20"
+	     $PROGRAM --training-file=$THIS_DIR/example.train --test-file=$THIS_DIR/example.test --recommender=$method --recommender-options="k=20"
 done
 
 echo
@@ -28,22 +26,24 @@ DATA_DIR=../../../../data/ml100k
 
 for method in BPRMF WRMF
 do
-	echo $PROGRAM u1.base u1.test $method find_iter=1 max_iter=5 num_iter=1 data_dir=$DATA_DIR
-   	     $PROGRAM u1.base u1.test $method find_iter=1 max_iter=5 num_iter=1 data_dir=$DATA_DIR
+	echo $PROGRAM --training-file=u1.base --test-file=u1.test --recommender=$method --find-iter=1 --max-iter=5 --recommender-options="num_iter=1" --data-dir=$DATA_DIR
+   	     $PROGRAM --training-file=u1.base --test-file=u1.test --recommender=$method --find-iter=1 --max-iter=5 --recommender-options="num_iter=1" --data-dir=$DATA_DIR
 done
 
 
 for method in Random MostPopular
 do
-	echo $PROGRAM u1.base u1.test $method data_dir=$DATA_DIR
-	     $PROGRAM u1.base u1.test $method data_dir=$DATA_DIR
+	echo $PROGRAM --training-file=u1.base --test-file=u1.test --recommender=$method --data-dir=$DATA_DIR
+	     $PROGRAM --training-file=u1.base --test-file=u1.test --recommender=$method --data-dir=$DATA_DIR
 done
 
+for i in `seq 1 10`; do echo $i >> $DATA_DIR/first-10; done
 for method in ItemKNN WeightedItemKNN UserKNN WeightedUserKNN
 do
-	echo $PROGRAM u1.base u1.test $method k=20 data_dir=$DATA_DIR
-	     $PROGRAM u1.base u1.test $method k=20 data_dir=$DATA_DIR
+	echo $PROGRAM --training-file=u1.base --test-file=u1.test --recommender=$method --recommender-options="k=20" --data-dir=$DATA_DIR --relevant-users=first-10 --relevant-items=first-10
+	     $PROGRAM --training-file=u1.base --test-file=u1.test --recommender=$method --recommender-options="k=20" --data-dir=$DATA_DIR --relevant-users=first-10 --relevant-items=first-10
 done
+rm $DATA_DIR/first-10
 
 echo
 echo "MovieLens 1M"
@@ -53,20 +53,20 @@ DATA_DIR=../../../../data/ml1m
 
 for method in ItemAttributeKNN
 do
-	echo $PROGRAM ml1m-0.train.txt ml1m-0.test.txt $method item_attributes=item-attributes-genres.txt k=20 data_dir=$DATA_DIR
-	     $PROGRAM ml1m-0.train.txt ml1m-0.test.txt $method item_attributes=item-attributes-genres.txt k=20 data_dir=$DATA_DIR
+	echo $PROGRAM --training-file=ml1m-0.train.txt --test-file=ml1m-0.test.txt --recommender=$method --item-attributes=item-attributes-genres.txt --recommender-options="k=20" --data-dir=$DATA_DIR
+	     $PROGRAM --training-file=ml1m-0.train.txt --test-file=ml1m-0.test.txt --recommender=$method --item-attributes=item-attributes-genres.txt --recommender-options="k=20" --data-dir=$DATA_DIR
 done
 
 for method in BPR_Linear
 do
-	echo $PROGRAM ml1m-0.train.txt ml1m-0.test.txt $method item_attributes=item-attributes-genres.txt find_iter=1 max_iter=2 num_iter=1 data_dir=$DATA_DIR
-	     $PROGRAM ml1m-0.train.txt ml1m-0.test.txt $method item_attributes=item-attributes-genres.txt find_iter=1 max_iter=2 num_iter=1 data_dir=$DATA_DIR
+	echo $PROGRAM --training-file=ml1m-0.train.txt --test-file=ml1m-0.test.txt --recommender=$method --item-attributes=item-attributes-genres.txt --find-iter=1 --max-iter=2 --recommender-options="num_iter=1" --data-dir=$DATA_DIR
+	     $PROGRAM --training-file=ml1m-0.train.txt --test-file=ml1m-0.test.txt --recommender=$method --item-attributes=item-attributes-genres.txt --find-iter=1 --max-iter=2 --recommender-options="num_iter=1" --data-dir=$DATA_DIR
 done
 
 for method in UserAttributeKNN
 do
-	echo $PROGRAM ml1m-new-user-0.train.txt ml1m-new-user-0.test.txt $method user_attributes=user-attributes-nozip.txt k=20 data_dir=$DATA_DIR
-             $PROGRAM ml1m-new-user-0.train.txt ml1m-new-user-0.test.txt $method user_attributes=user-attributes-nozip.txt k=20 data_dir=$DATA_DIR
+	echo $PROGRAM --training-file=ml1m-new-user-0.train.txt --test-file=ml1m-new-user-0.test.txt --recommender=$method --user-attributes=user-attributes-nozip.txt --recommender-options="k=20" --data-dir=$DATA_DIR
+             $PROGRAM --training-file=ml1m-new-user-0.train.txt --test-file=ml1m-new-user-0.test.txt --recommender=$method --user-attributes=user-attributes-nozip.txt --recommender-options="k=20" --data-dir=$DATA_DIR
 done
 
 cd ../../../../

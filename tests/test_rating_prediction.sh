@@ -2,7 +2,7 @@
 
 PROGRAM="mono --debug RatingPrediction.exe"
 
-echo "This will take about 5 minutes ..."
+echo "This will take about 7 minutes ..."
 
 echo ""
 echo "MovieLens 1M"
@@ -22,7 +22,7 @@ done
 touch $DATA_DIR/empty
 for method in SocialMF
 do
-	echo $PROGRAM --training-file=ml1m-0.train.txt --test-file=ml1m-0.test.txt --recommender=$method --find-iter=1 --max-iter=15 --recommender-options=\"num_iter=1 learn_rate=0.005 social_reg=0\" --compute-fit --data-dir=$DATA_DIR --user-relations=empty
+	echo $PROGRAM --training-file=ml1m-0.train.txt --test-file=ml1m-0.test.txt --recommender=$method --find-iter=1 --max-iter=15 --recommender-options="num_iter=1 learn_rate=0.005 social_reg=0" --compute-fit --data-dir=$DATA_DIR --user-relations=empty
 	     $PROGRAM --training-file=ml1m-0.train.txt --test-file=ml1m-0.test.txt --recommender=$method --find-iter=1 --max-iter=15 --recommender-options="num_iter=1 learn_rate=0.005 social_reg=0" --compute-fit --data-dir=$DATA_DIR --user-relations=empty
 done
 rm $DATA_DIR/empty
@@ -35,7 +35,7 @@ done
 
 for method in ItemAttributeKNN
 do
-	echo $PROGRAM --training-file=ml1m-0.train.txt --test-file=ml1m-0.test.txt --recommender=$method --item-attributes=item-attributes-genres.txt --recommender-options=\"k=20\" --data-dir=$DATA_DIR
+	echo $PROGRAM --training-file=ml1m-0.train.txt --test-file=ml1m-0.test.txt --recommender=$method --item-attributes=item-attributes-genres.txt --recommender-options="k=20" --data-dir=$DATA_DIR
 	     $PROGRAM --training-file=ml1m-0.train.txt --test-file=ml1m-0.test.txt --recommender=$method --item-attributes=item-attributes-genres.txt --recommender-options="k=20" --data-dir=$DATA_DIR
 done
 
@@ -54,7 +54,7 @@ done
 
 for method in UserKNNPearson UserKNNCosine ItemKNNPearson ItemKNNCosine
 do
-	echo $PROGRAM --training-file=u1.base --test-file=u1.test --recommender=$method --recommender-options=\"k=20\" --data-dir=$DATA_DIR
+	echo $PROGRAM --training-file=u1.base --test-file=u1.test --recommender=$method --recommender-options="k=20" --data-dir=$DATA_DIR
 	     $PROGRAM --training-file=u1.base --test-file=u1.test --recommender=$method --recommender-options="k=20" --data-dir=$DATA_DIR
 done
 
