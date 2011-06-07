@@ -90,7 +90,7 @@ class MergeScoresTrack2
 		}
 		else if (prob80plus)
 		{
-			Console.Write("Computing >80 porbabilities for {0} files ...", files.Count);
+			Console.Write("Computing >80 probabilities for {0} files ...", files.Count);
 			IList<double> test_probs = ComputeProb80Plus(files);
 			IList<double> valid_probs = ComputeProb80Plus(ValidationFilenames(files));
 			Console.WriteLine(" done");
