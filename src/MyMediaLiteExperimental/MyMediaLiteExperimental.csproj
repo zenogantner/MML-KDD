@@ -64,6 +64,8 @@
     <Compile Include="ItemRecommendation\SemiSupervisedBPRMF_KDD.cs" />
     <Compile Include="ItemRecommendation\TypedBPRMF.cs" />
     <Compile Include="ItemRecommendation\WRMF_KDD.cs" />
+    <Compile Include="Util\GridSearch.cs" />
+    <Compile Include="Util\NelderMead.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AttrToFactor\" />
@@ -76,6 +78,7 @@
     <Folder Include="Correlation\" />
     <Folder Include="RatingPrediction\" />
     <Folder Include="ItemRecommendation\" />
+    <Folder Include="Util\" />
   </ItemGroup>
   <ItemGroup>
     <ProjectReference Include="..\MyMediaLite\MyMediaLite.csproj">
