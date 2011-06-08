@@ -5,6 +5,8 @@
            - remove AddUser() and AddItem()
           - IItemRecommender
            - remove AddUser() and AddItem()
+          - Util.Recommender.Configure can now be called without a delegate
+            argument.
 	- recommenders
           - new rating predictor BiasedMatrixFactorizationMAE, which is BMF
             optimized for MAE instead of RMSE
