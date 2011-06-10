@@ -22,6 +22,11 @@ using MyMediaLite.DataType;
 namespace MyMediaLite.Classification
 {
 	/// <summary>Regularized logistic regression trained by stochastic gradient descent</summary>
+	/// <remarks>
+	/// Implementation for dense feature vectors.
+	/// Predictor variables are implemented transposed to their normal layout, due to being used in
+	/// for the KDD Cup 2011 ensembles.
+	/// </remarks>
 	public class LogisticRegression
 	{
 		/// <summary>the predictor (input) variables</summary>
@@ -72,14 +77,14 @@ namespace MyMediaLite.Classification
 			InitModel();
 			
 			for (int i = 0; i < NumIter; i++)
-				for (int j = 0; j < PredictorVariables.NumberOfRows; j++) // TODO shuffle to have really stochastic gradient ascent
+				for (int j = 0; j < PredictorVariables.NumberOfColumns; j++) // TODO shuffle to have really stochastic gradient ascent
 				{
-					double t_minus_p = TargetVariables[j] - PredictProbability(PredictorVariables.GetRow(j));
+					double t_minus_p = TargetVariables[j] - PredictProbability(PredictorVariables.GetColumn(j));
 				
-					// TODO do bias update
+					// TODO perform bias update
 				
-					for (int k = 0; k < PredictorVariables.NumberOfColumns; k++)
-						parameters[k] += LearnRate * (t_minus_p * PredictorVariables[j, k] - Regularization * parameters[k]);
+					for (int k = 0; k < parameters.Count; k++)
+						parameters[k] += LearnRate * (t_minus_p * PredictorVariables[k, j] - Regularization * parameters[k]);
 				}
 		}
 	}

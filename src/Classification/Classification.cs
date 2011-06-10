@@ -37,11 +37,27 @@ class Classification
 	/// <returns>the predictor and target variables</returns>
 	static Pair<Matrix<double>, IList<byte>> ReadData(string filename)
 	{
+		var targets    = new List<byte>();
+		var predictors = new List<IList<double>>();
+		
 		string line;
 		using ( var reader = new StreamReader(filename) )
 			while ( (line = reader.ReadLine()) != null )
 			{
-				// do stuff
+				var fields = line.Split(' ');
+				if (fields[0] == "+1" || fields[0] == "1")
+					targets.Add(1);
+				else if (fields[0] == "-1" || fields[0] == "0")
+					targets.Add(0);
+				else
+					throw new IOException("Unknown target label " + fields[0]);
+				
+				var features = new Dictionary<uint, double>();
+				for (int i = 1; i < fields.Length; i++)
+				{
+					var pair = fields[i].Split(':');
+					features[uint.Parse(pair[0])] = double.Parse(pair[1]);
+				}
 			}
 		throw new Exception();
 	}

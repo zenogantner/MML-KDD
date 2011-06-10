@@ -22,6 +22,7 @@ using System.Globalization;
 using System.Linq;
 using System.IO;
 using System.IO.Compression;
+using MyMediaLite.Classification;
 using MyMediaLite.Eval;
 using MyMediaLite.IO.KDDCup2011;
 using MyMediaLite.Util;
@@ -299,11 +300,26 @@ class MergeScoresTrack2
 		return KDDCup.EvaluateTrack2(predictions, candidates, hits);
 	}
 
+	//static IList<double> MergeScores(IList<IList<double>> scores, Dictionary<int, IList<int>> candidates, Dictionary<int, IList<int>> hits)
 	static IList<double> MergeScores(IList<IList<double>> scores)
 	{
-		var weights = new double[scores.Count];
-		for (int i = 0; i < weights.Length; i++)
-			weights[i] = 1;
+		double[] weights;
+		
+		/*if (log_reg)
+		{
+			var lr = new LogisticRegression();
+			//lr.PredictorVariables = scores;
+			//var targets = new byte[scores[0].Count];
+			//foreach (int u in candidates.Keys)
+				
+			//lr.TargetVariables = targets;
+		}
+		else
+		{*/
+			weights = new double[scores.Count];
+			for (int i = 0; i < weights.Length; i++)
+				weights[i] = 1;
+		//}
 
 		return MergeScores(scores, weights);
 	}
