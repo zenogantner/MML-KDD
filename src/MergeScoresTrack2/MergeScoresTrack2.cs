@@ -31,7 +31,9 @@ class MergeScoresTrack2
 	const int NUM_CANDIDATES = 6;
 	const int FILE_SIZE      = 607032;
 
-	static string data_dir      = null;
+	static string data_dir = null;
+	static bool log_reg = false;
+	static bool bpr     = false;
 
 	/// <summary>Parameters: num_files weight_1 .. weight_n file_1 .. file_n output_file</summary>
 	/// <param name="args">the command-line arguments</param>
@@ -53,14 +55,17 @@ class MergeScoresTrack2
    			{ "data-dir=",                 v => data_dir = v },
 			{ "prediction-file=",          v => output_file = v },
 			{ "greedy-forward",            v => greedy_forward = v != null },
+			{ "logistic-regression",       v => log_reg = v != null },
+			{ "bpr",                       v => bpr = v != null },
+			{ "greedy-forward",            v => greedy_forward = v != null },
 			{ "prob-80-plus",              v => prob80plus = v != null },
 			{ "error-threshold=",          (double v) => err_threshold = v },
 			{ "k|pick-most-diverse-from=", (int v) => diversification_k = v },
    	  	};
    		IList<string> extra_args = p.Parse(args);
 
-		List<string> files = new List<string>();
-		List<double> weights = new List<double>();
+		var files = new List<string>();
+		var weights = new List<double>();
 		foreach (string arg in extra_args)
 		{
 			string[] tokens = arg.Split(':');
@@ -233,9 +238,6 @@ class MergeScoresTrack2
 		// show results
 		foreach (var file in ensemble)
 			Console.WriteLine("{0} ({1})", file, error[file]);
-		//Console.WriteLine("files {0} of {1} ERR {2:F7} memory {3}", ensemble.Count, error.Count, best_result, Memory.Usage);
-
-
 
 		return ensemble;
 	}
