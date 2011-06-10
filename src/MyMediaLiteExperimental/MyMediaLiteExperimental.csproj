@@ -66,6 +66,7 @@
     <Compile Include="ItemRecommendation\WRMF_KDD.cs" />
     <Compile Include="Util\GridSearch.cs" />
     <Compile Include="Util\NelderMead.cs" />
+    <Compile Include="Classification\LogisticRegression.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AttrToFactor\" />

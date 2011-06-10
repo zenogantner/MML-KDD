@@ -25,7 +25,7 @@ namespace MyMediaLite.Classification
 	public class LogisticRegression
 	{
 		/// <summary>the predictor (input) variables</summary>
-		public Matrix<byte> PredictorVariables { get; set; }
+		public Matrix<double> PredictorVariables { get; set; }
 		/// <summary>the target (output) variables</summary>
 		public IList<byte>  TargetVariables { get; set; }
 		/// <summary>number of training iterations</summary>
@@ -55,7 +55,7 @@ namespace MyMediaLite.Classification
 		/// <summary>Predict probability for given features</summary>
 		/// <param name="input">the input</param>
 		/// <returns>the probability of the input belonging to class 1</returns>
-		public double PredictProbability(IList<byte> input)
+		public double PredictProbability(IList<double> input)
 		{
 			// TODO assert features and parameters have same length
 			
