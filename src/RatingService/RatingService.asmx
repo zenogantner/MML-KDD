@@ -38,6 +38,9 @@ namespace MyMediaLite
 				recommender.Ratings = new Ratings();
 				recommender.MinRating = 1;
 				recommender.MaxRating = 5; // expose this to API/configuration
+
+				// TODO bias_reg=0.007 reg_u=0.1 reg_i=0.12 learn_rate=0.05 num_iter=100 bold_driver=true
+
 				//recommender.Train();
 				Console.Error.WriteLine("done.");
 			}
@@ -46,6 +49,11 @@ namespace MyMediaLite
 		[WebMethod]
 		public void AddBulkFeedback(int user_id, List<int> item_ids, List<double> scores)
 		{
+			for (int i = 0; i < item_ids.Count; i++)
+			{
+				// TODO improve IRatingPredictor API
+				recommender.AddRating(user_mapping.ToInternalID(user_id), item_mapping.ToInternalID(item_ids[i]), scores[i]);
+			}
 		}
 
 		[WebMethod]
