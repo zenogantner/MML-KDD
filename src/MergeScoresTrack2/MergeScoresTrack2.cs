@@ -23,6 +23,7 @@ using System.Linq;
 using System.IO;
 using System.IO.Compression;
 using MyMediaLite.Classification;
+using MyMediaLite.DataType;
 using MyMediaLite.Eval;
 using MyMediaLite.IO.KDDCup2011;
 using MyMediaLite.Util;
@@ -58,7 +59,6 @@ class MergeScoresTrack2
 			{ "greedy-forward",            v => greedy_forward = v != null },
 			{ "logistic-regression",       v => log_reg = v != null },
 			{ "bpr",                       v => bpr = v != null },
-			{ "greedy-forward",            v => greedy_forward = v != null },
 			{ "prob-80-plus",              v => prob80plus = v != null },
 			{ "error-threshold=",          (double v) => err_threshold = v },
 			{ "k|pick-most-diverse-from=", (int v) => diversification_k = v },
@@ -220,7 +220,7 @@ class MergeScoresTrack2
 			// cache entry not needed any more
 			score_cache.Remove(next_candidate);
 
-			ensemble_merged_scores = MergeScores(ensemble_validation_scores);
+			ensemble_merged_scores = MergeScores(ensemble_validation_scores, candidate_items, item_hits);
 			double result = Eval(ensemble_merged_scores, candidate_items, item_hits);
 			Console.Write("ERR {0:F7} ... ", result);
 			if (result > best_result) // if no improvement
@@ -300,26 +300,46 @@ class MergeScoresTrack2
 		return KDDCup.EvaluateTrack2(predictions, candidates, hits);
 	}
 
-	//static IList<double> MergeScores(IList<IList<double>> scores, Dictionary<int, IList<int>> candidates, Dictionary<int, IList<int>> hits)
 	static IList<double> MergeScores(IList<IList<double>> scores)
+	{
+		var weights = new double[scores.Count];
+		for (int i = 0; i < weights.Length; i++)
+			weights[i] = 1;
+
+		return MergeScores(scores, weights);
+	}	
+	
+	static IList<double> MergeScores(IList<IList<double>> scores, Dictionary<int, IList<int>> candidates, Dictionary<int, IList<int>> hits)
 	{
 		double[] weights;
 		
-		/*if (log_reg)
+		if (log_reg)
 		{
 			var lr = new LogisticRegression();
-			//lr.PredictorVariables = scores;
-			//var targets = new byte[scores[0].Count];
-			//foreach (int u in candidates.Keys)
-				
-			//lr.TargetVariables = targets;
+			
+			lr.PredictorVariables = new Matrix<double>(scores);
+			
+			var targets = new byte[scores[0].Count];
+			int pos = 0;
+			foreach (int u in candidates.Keys)
+				foreach (int i in candidates[u])
+					targets[pos++] = hits[u].Contains(i) ? (byte) 1 : (byte) 0;
+			lr.TargetVariables = targets;
+			
+			lr.Train();
+			//lr.InitModel();
+			
+			weights = lr.parameters.ToArray();
+			
+			for (int i = 0; i < weights.Length; i++)
+				Console.Error.WriteLine(weights[i]);
 		}
 		else
-		{*/
+		{
 			weights = new double[scores.Count];
 			for (int i = 0; i < weights.Length; i++)
 				weights[i] = 1;
-		//}
+		}
 
 		return MergeScores(scores, weights);
 	}

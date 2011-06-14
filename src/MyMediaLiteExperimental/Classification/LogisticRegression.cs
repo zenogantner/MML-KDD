@@ -41,20 +41,22 @@ namespace MyMediaLite.Classification
 		public double Regularization { get; set; }
 		
 		double bias;
-		IList<double> parameters;
+		public IList<double> parameters;
 		
 		/// <summary>Default constructor</summary>
 		public LogisticRegression()
 		{
-			NumIter= 10;
-			LearnRate = 0.01;
-			Regularization = 0.0001;
+			NumIter = 100;
+			LearnRate = 0.0001;
+			//Regularization = 0.0001;
 		}
 		
-		void InitModel()
+		public void InitModel()
 		{
 			bias = 0;
-			parameters = new double[PredictorVariables.NumberOfColumns];
+			parameters = new double[PredictorVariables.NumberOfRows];
+			for (int i = 0; i < parameters.Count; i++)
+				parameters[i] = 1;
 		}
 		
 		/// <summary>Predict probability for given features</summary>
@@ -80,9 +82,8 @@ namespace MyMediaLite.Classification
 				for (int j = 0; j < PredictorVariables.NumberOfColumns; j++) // TODO shuffle to have really stochastic gradient ascent
 				{
 					double t_minus_p = TargetVariables[j] - PredictProbability(PredictorVariables.GetColumn(j));
-				
-					// TODO perform bias update
-				
+								
+					// TODO perform bias update (not really necessary for our use case)
 					for (int k = 0; k < parameters.Count; k++)
 						parameters[k] += LearnRate * (t_minus_p * PredictorVariables[k, j] - Regularization * parameters[k]);
 				}
