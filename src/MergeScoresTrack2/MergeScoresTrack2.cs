@@ -36,6 +36,9 @@ class MergeScoresTrack2
 	static string data_dir = null;
 	static bool log_reg = false;
 	static bool bpr     = false;
+	static double learn_rate     = 0.0001;
+	static double regularization = 0;
+	static uint num_it           = 30;
 
 	/// <summary>Parameters: num_files weight_1 .. weight_n file_1 .. file_n output_file</summary>
 	/// <param name="args">the command-line arguments</param>
@@ -56,6 +59,9 @@ class MergeScoresTrack2
 	   	var p = new OptionSet() {
    			{ "data-dir=",                 v => data_dir = v },
 			{ "prediction-file=",          v => output_file = v },
+			{ "num-it=",                   (uint v) => num_it = v },
+			{ "learn-rate=",               (double v) => learn_rate = v },
+			{ "regularization=",           (double v) => regularization = v },
 			{ "greedy-forward",            v => greedy_forward = v != null },
 			{ "logistic-regression",       v => log_reg = v != null },
 			{ "bpr",                       v => bpr = v != null },
@@ -85,7 +91,7 @@ class MergeScoresTrack2
 
 			IList<double> final_scores = MergeFiles(greedy_files);
 			IList<double> valid_scores = MergeFiles(ValidationFilenames(greedy_files));
-			IList<byte> final_predictions = Scores2Predictions(final_scores);
+			IList<byte> final_predictions = Scores2Predictions(final_scores); // TODO take care of logistic regression
 
 			if (output_file != null)
 			{
@@ -300,39 +306,35 @@ class MergeScoresTrack2
 		return KDDCup.EvaluateTrack2(predictions, candidates, hits);
 	}
 
-	static IList<double> MergeScores(IList<IList<double>> scores)
-	{
-		var weights = new double[scores.Count];
-		for (int i = 0; i < weights.Length; i++)
-			weights[i] = 1;
-
-		return MergeScores(scores, weights);
-	}	
-	
 	static IList<double> MergeScores(IList<IList<double>> scores, Dictionary<int, IList<int>> candidates, Dictionary<int, IList<int>> hits)
 	{
 		double[] weights;
-		
+
 		if (log_reg)
 		{
 			var lr = new LogisticRegression();
-			
+			lr.LearnRate = learn_rate;
+			lr.NumIter = num_it;
+			lr.Regularization = regularization;
+
 			lr.PredictorVariables = new Matrix<double>(scores);
-			
+
 			var targets = new byte[scores[0].Count];
 			int pos = 0;
 			foreach (int u in candidates.Keys)
 				foreach (int i in candidates[u])
 					targets[pos++] = hits[u].Contains(i) ? (byte) 1 : (byte) 0;
 			lr.TargetVariables = targets;
-			
+
 			lr.Train();
 			//lr.InitModel();
-			
+
 			weights = lr.parameters.ToArray();
-			
+
+			/*
 			for (int i = 0; i < weights.Length; i++)
 				Console.Error.WriteLine(weights[i]);
+			*/
 		}
 		else
 		{
@@ -409,11 +411,11 @@ class MergeScoresTrack2
 		for (int pos = 0; pos < combined_scores.Length; pos++)
 			for (int i = 0; i < scores.Count; i++)
 				combined_scores[pos] += weights[i] * scores[i][pos];
-		
+
 		// compute averages
 		for (int pos = 0; pos < combined_scores.Length; pos++)
 			combined_scores[pos] /= weights.Sum();
-		
+
 		return combined_scores;
 	}
 
@@ -437,8 +439,8 @@ class MergeScoresTrack2
 
 		// compute averages
 		for (int pos = 0; pos < combined_scores.Length; pos++)
-			combined_scores[pos] /= weights.Sum();		
-		
+			combined_scores[pos] /= weights.Sum();
+
 		return combined_scores;
 	}
 

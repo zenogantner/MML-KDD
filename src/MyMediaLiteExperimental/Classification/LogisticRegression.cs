@@ -46,7 +46,7 @@ namespace MyMediaLite.Classification
 		/// <summary>Default constructor</summary>
 		public LogisticRegression()
 		{
-			NumIter = 100;
+			NumIter = 10;
 			LearnRate = 0.0001;
 			//Regularization = 0.0001;
 		}
