@@ -283,11 +283,6 @@ class MergeScoresTrack2
 		return predictions;
 	}
 
-	static double Eval(IList<double> scores)
-	{
-		return Eval(Scores2Predictions(scores));
-	}
-
 	static double Eval(IList<byte> predictions)
 	{
 		var candidates = Track2Items.Read(data_dir + "/mml-track2/validationCandidatesIdx2.txt");
