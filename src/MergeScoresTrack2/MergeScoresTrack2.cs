@@ -69,21 +69,7 @@ class MergeScoresTrack2
 			{ "error-threshold=",          (double v) => err_threshold = v },
 			{ "k|pick-most-diverse-from=", (int v) => diversification_k = v },
    	  	};
-   		IList<string> extra_args = p.Parse(args);
-
-		var files = new List<string>();
-		var weights = new List<double>();
-		foreach (string arg in extra_args)
-		{
-			string[] tokens = arg.Split(':');
-
-			if (tokens.Length == 2)
-				weights.Add(double.Parse(tokens[1]));
-			else
-				weights.Add(weights.Count == 0 ? 1.1 : 1);
-
-			files.Add(tokens[0]);
-		}
+   		IList<string> files = p.Parse(args);
 
 		if (greedy_forward)
 		{
@@ -114,14 +100,14 @@ class MergeScoresTrack2
 		{
 			if (data_dir != null)
 			{
-				IList<byte> validation_predictions = Scores2Predictions(MergeValidationFiles(files, weights));
+				IList<byte> validation_predictions = Scores2Predictions(MergeValidationFiles(files));
 				double result = Eval(validation_predictions);
 				Console.WriteLine("ERR {0:0.#######}", result);
 				WritePredictions(validation_predictions, output_file + "-validation");
 			}
 
 			Console.WriteLine("{0} files", files.Count);
-			IList<byte> final_prediction = Scores2Predictions(MergeFiles(files, weights));
+			IList<byte> final_prediction = Scores2Predictions(MergeFiles(files));
 			WritePredictions(final_prediction, output_file);
 		}
 	}
