@@ -37,7 +37,7 @@ namespace MyMediaLite.ItemRecommendation
 		Matrix<double> item_typed_factors;
 
 		/// <summary>Number of typed factors</summary>
-		public int NumTypedFactors { get; set; }
+		public uint NumTypedFactors { get; set; }
 
 		/// <summary>Regularization modifier for artist factors</summary>
 		public double ArtistRegModifier { get; set; }
@@ -72,11 +72,11 @@ namespace MyMediaLite.ItemRecommendation
 
 			item_typed_factors = new Matrix<double>(MaxItemID + 1, NumTypedFactors);
 
-			MatrixUtils.InitNormal(user_artist_factors, InitMean, InitStdev);
-			MatrixUtils.InitNormal(user_album_factors, InitMean, InitStdev);
-			MatrixUtils.InitNormal(user_genre_factors, InitMean, InitStdev);
-			MatrixUtils.InitNormal(user_track_factors, InitMean, InitStdev);
-			MatrixUtils.InitNormal(item_typed_factors, InitMean, InitStdev);
+			MatrixUtils.RowInitNormal(user_artist_factors, InitMean, InitStdev);
+			MatrixUtils.RowInitNormal(user_album_factors, InitMean, InitStdev);
+			MatrixUtils.RowInitNormal(user_genre_factors, InitMean, InitStdev);
+			MatrixUtils.RowInitNormal(user_track_factors, InitMean, InitStdev);
+			MatrixUtils.RowInitNormal(item_typed_factors, InitMean, InitStdev);
 		}
 
 		/// <inheritdoc/>

@@ -93,10 +93,10 @@ namespace MyMediaLite.ItemRecommendation
 			genre_biases  = new double[MaxItemID + 1];
 			*/
 
-			MatrixUtils.InitNormal(user_shared_artist_factors, InitMean, InitStdev);
-			MatrixUtils.InitNormal(item_shared_artist_factors, InitMean, InitStdev);
-			MatrixUtils.InitNormal(user_shared_album_factors, InitMean, InitStdev);
-			MatrixUtils.InitNormal(item_shared_album_factors, InitMean, InitStdev);
+			MatrixUtils.RowInitNormal(user_shared_artist_factors, InitMean, InitStdev);
+			MatrixUtils.RowInitNormal(item_shared_artist_factors, InitMean, InitStdev);
+			MatrixUtils.RowInitNormal(user_shared_album_factors, InitMean, InitStdev);
+			MatrixUtils.RowInitNormal(item_shared_album_factors, InitMean, InitStdev);
 			//MatrixUtils.InitNormal(user_shared_genre_factors, InitMean, InitStdev);
 			//MatrixUtils.InitNormal(item_shared_genre_factors, InitMean, InitStdev);
 		}
