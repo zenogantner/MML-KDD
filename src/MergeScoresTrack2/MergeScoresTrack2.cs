@@ -36,9 +36,9 @@ class MergeScoresTrack2
 	static string data_dir = null;
 	static bool log_reg = false;
 	static bool bpr     = false;
-	static double learn_rate     = 0.0001;
+	static double learn_rate     = 0.0000001;
 	static double regularization = 0;
-	static uint num_it           = 30;
+	static uint num_it           = 10;
 
 	/// <summary>Parameters: num_files weight_1 .. weight_n file_1 .. file_n output_file</summary>
 	/// <param name="args">the command-line arguments</param>
