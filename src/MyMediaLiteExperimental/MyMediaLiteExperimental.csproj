@@ -52,7 +52,6 @@
     <Compile Include="IKDDCupRecommender.cs" />
     <Compile Include="IO\KDDCup2011\Track2Items.cs" />
     <Compile Include="ItemRecommendation\ItemAttributeSVM.cs" />
-    <Compile Include="ItemRecommendation\ISemiSupervisedItemRecommender.cs" />
     <Compile Include="ItemRecommendation\AlbumCounter.cs" />
     <Compile Include="ItemRecommendation\ArtistCounter.cs" />
     <Compile Include="ItemRecommendation\AttributeCounter.cs" />
@@ -60,13 +59,16 @@
     <Compile Include="ItemRecommendation\BPRMF_KDD.cs" />
     <Compile Include="ItemRecommendation\BPR_SMF_KDD.cs" />
     <Compile Include="ItemRecommendation\GenreCounter.cs" />
-    <Compile Include="ItemRecommendation\SemiSupervisedBPRMF.cs" />
-    <Compile Include="ItemRecommendation\SemiSupervisedBPRMF_KDD.cs" />
+    <Compile Include="ItemRecommendation\TransductiveBPRMF.cs" />
     <Compile Include="ItemRecommendation\TypedBPRMF.cs" />
     <Compile Include="ItemRecommendation\WRMF_KDD.cs" />
     <Compile Include="Util\GridSearch.cs" />
     <Compile Include="Util\NelderMead.cs" />
     <Compile Include="Classification\LogisticRegression.cs" />
+    <Compile Include="Util\GridSearch.cs" />
+    <Compile Include="Util\NelderMead.cs" />
+    <Compile Include="ItemRecommendation\ITransductiveItemRecommender.cs" />
+    <Compile Include="ItemRecommendation\TransductiveBPRMF_KDD.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AttrToFactor\" />
