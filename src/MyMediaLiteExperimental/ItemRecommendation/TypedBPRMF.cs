@@ -212,10 +212,7 @@ namespace MyMediaLite.ItemRecommendation
 		/// <inheritdoc/>
 		public override string ToString()
 		{
-			var ni = new NumberFormatInfo();
-			ni.NumberDecimalDigits = '.';
-
-			return string.Format(ni, "BPR_SMF_KDD num_factors={0} num_typed_factors={1} bias_reg={2} reg_u={3} reg_i={4} reg_j={5} album_reg_modifier={6} artist_reg_modifier={7} genre_reg_modifier={8} track_reg_modifier={9} num_iter={6} learn_rate={10} init_mean={11} init_stdev={12}",
+			return string.Format(CultureInfo.InvariantCulture, "BPR_SMF_KDD num_factors={0} num_typed_factors={1} bias_reg={2} reg_u={3} reg_i={4} reg_j={5} album_reg_modifier={6} artist_reg_modifier={7} genre_reg_modifier={8} track_reg_modifier={9} num_iter={6} learn_rate={10} init_mean={11} init_stdev={12}",
 								 num_factors, NumTypedFactors, BiasReg, reg_u, reg_i, reg_j, AlbumRegModifier, ArtistRegModifier, GenreRegModifier, TrackRegModifier, NumIter, learn_rate, InitMean, InitStdev);
 		}
 	}

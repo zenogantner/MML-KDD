@@ -39,7 +39,7 @@ namespace MyMediaLite.ItemRecommendation
 		{
 			NonTestModifier = 1;
 		}
-		
+
 		/// <inheritdoc/>
 		protected override void UpdateFactors(int u, int i, int j, bool update_u, bool update_i, bool update_j)
 		{
@@ -102,12 +102,9 @@ namespace MyMediaLite.ItemRecommendation
 				/// <inheritdoc/>
 		public override string ToString()
 		{
-			var ni = new NumberFormatInfo();
-			ni.NumberDecimalDigits = '.';
-
-			return string.Format(ni, "SemiSupervisedBPRMF num_factors={0} bias_reg={1} reg_u={2} reg_i={3} reg_j={4} non_test_modifier={5} num_iter={6} learn_rate={7} fast_sampling_memory_limit={8} init_mean={9} init_stdev={10}",
+			return string.Format(CultureInfo.InvariantCulture, "SemiSupervisedBPRMF num_factors={0} bias_reg={1} reg_u={2} reg_i={3} reg_j={4} non_test_modifier={5} num_iter={6} learn_rate={7} fast_sampling_memory_limit={8} init_mean={9} init_stdev={10}",
 								 num_factors, BiasReg, reg_u, reg_i, reg_j, NonTestModifier, NumIter, LearnRate, fast_sampling_memory_limit, InitMean, InitStdev);
-		}		
+		}
 	}
 }
 

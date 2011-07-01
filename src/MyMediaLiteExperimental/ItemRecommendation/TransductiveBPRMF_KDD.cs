@@ -22,7 +22,7 @@ using MyMediaLite.Util;
 
 namespace MyMediaLite.ItemRecommendation
 {
-	/// <summary>Semi-supervised BPRMF with frequency-adjusted sampling, prototype for KDD Cup 2011</summary>
+	/// <summary>Transductive BPRMF with frequency-adjusted sampling, prototype for KDD Cup 2011</summary>
 	public class TransductiveBPRMF_KDD : TransductiveBPRMF
 	{
 		// TODO offer this data structure from Feedback

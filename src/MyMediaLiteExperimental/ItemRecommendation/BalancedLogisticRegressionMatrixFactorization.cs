@@ -54,9 +54,9 @@ namespace MyMediaLite.ItemRecommendation
 				{
 					double uif_update = h_if * i_gradient - reg_u * w_uf;
 					user_factors[u, f] = w_uf + learn_rate * uif_update;
-					
+
 					double ujf_update = h_jf * j_gradient - reg_u * w_uf;
-					user_factors[u, f] = w_uf + learn_rate * ujf_update;					
+					user_factors[u, f] = w_uf + learn_rate * ujf_update;
 				}
 
 				if (update_i)
@@ -119,15 +119,12 @@ namespace MyMediaLite.ItemRecommendation
 		{
 			double score = item_bias[item_id] + MatrixUtils.RowScalarProduct(user_factors, user_id, item_factors, item_id);
 			return 1 / (1 + Math.Exp(-score));
-		}		
-		
+		}
+
 		/// <inheritdoc/>
 		public override string ToString()
 		{
-			var ni = new NumberFormatInfo();
-			ni.NumberDecimalDigits = '.';
-
-			return string.Format(ni, "BalancedLogisticRegressionMatrixFactorzation num_factors={0} bias_reg={1} reg_u={2} reg_i={3} reg_j={4} num_iter={5} bold_driver={6} learn_rate={7} init_mean={8} init_stdev={8}",
+			return string.Format(CultureInfo.InvariantCulture, "BalancedLogisticRegressionMatrixFactorzation num_factors={0} bias_reg={1} reg_u={2} reg_i={3} reg_j={4} num_iter={5} bold_driver={6} learn_rate={7} init_mean={8} init_stdev={8}",
 								 num_factors, BiasReg, reg_u, reg_i, reg_j, NumIter, BoldDriver, learn_rate, InitMean, InitStdev);
 		}
 	}
