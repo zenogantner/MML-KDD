@@ -44,9 +44,6 @@ class MergeScoresTrack2
 	/// <param name="args">the command-line arguments</param>
 	public static void Main(string[] args)
 	{
-		var ni = new NumberFormatInfo();
-		ni.NumberDecimalDigits = '.';
-
 		AppDomain.CurrentDomain.UnhandledException += new UnhandledExceptionEventHandler(Handlers.UnhandledExceptionHandler);
 
 		// parse command-line parameters

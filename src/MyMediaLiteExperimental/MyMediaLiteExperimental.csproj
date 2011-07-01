@@ -69,6 +69,7 @@
     <Compile Include="Util\NelderMead.cs" />
     <Compile Include="ItemRecommendation\ITransductiveItemRecommender.cs" />
     <Compile Include="ItemRecommendation\TransductiveBPRMF_KDD.cs" />
+    <Compile Include="RatingPrediction\LogisticRegressionMatrixFactorization.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AttrToFactor\" />

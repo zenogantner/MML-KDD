@@ -76,10 +76,8 @@ namespace MyMediaLite.ItemRecommendation
 		///
 		public override string ToString()
 		{
-			var ni = new NumberFormatInfo();
-			ni.NumberDecimalDigits = '.';
-
-			return string.Format(ni, "BPRMF_KDD num_factors={0} bias_reg={1} reg_u={2} reg_i={3} reg_j={4} num_iter={5} bold_driver={6} learn_rate={7} init_mean={8} init_stdev={8}",
+			return string.Format(CultureInfo.InvariantCulture,
+			                     "BPRMF_KDD num_factors={0} bias_reg={1} reg_u={2} reg_i={3} reg_j={4} num_iter={5} bold_driver={6} learn_rate={7} init_mean={8} init_stdev={8}",
 								 num_factors, BiasReg, reg_u, reg_i, reg_j, NumIter, BoldDriver, learn_rate, InitMean, InitStdev);
 		}
 	}

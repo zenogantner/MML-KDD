@@ -27,9 +27,6 @@ class MergeRatings
 	/// <param name="args">the command-line arguments</param>
 	public static void Main(string[] args)
 	{
-		var ni = new NumberFormatInfo();
-		ni.NumberDecimalDigits = '.';
-		
 		int chunk_size = 1000;
 		
 		double weight_sum = 0;
