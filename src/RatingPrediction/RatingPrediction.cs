@@ -308,7 +308,7 @@ class RatingPrediction
 
 					Recommender.SaveModel(recommender, save_model_file, i);
 					if (prediction_file != string.Empty)
-						MyMediaLite.Eval.RatingPrediction.WritePredictions(recommender, test_data, user_mapping, item_mapping, prediction_file + "-it-" + i);
+						Prediction.WritePredictions(recommender, test_data, user_mapping, item_mapping, prediction_file + "-it-" + i);
 
 					if (epsilon > 0.0 && results["RMSE"] - rmse_eval_stats.Min() > epsilon)
 					{
@@ -386,7 +386,7 @@ class RatingPrediction
 			{
 				seconds = Utils.MeasureTime(delegate() {
 						Console.WriteLine();
-						MyMediaLite.Eval.RatingPrediction.WritePredictions(recommender, test_data, user_mapping, item_mapping, prediction_file);
+						Prediction.WritePredictions(recommender, test_data, user_mapping, item_mapping, prediction_file);
 				});
 				Console.Error.Write("predicting_time " + seconds);
 			}
