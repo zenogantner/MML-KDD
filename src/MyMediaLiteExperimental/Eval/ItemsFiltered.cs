@@ -29,16 +29,23 @@ namespace MyMediaLite.Eval
 	/// <summary>Evaluation class for filtered item recommendation</summary>
 	public static class ItemsFiltered
 	{
-		/// <summary>the evaluation measures for item prediction offered by the class</summary>
-		static public ICollection<string> Measures
-		{
-			get	{
-				string[] measures = { "AUC", "prec@5", "prec@10", "prec@15", "NDCG", "MAP" };
-				return new HashSet<string>(measures);
-			}
-		}
-
 		// TODO generalize more to save code ...
+		// TODO generalize that normal protocol is just an instance of this? Only if w/o performance penalty ...
+		
+		static public Dictionary<int, ICollection<int>> GetFilteredItems(int user_id, IPosOnlyFeedback test,
+		                                                                 SparseBooleanMatrix item_attributes)
+		{
+			var filtered_items = new Dictionary<int, ICollection<int>>();
+			
+			foreach (int item_id in test.UserMatrix[user_id])
+				foreach (int attribute_id in item_attributes[item_id])
+					if (filtered_items.ContainsKey(attribute_id))
+						filtered_items[attribute_id].Add(item_id);
+					else
+						filtered_items[attribute_id] = new HashSet<int>() { item_id };
+			
+			return filtered_items;
+		}
 		
 		/// <summary>Evaluation for rankings of filtered items</summary>
 		/// <remarks>
@@ -46,6 +53,7 @@ namespace MyMediaLite.Eval
 		/// <param name="recommender">item recommender</param>
 		/// <param name="test">test cases</param>
 		/// <param name="train">training data</param>
+		/// <param name="item_attributes">the item attributes to be used for filtering</param>
 		/// <param name="relevant_users">a collection of integers with all relevant users</param>
 		/// <param name="relevant_items">a collection of integers with all relevant items</param>
 		/// <returns>a dictionary containing the evaluation results</returns>
@@ -53,12 +61,15 @@ namespace MyMediaLite.Eval
 			IItemRecommender recommender,
 			IPosOnlyFeedback test,
 			IPosOnlyFeedback train,
+		    SparseBooleanMatrix item_attributes,
 		    ICollection<int> relevant_users,
 			ICollection<int> relevant_items)
 		{
 			if (train.Overlap(test) > 0)
 				Console.Error.WriteLine("WARNING: Overlapping train and test data");
 
+			SparseBooleanMatrix items_by_attribute = (SparseBooleanMatrix) item_attributes.Transpose();
+			
 			// compute evaluation measures
 			double auc_sum     = 0;
 			double map_sum     = 0;
@@ -69,24 +80,31 @@ namespace MyMediaLite.Eval
 			int num_lists      = 0;
 
 			foreach (int user_id in relevant_users)
-				//foreach (int attribute_id in GetFilterAttributes(user_id))
+			{
+				var filtered_items = GetFilteredItems(user_id, test, item_attributes);
+				
+				foreach (int attribute_id in filtered_items.Keys)
 				{
-					var correct_items = new HashSet<int>(test.UserMatrix[user_id]);
-					correct_items.IntersectWith(relevant_items);
+					// TODO optimize this a bit, currently it is quite naive
+					var relevant_filtered_items = new HashSet<int>(items_by_attribute[attribute_id]);
+					relevant_filtered_items.IntersectWith(relevant_items);
+					
+					var correct_items = new HashSet<int>(filtered_items[attribute_id]);
+					correct_items.IntersectWith(relevant_filtered_items);
 	
 					// the number of items that are really relevant for this user
 					var relevant_items_in_train = new HashSet<int>(train.UserMatrix[user_id]);
-					relevant_items_in_train.IntersectWith(relevant_items);
-					int num_eval_items = relevant_items.Count - relevant_items_in_train.Count();
+					relevant_items_in_train.IntersectWith(relevant_filtered_items);
+					int num_eval_items = relevant_filtered_items.Count - relevant_items_in_train.Count();
 	
-					// skip all users that have 0 or #relevant_items test items
+					// skip all users that have 0 or #relevant_filtered_items test items
 					if (correct_items.Count == 0)
 						continue;
 					if (num_eval_items - correct_items.Count == 0)
 						continue;
 	
 					num_lists++;
-					int[] prediction = Prediction.PredictItems(recommender, user_id, relevant_items);
+					int[] prediction = Prediction.PredictItems(recommender, user_id, relevant_filtered_items);
 	
 					auc_sum     += Items.AUC(prediction, correct_items, train.UserMatrix[user_id]);
 					map_sum     += Items.MAP(prediction, correct_items, train.UserMatrix[user_id]);
@@ -103,6 +121,7 @@ namespace MyMediaLite.Eval
 					if (num_lists % 20000 == 0)
 						Console.Error.WriteLine();
 				}
+			}
 
 			var result = new Dictionary<string, double>();
 			result.Add("AUC",     auc_sum / num_lists);
@@ -118,7 +137,5 @@ namespace MyMediaLite.Eval
 		}
 
 		// TODO implement online eval
-		
-
 	}
 }
