@@ -71,6 +71,7 @@
     <Compile Include="ItemRecommendation\TransductiveBPRMF_KDD.cs" />
     <Compile Include="RatingPrediction\LogisticRegressionMatrixFactorization.cs" />
     <Compile Include="Eval\ItemsFiltered.cs" />
+    <Compile Include="ItemRecommendation\FilterBPRMF.cs" />
   </ItemGroup>
   <ItemGroup>
     <Folder Include="AttrToFactor\" />
