@@ -1,3 +1,11 @@
+This repository contains an old version of MyMediaLite.
+It is just kept as an archive.
+
+For a more recent version of MyMediaLite (with more features and less bugs),
+go to https://github.com/zenogantner/MyMediaLite and http://mymedialite.net
+
+-------------------------------------------------------------------------------
+
 MyMediaLite - a recommender system algorithm library
 
 Features
@@ -28,7 +36,7 @@ See doc/ and the website for more documentation.
 
 Website
 -------
-  http://ismll.de/mymedialite
+  http://mymedialite.net
 
 Acknowledgments
 ---------------
